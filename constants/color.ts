@@ -6,6 +6,7 @@ const PALETTE = {
   bg1: '#ebe2de',
   bg2: '#f7f3f3',
   grey: '#c0c0c0',
+  error: '#d6464a',
 };
 
 export { PALETTE };

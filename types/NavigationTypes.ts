@@ -12,5 +12,5 @@ export type AppNavParamList = {
 export type LandingParamList = {
   //Intro: undefined;
   SignIn: undefined;
-  //SignUp: undefined;
+  SignUp: undefined;
 };

@@ -10,19 +10,24 @@ import {
   View,
 } from 'react-native';
 import { PALETTE } from '../../constants/color';
-//import Ionicons from 'react-native-vector-icons/Ionicons';
-import { ISignIn } from '../../types/ScreenProps';
+import { ISignUp } from '../../types/ScreenProps';
 import PressableIcon from '../../components/PressableIcon';
 import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useDispatch } from 'react-redux';
+import { RegData, REGISTER_USER } from '../../store/types';
+import { registerUser } from '../../store/actions/userAction';
 
 interface FormInput {
+  name: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
-const SignInSchema = yup.object().shape({
+const SignUpSchema = yup.object().shape({
+  name: yup.string().required('필수 입력 항목입니다'),
   email: yup
     .string()
     .email('이메일 형식을 맞춰주세요')
@@ -34,18 +39,35 @@ const SignInSchema = yup.object().shape({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#^&])[A-Za-z\d@$!%*?#^&]{8,}$/,
       '대/소문자, 숫자, 특수문자가 포함된 8자 이상',
     ),
+  confirmPassword: yup
+    .string()
+    .required('필수 입력 항목입니다')
+    .oneOf([yup.ref('password'), null], '비밀번호가 일치하지 않습니다'),
 });
 
-const SignIn = ({ navigation }: ISignIn) => {
-  const [visible, setVisible] = useState(false);
+const SignUp = ({ navigation }: ISignUp) => {
+  const [visible, setVisible] = useState({
+    pwd: false,
+    confirmPwd: false,
+  });
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<FormInput>({
-    resolver: yupResolver(SignInSchema),
+    resolver: yupResolver(SignUpSchema),
   });
-  const onSubmit = (data: FormInput) => console.log(data);
+  const dispatch = useDispatch();
+
+  const onSubmit = (data: FormInput) => {
+    console.log(data);
+    const regData: RegData = {
+      userName: data.name,
+      userEmail: data.email,
+      userPW: data.password,
+    };
+    dispatch(registerUser(regData));
+  };
 
   return (
     <TouchableWithoutFeedback
@@ -53,9 +75,35 @@ const SignIn = ({ navigation }: ISignIn) => {
       onPress={() => Keyboard.dismiss()}>
       <KeyboardAvoidingView style={{ flex: 1 }}>
         <View style={styles.container}>
-          <View style={styles.logoContainer}>
-            <Text style={styles.logo}>Market</Text>
-            <Text style={styles.logo}>KC</Text>
+          <Text style={styles.logo}>Join Us!</Text>
+          <View style={styles.input}>
+            <View
+              style={[
+                styles.inputContainer,
+                errors.email && { borderColor: PALETTE.error },
+              ]}>
+              <Controller
+                name="name"
+                control={control}
+                defaultValue=""
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={[
+                      styles.inputText,
+                      errors.name && { borderColor: PALETTE.error },
+                    ]}
+                    placeholder="Your Nickname"
+                    placeholderTextColor={PALETTE.grey}
+                    onBlur={onBlur}
+                    onChangeText={value => onChange(value)}
+                    value={value}
+                  />
+                )}
+              />
+            </View>
+            <Text style={styles.inputError}>
+              {errors.name && errors.name.message}
+            </Text>
           </View>
           <View style={styles.input}>
             <View
@@ -101,24 +149,29 @@ const SignIn = ({ navigation }: ISignIn) => {
                     style={styles.inputText}
                     placeholder="Your Password"
                     placeholderTextColor={PALETTE.grey}
-                    secureTextEntry={visible}
+                    secureTextEntry={visible.pwd}
                     value={value}
                     onChangeText={value => onChange(value)}
                     onBlur={onBlur}
                   />
                 )}
               />
-              {visible ? (
+
+              {visible.pwd ? (
                 <PressableIcon
                   name="eye"
                   size={16}
-                  onPress={() => setVisible((prev: boolean) => !prev)}
+                  onPress={() =>
+                    setVisible(prev => ({ ...prev, pwd: !prev.pwd }))
+                  }
                 />
               ) : (
                 <PressableIcon
                   name="eye-off"
                   size={16}
-                  onPress={() => setVisible((prev: boolean) => !prev)}
+                  onPress={() =>
+                    setVisible(prev => ({ ...prev, pwd: !prev.pwd }))
+                  }
                 />
               )}
             </View>
@@ -126,25 +179,76 @@ const SignIn = ({ navigation }: ISignIn) => {
               {errors.password && errors.password.message}
             </Text>
           </View>
+          <View style={styles.input}>
+            <View
+              style={[
+                styles.inputContainer,
+                errors.confirmPassword && { borderColor: PALETTE.error },
+              ]}>
+              <Controller
+                name="confirmPassword"
+                defaultValue=""
+                control={control}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={styles.inputText}
+                    placeholder="Confirm Password"
+                    placeholderTextColor={PALETTE.grey}
+                    secureTextEntry={visible.confirmPwd}
+                    value={value}
+                    onChangeText={value => onChange(value)}
+                    onBlur={onBlur}
+                  />
+                )}
+              />
+
+              {visible.confirmPwd ? (
+                <PressableIcon
+                  name="eye"
+                  size={16}
+                  onPress={() =>
+                    setVisible(prev => ({
+                      ...prev,
+                      confirmPwd: !prev.confirmPwd,
+                    }))
+                  }
+                />
+              ) : (
+                <PressableIcon
+                  name="eye-off"
+                  size={16}
+                  onPress={() =>
+                    setVisible(prev => ({
+                      ...prev,
+                      confirmPwd: !prev.confirmPwd,
+                    }))
+                  }
+                />
+              )}
+            </View>
+            <Text style={styles.inputError}>
+              {errors.confirmPassword && errors.confirmPassword.message}
+            </Text>
+          </View>
           <TouchableOpacity
             style={styles.button}
             onPress={handleSubmit(onSubmit)}>
-            <Text style={styles.buttonText}>Sign In</Text>
+            <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
-          <View style={styles.join}>
-            <Text style={[styles.joinText]}>Don't you have any account?</Text>
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={() => navigation.navigate('SignUp')}>
-              <Text
-                style={[
-                  styles.joinText,
-                  { color: PALETTE.main, fontWeight: 'bold' },
-                ]}>
-                Join Us!
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('SignIn')}
+            style={[
+              styles.button,
+              {
+                backgroundColor: PALETTE.bg2,
+                borderColor: PALETTE.line1,
+                borderWidth: 1,
+              },
+            ]}>
+            <Text style={[styles.buttonText, { color: PALETTE.line1 }]}>
+              Sign In
+            </Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
@@ -158,12 +262,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logoContainer: {
-    flexDirection: 'row',
-  },
   logo: {
     fontWeight: 'bold',
-    fontSize: 48,
+    fontSize: 32,
     color: PALETTE.main,
     marginHorizontal: 4,
     marginBottom: 40,
@@ -194,7 +295,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 11,
   },
-
   button: {
     width: '80%',
     backgroundColor: PALETTE.main,
@@ -209,8 +309,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: 'white',
   },
-  join: { flexDirection: 'row', marginTop: 14 },
-  joinText: { marginHorizontal: 2, color: PALETTE.line1 },
 });
 
-export default SignIn;
+export default SignUp;

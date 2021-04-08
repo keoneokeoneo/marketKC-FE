@@ -8,3 +8,10 @@ export interface ISignIn {
     StackNavigationProp<AppNavParamList>
   >;
 }
+
+export interface ISignUp {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<LandingParamList, 'SignUp'>,
+    StackNavigationProp<AppNavParamList>
+  >;
+}

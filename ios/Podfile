@@ -12,7 +12,6 @@ target 'marketKC' do
     :hermes_enabled => false
   )
 
-  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
   target 'marketKCTests' do
     inherit! :complete
@@ -26,6 +25,6 @@ target 'marketKC' do
   use_flipper!()
 
   post_install do |installer|
-    react_native_post_install(installer)
+    flipper_post_install(installer)
   end
 end

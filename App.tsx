@@ -1,12 +1,13 @@
 import React from 'react';
+import { Provider } from 'react-redux';
 import AppNav from './navigations/AppNav';
+import store from './store';
 
 const App = () => {
   return (
-    // <SafeAreaView>
-    //   <AppNav />
-    // </SafeAreaView>
-    <AppNav />
+    <Provider store={store}>
+      <AppNav />
+    </Provider>
   );
 };
 
