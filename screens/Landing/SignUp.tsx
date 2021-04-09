@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Dispatch, useEffect, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -15,9 +15,13 @@ import PressableIcon from '../../components/PressableIcon';
 import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useDispatch } from 'react-redux';
-import { RegData, REGISTER_USER } from '../../store/types';
-import { registerUser } from '../../store/actions/userAction';
+import { useDispatch, useSelector } from 'react-redux';
+import { RegData } from '../../types/APITypes';
+import { AuthDispatch } from '../../store/actions/ActionTypes';
+import { registerInit, registerRequest } from '../../store/actions/authAction';
+import { RootState } from '../../store/reducers';
+import NoticeModal from '../../components/Modal/NoticeModal';
+import Indicator from '../../components/Indicator';
 
 interface FormInput {
   name: string;
@@ -50,7 +54,9 @@ const SignUp = ({ navigation }: ISignUp) => {
     pwd: false,
     confirmPwd: false,
   });
+  const [modalOpen, setModalOpen] = useState(false);
   const {
+    reset,
     control,
     handleSubmit,
     formState: { errors },
@@ -58,22 +64,41 @@ const SignUp = ({ navigation }: ISignUp) => {
     resolver: yupResolver(SignUpSchema),
   });
   const dispatch = useDispatch();
+  const regState = useSelector((state: RootState) => state.auth.register);
 
   const onSubmit = (data: FormInput) => {
-    console.log(data);
     const regData: RegData = {
       userName: data.name,
       userEmail: data.email,
       userPW: data.password,
     };
-    dispatch(registerUser(regData));
+    dispatch(registerRequest(regData));
   };
+
+  useEffect(() => {
+    if (
+      regState.status !== 'WAITING' &&
+      (regState.status === 'FAILURE' || regState.status === 'SUCCESS')
+    ) {
+      setModalOpen(true);
+    }
+  }, [regState.status]);
 
   return (
     <TouchableWithoutFeedback
       style={{ flex: 1 }}
       onPress={() => Keyboard.dismiss()}>
       <KeyboardAvoidingView style={{ flex: 1 }}>
+        {/* <Indicator isActive={regState.status === 'WAITING'} /> */}
+        <NoticeModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          content={
+            regState.status === 'SUCCESS'
+              ? '회원가입이 완료되었습니다.'
+              : regState.error
+          }
+        />
         <View style={styles.container}>
           <Text style={styles.logo}>Join Us!</Text>
           <View style={styles.input}>
@@ -149,7 +174,7 @@ const SignUp = ({ navigation }: ISignUp) => {
                     style={styles.inputText}
                     placeholder="Your Password"
                     placeholderTextColor={PALETTE.grey}
-                    secureTextEntry={visible.pwd}
+                    secureTextEntry={!visible.pwd}
                     value={value}
                     onChangeText={value => onChange(value)}
                     onBlur={onBlur}
@@ -157,7 +182,7 @@ const SignUp = ({ navigation }: ISignUp) => {
                 )}
               />
 
-              {visible.pwd ? (
+              {!visible.pwd ? (
                 <PressableIcon
                   name="eye"
                   size={16}
@@ -194,7 +219,7 @@ const SignUp = ({ navigation }: ISignUp) => {
                     style={styles.inputText}
                     placeholder="Confirm Password"
                     placeholderTextColor={PALETTE.grey}
-                    secureTextEntry={visible.confirmPwd}
+                    secureTextEntry={!visible.confirmPwd}
                     value={value}
                     onChangeText={value => onChange(value)}
                     onBlur={onBlur}
@@ -202,7 +227,7 @@ const SignUp = ({ navigation }: ISignUp) => {
                 )}
               />
 
-              {visible.confirmPwd ? (
+              {!visible.confirmPwd ? (
                 <PressableIcon
                   name="eye"
                   size={16}
@@ -236,7 +261,10 @@ const SignUp = ({ navigation }: ISignUp) => {
             <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => navigation.navigate('SignIn')}
+            onPress={() => {
+              navigation.navigate('SignIn');
+              dispatch(registerInit());
+            }}
             style={[
               styles.button,
               {
@@ -272,11 +300,10 @@ const styles = StyleSheet.create({
   input: {
     width: '80%',
     justifyContent: 'center',
-    marginBottom: 4,
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 16,
+    padding: 12,
     borderRadius: 16,
     borderColor: PALETTE.line1,
     borderWidth: 1,
@@ -292,7 +319,6 @@ const styles = StyleSheet.create({
     color: PALETTE.error,
     alignSelf: 'flex-start',
     padding: 4,
-    marginTop: 4,
     fontSize: 11,
   },
   button: {
