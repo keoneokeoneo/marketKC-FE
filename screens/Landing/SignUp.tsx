@@ -21,7 +21,6 @@ import { AuthDispatch } from '../../store/actions/ActionTypes';
 import { registerInit, registerRequest } from '../../store/actions/authAction';
 import { RootState } from '../../store/reducers';
 import NoticeModal from '../../components/Modal/NoticeModal';
-import Indicator from '../../components/Indicator';
 
 interface FormInput {
   name: string;
@@ -56,7 +55,6 @@ const SignUp = ({ navigation }: ISignUp) => {
   });
   const [modalOpen, setModalOpen] = useState(false);
   const {
-    reset,
     control,
     handleSubmit,
     formState: { errors },
@@ -64,7 +62,15 @@ const SignUp = ({ navigation }: ISignUp) => {
     resolver: yupResolver(SignUpSchema),
   });
   const dispatch = useDispatch();
-  const regState = useSelector((state: RootState) => state.auth.register);
+  const authState = useSelector((state: RootState) => state.auth);
+
+  const onClose = () => {
+    setModalOpen(false);
+    if (authState.register.status === 'SUCCESS') {
+      navigation.navigate('SignIn');
+      dispatch(registerInit());
+    }
+  };
 
   const onSubmit = (data: FormInput) => {
     const regData: RegData = {
@@ -77,26 +83,25 @@ const SignUp = ({ navigation }: ISignUp) => {
 
   useEffect(() => {
     if (
-      regState.status !== 'WAITING' &&
-      (regState.status === 'FAILURE' || regState.status === 'SUCCESS')
+      authState.register.status === 'FAILURE' ||
+      authState.register.status === 'SUCCESS'
     ) {
       setModalOpen(true);
     }
-  }, [regState.status]);
+  }, [authState.register.status]);
 
   return (
     <TouchableWithoutFeedback
       style={{ flex: 1 }}
       onPress={() => Keyboard.dismiss()}>
       <KeyboardAvoidingView style={{ flex: 1 }}>
-        {/* <Indicator isActive={regState.status === 'WAITING'} /> */}
         <NoticeModal
           isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
+          onClose={onClose}
           content={
-            regState.status === 'SUCCESS'
-              ? '회원가입이 완료되었습니다.'
-              : regState.error
+            authState.register.status === 'SUCCESS'
+              ? '회원가입이 완료되었습니다'
+              : authState.register.error
           }
         />
         <View style={styles.container}>
@@ -127,7 +132,7 @@ const SignUp = ({ navigation }: ISignUp) => {
               />
             </View>
             <Text style={styles.inputError}>
-              {errors.name && errors.name.message}
+              {errors.name && `* ${errors.name.message}`}
             </Text>
           </View>
           <View style={styles.input}>
@@ -156,7 +161,7 @@ const SignUp = ({ navigation }: ISignUp) => {
               />
             </View>
             <Text style={styles.inputError}>
-              {errors.email && errors.email.message}
+              {errors.email && `* ${errors.email.message}`}
             </Text>
           </View>
           <View style={styles.input}>
@@ -186,6 +191,8 @@ const SignUp = ({ navigation }: ISignUp) => {
                 <PressableIcon
                   name="eye"
                   size={16}
+                  color={PALETTE.grey}
+                  mh={2}
                   onPress={() =>
                     setVisible(prev => ({ ...prev, pwd: !prev.pwd }))
                   }
@@ -194,6 +201,8 @@ const SignUp = ({ navigation }: ISignUp) => {
                 <PressableIcon
                   name="eye-off"
                   size={16}
+                  color={PALETTE.grey}
+                  mh={2}
                   onPress={() =>
                     setVisible(prev => ({ ...prev, pwd: !prev.pwd }))
                   }
@@ -231,6 +240,8 @@ const SignUp = ({ navigation }: ISignUp) => {
                 <PressableIcon
                   name="eye"
                   size={16}
+                  color={PALETTE.grey}
+                  mh={2}
                   onPress={() =>
                     setVisible(prev => ({
                       ...prev,
@@ -242,6 +253,8 @@ const SignUp = ({ navigation }: ISignUp) => {
                 <PressableIcon
                   name="eye-off"
                   size={16}
+                  color={PALETTE.grey}
+                  mh={2}
                   onPress={() =>
                     setVisible(prev => ({
                       ...prev,
@@ -255,6 +268,7 @@ const SignUp = ({ navigation }: ISignUp) => {
               {errors.confirmPassword && errors.confirmPassword.message}
             </Text>
           </View>
+          <View style={{ marginBottom: 30 }} />
           <TouchableOpacity
             style={styles.button}
             onPress={handleSubmit(onSubmit)}>
@@ -303,32 +317,36 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingBottom: 8,
     borderRadius: 16,
-    borderColor: PALETTE.line1,
-    borderWidth: 1,
     justifyContent: 'space-between',
+    borderBottomColor: PALETTE.line1,
+    borderBottomWidth: 1,
+    marginTop: 15,
   },
   inputText: {
     flex: 1,
     fontWeight: '500',
     color: PALETTE.line1,
     paddingHorizontal: 4,
+    fontSize: 17,
   },
   inputError: {
     color: PALETTE.error,
     alignSelf: 'flex-start',
-    padding: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
     fontSize: 11,
   },
   button: {
     width: '80%',
     backgroundColor: PALETTE.main,
-    borderRadius: 25,
-    height: 50,
+    borderRadius: 28,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
+    marginBottom: 10,
   },
   buttonText: {
     fontSize: 18,

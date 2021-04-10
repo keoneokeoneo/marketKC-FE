@@ -8,14 +8,19 @@ interface IProps {
   color?: string;
   onPress: () => void;
   opacity?: number;
+  mh?: number;
 }
 
-const PressableIcon = ({ name, onPress, color, size, opacity }: IProps) => {
+const PressableIcon = ({ name, onPress, color, size, opacity, mh }: IProps) => {
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={opacity ? opacity : 1}
-      style={{ justifyContent: 'center', alignItems: 'center' }}>
+      style={{
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginHorizontal: mh ? mh : 0,
+      }}>
       <Ionicons name={name} size={size} color={color} />
     </TouchableOpacity>
   );

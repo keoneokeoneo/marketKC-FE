@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -16,6 +16,11 @@ import PressableIcon from '../../components/PressableIcon';
 import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginInit, loginRequest } from '../../store/actions/authAction';
+import { LoginData } from '../../types/APITypes';
+import { RootState } from '../../store/reducers';
+import NoticeModal from '../../components/Modal/NoticeModal';
 
 interface FormInput {
   email: string;
@@ -27,17 +32,12 @@ const SignInSchema = yup.object().shape({
     .string()
     .email('이메일 형식을 맞춰주세요')
     .required('필수 입력 항목입니다'),
-  password: yup
-    .string()
-    .required('필수 입력 항목입니다')
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#^&])[A-Za-z\d@$!%*?#^&]{8,}$/,
-      '대/소문자, 숫자, 특수문자가 포함된 8자 이상',
-    ),
+  password: yup.string().required('필수 입력 항목입니다'),
 });
 
 const SignIn = ({ navigation }: ISignIn) => {
   const [visible, setVisible] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const {
     control,
     handleSubmit,
@@ -45,13 +45,36 @@ const SignIn = ({ navigation }: ISignIn) => {
   } = useForm<FormInput>({
     resolver: yupResolver(SignInSchema),
   });
-  const onSubmit = (data: FormInput) => console.log(data);
+  const dispatch = useDispatch();
+  const authState = useSelector((state: RootState) => state.auth);
+
+  const onSubmit = (data: FormInput) => {
+    const loginData: LoginData = {
+      userEmail: data.email,
+      userPW: data.password,
+    };
+    dispatch(loginRequest(loginData));
+  };
+
+  useEffect(() => {
+    if (authState.login.status === 'FAILURE') {
+      setModalOpen(true);
+    } else if (authState.login.status === 'SUCCESS') {
+      dispatch(loginInit());
+      navigation.navigate('Main', { screen: 'Test' });
+    }
+  }, [authState.login.status]);
 
   return (
     <TouchableWithoutFeedback
       style={{ flex: 1 }}
       onPress={() => Keyboard.dismiss()}>
       <KeyboardAvoidingView style={{ flex: 1 }}>
+        <NoticeModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          content={authState.login.error}
+        />
         <View style={styles.container}>
           <View style={styles.logoContainer}>
             <Text style={styles.logo}>Market</Text>
@@ -108,7 +131,7 @@ const SignIn = ({ navigation }: ISignIn) => {
                   />
                 )}
               />
-              {visible ? (
+              {!visible ? (
                 <PressableIcon
                   name="eye"
                   size={16}
@@ -198,8 +221,8 @@ const styles = StyleSheet.create({
   button: {
     width: '80%',
     backgroundColor: PALETTE.main,
-    borderRadius: 25,
-    height: 50,
+    borderRadius: 28,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,
