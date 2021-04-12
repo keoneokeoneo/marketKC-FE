@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { PALETTE } from '../../constants/color';
 //import Ionicons from 'react-native-vector-icons/Ionicons';
-import { ISignIn } from '../../types/ScreenProps';
+import { SignInProps } from '../../types/ScreenProps';
 import PressableIcon from '../../components/PressableIcon';
 import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -35,7 +35,7 @@ const SignInSchema = yup.object().shape({
   password: yup.string().required('필수 입력 항목입니다'),
 });
 
-const SignIn = ({ navigation }: ISignIn) => {
+const SignIn = ({ navigation }: SignInProps) => {
   const [visible, setVisible] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const {
@@ -61,7 +61,10 @@ const SignIn = ({ navigation }: ISignIn) => {
       setModalOpen(true);
     } else if (authState.login.status === 'SUCCESS') {
       dispatch(loginInit());
-      navigation.navigate('Main', { screen: 'Test' });
+      navigation.navigate('Main', {
+        screen: 'Home',
+        params: { screen: 'Feed' },
+      });
     }
   }, [authState.login.status]);
 

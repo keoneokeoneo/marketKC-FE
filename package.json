@@ -15,6 +15,7 @@
     "@react-native-async-storage/async-storage": "^1.15.2",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/bottom-tabs": "^5.11.9",
+    "@react-navigation/devtools": "^5.1.22",
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.4",
     "@reduxjs/toolkit": "^1.5.1",

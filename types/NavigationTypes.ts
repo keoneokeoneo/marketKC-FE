@@ -10,11 +10,46 @@ export type AppNavParamList = {
 };
 
 export type LandingParamList = {
-  //Intro: undefined;
   SignIn: undefined;
   SignUp: undefined;
 };
 
 export type MainParamList = {
-  Test: undefined;
+  Home: NestedNavigatorParams<HomeParamList>;
+  Crypto: NestedNavigatorParams<CryptoParamList>;
+  Posting: NestedNavigatorParams<PostingParamList>;
+  Chat: NestedNavigatorParams<ChatParamList>;
+  Profile: NestedNavigatorParams<ProfileParamList>;
+};
+
+export type HomeParamList = {
+  Feed: undefined;
+  Post: undefined;
+  Search: undefined;
+  SetCategory: undefined;
+  SetLocation: undefined;
+};
+
+export type CryptoParamList = {
+  Chart: undefined;
+};
+
+export type PostingParamList = {
+  UploadPost: undefined;
+  SelectCategory: undefined;
+};
+
+export type ChatParamList = {
+  ChatList: undefined;
+  ChatRoom: undefined;
+};
+
+export type ProfileParamList = {
+  Dibs: undefined;
+  Sales: undefined;
+  Purchases: undefined;
+  Wallet: undefined;
+  ProfileModification: undefined;
+  UserProfile: undefined;
+  MyPage: undefined;
 };

@@ -1,16 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  NavigationContainerRef,
+} from '@react-navigation/native';
 import LandingNav from './LandingNav';
 import MainNav from './MainNav';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducers';
 import { authInit } from '../store/actions/authAction';
+import { useReduxDevToolsExtension } from '@react-navigation/devtools';
 
 const Stack = createStackNavigator();
 
 const AppNav = () => {
+  const navigationRef = useRef<NavigationContainerRef>(null);
+  useReduxDevToolsExtension(navigationRef);
   const dispatch = useDispatch();
   const authState = useSelector((state: RootState) => state.auth);
 
@@ -26,11 +32,13 @@ const AppNav = () => {
       console.log(e);
     }
   };
+
   useEffect(() => {
     getData();
   }, []);
+
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {authState.status.isLoggedIn ? (
           <Stack.Screen name="Main" component={MainNav} />

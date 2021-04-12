@@ -10,14 +10,13 @@ import {
   View,
 } from 'react-native';
 import { PALETTE } from '../../constants/color';
-import { ISignUp } from '../../types/ScreenProps';
+import { SignUpProps } from '../../types/ScreenProps';
 import PressableIcon from '../../components/PressableIcon';
 import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
 import { RegData } from '../../types/APITypes';
-import { AuthDispatch } from '../../store/actions/ActionTypes';
 import { registerInit, registerRequest } from '../../store/actions/authAction';
 import { RootState } from '../../store/reducers';
 import NoticeModal from '../../components/Modal/NoticeModal';
@@ -48,7 +47,7 @@ const SignUpSchema = yup.object().shape({
     .oneOf([yup.ref('password'), null], '비밀번호가 일치하지 않습니다'),
 });
 
-const SignUp = ({ navigation }: ISignUp) => {
+const SignUp = ({ navigation }: SignUpProps) => {
   const [visible, setVisible] = useState({
     pwd: false,
     confirmPwd: false,
