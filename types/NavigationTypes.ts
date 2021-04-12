@@ -37,6 +37,8 @@ export type CryptoParamList = {
 export type PostingParamList = {
   UploadPost: undefined;
   SelectCategory: undefined;
+  ImagePicker: undefined;
+  GalleryPermission: undefined;
 };
 
 export type ChatParamList = {

@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { BottomTabItem } from './BottomTabItem';
+import { PALETTE } from '../../constants/color';
 
 export const BottomTabBar = ({
   state,
@@ -96,8 +97,8 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 4.0,
-    backgroundColor: 'white',
     elevation: 10,
+    backgroundColor: PALETTE.bg2,
     position: 'absolute',
     bottom: 0,
   },
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 10,
-    backgroundColor: PALETTE.three,
+    backgroundColor: PALETTE.main,
     borderRadius: 10,
     width: 0,
   },

@@ -14,7 +14,7 @@ import {
   AUTH_REGISTER_FAILURE,
   AUTH_REGISTER_INIT,
   AUTH_REGISTER_SUCCESS,
-} from './ActionTypes';
+} from './authActionTypes';
 
 const BASE_URL = 'http://localhost:3000/api';
 

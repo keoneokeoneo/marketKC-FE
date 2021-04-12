@@ -8,7 +8,7 @@ import {
   AUTH_REGISTER_FAILURE,
   AUTH_REGISTER_INIT,
   AUTH_REGISTER_SUCCESS,
-} from '../actions/ActionTypes';
+} from '../actions/authActionTypes';
 import { AuthActions, AuthState } from '../types';
 
 const initialState: AuthState = {
@@ -22,7 +22,7 @@ const initialState: AuthState = {
   },
   status: {
     valid: false,
-    isLoggedIn: false,
+    isLoggedIn: true,
     currentUserToken: '',
     currentUserID: '',
   },

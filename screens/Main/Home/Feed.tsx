@@ -31,7 +31,7 @@ const Feed = ({ navigation }: FeedProps) => {
         </HeaderSide>
       ),
       headerStyle: {
-        backgroundColor: PALETTE.bg2,
+        backgroundColor: 'white',
       },
     });
   }, [navigation]);
@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: PALETTE.bg2,
   },
 });
 

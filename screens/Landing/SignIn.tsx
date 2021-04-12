@@ -10,30 +10,21 @@ import {
   View,
 } from 'react-native';
 import { PALETTE } from '../../constants/color';
-//import Ionicons from 'react-native-vector-icons/Ionicons';
 import { SignInProps } from '../../types/ScreenProps';
 import PressableIcon from '../../components/PressableIcon';
 import { Controller, useForm } from 'react-hook-form';
-import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginInit, loginRequest } from '../../store/actions/authAction';
 import { LoginData } from '../../types/APITypes';
 import { RootState } from '../../store/reducers';
 import NoticeModal from '../../components/Modal/NoticeModal';
+import { SignInSchema } from '../../constants/schema';
 
 interface FormInput {
   email: string;
   password: string;
 }
-
-const SignInSchema = yup.object().shape({
-  email: yup
-    .string()
-    .email('이메일 형식을 맞춰주세요')
-    .required('필수 입력 항목입니다'),
-  password: yup.string().required('필수 입력 항목입니다'),
-});
 
 const SignIn = ({ navigation }: SignInProps) => {
   const [visible, setVisible] = useState(false);
@@ -69,10 +60,11 @@ const SignIn = ({ navigation }: SignInProps) => {
   }, [authState.login.status]);
 
   return (
+    //<KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
     <TouchableWithoutFeedback
       style={{ flex: 1 }}
       onPress={() => Keyboard.dismiss()}>
-      <KeyboardAvoidingView style={{ flex: 1 }}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <NoticeModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
@@ -127,7 +119,7 @@ const SignIn = ({ navigation }: SignInProps) => {
                     style={styles.inputText}
                     placeholder="Your Password"
                     placeholderTextColor={PALETTE.grey}
-                    secureTextEntry={visible}
+                    secureTextEntry={!visible}
                     value={value}
                     onChangeText={value => onChange(value)}
                     onBlur={onBlur}
@@ -174,6 +166,7 @@ const SignIn = ({ navigation }: SignInProps) => {
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
+    //</KeyboardAvoidingView>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { Dispatch, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -13,13 +13,13 @@ import { PALETTE } from '../../constants/color';
 import { SignUpProps } from '../../types/ScreenProps';
 import PressableIcon from '../../components/PressableIcon';
 import { Controller, useForm } from 'react-hook-form';
-import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
 import { RegData } from '../../types/APITypes';
 import { registerInit, registerRequest } from '../../store/actions/authAction';
 import { RootState } from '../../store/reducers';
 import NoticeModal from '../../components/Modal/NoticeModal';
+import { SignUpSchema } from '../../constants/schema';
 
 interface FormInput {
   name: string;
@@ -27,25 +27,6 @@ interface FormInput {
   password: string;
   confirmPassword: string;
 }
-
-const SignUpSchema = yup.object().shape({
-  name: yup.string().required('필수 입력 항목입니다'),
-  email: yup
-    .string()
-    .email('이메일 형식을 맞춰주세요')
-    .required('필수 입력 항목입니다'),
-  password: yup
-    .string()
-    .required('필수 입력 항목입니다')
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#^&])[A-Za-z\d@$!%*?#^&]{8,}$/,
-      '대/소문자, 숫자, 특수문자가 포함된 8자 이상',
-    ),
-  confirmPassword: yup
-    .string()
-    .required('필수 입력 항목입니다')
-    .oneOf([yup.ref('password'), null], '비밀번호가 일치하지 않습니다'),
-});
 
 const SignUp = ({ navigation }: SignUpProps) => {
   const [visible, setVisible] = useState({
@@ -93,7 +74,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
     <TouchableWithoutFeedback
       style={{ flex: 1 }}
       onPress={() => Keyboard.dismiss()}>
-      <KeyboardAvoidingView style={{ flex: 1 }}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <NoticeModal
           isOpen={modalOpen}
           onClose={onClose}

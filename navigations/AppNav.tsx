@@ -15,8 +15,8 @@ import { useReduxDevToolsExtension } from '@react-navigation/devtools';
 const Stack = createStackNavigator();
 
 const AppNav = () => {
-  const navigationRef = useRef<NavigationContainerRef>(null);
-  useReduxDevToolsExtension(navigationRef);
+  // const navigationRef = useRef<NavigationContainerRef>(null);
+  // useReduxDevToolsExtension(navigationRef);
   const dispatch = useDispatch();
   const authState = useSelector((state: RootState) => state.auth);
 
@@ -38,7 +38,7 @@ const AppNav = () => {
   }, []);
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {authState.status.isLoggedIn ? (
           <Stack.Screen name="Main" component={MainNav} />

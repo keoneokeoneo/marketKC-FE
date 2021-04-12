@@ -3,9 +3,13 @@ import { CompositeNavigationProp } from '@react-navigation/core';
 import { StackNavigationProp } from '@react-navigation/stack';
 import {
   AppNavParamList,
+  ChatParamList,
+  CryptoParamList,
   HomeParamList,
   LandingParamList,
   MainParamList,
+  PostingParamList,
+  ProfileParamList,
 } from './NavigationTypes';
 
 export interface SignInProps {
@@ -22,9 +26,74 @@ export interface SignUpProps {
   >;
 }
 
+/* Home */
 export interface FeedProps {
   navigation: CompositeNavigationProp<
     StackNavigationProp<HomeParamList, 'Feed'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
+/* Crypto */
+export interface ChartProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<CryptoParamList, 'Chart'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
+/* Posting */
+export interface UploadPostProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<PostingParamList, 'UploadPost'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
+export interface ImagePickerProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<PostingParamList, 'ImagePicker'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
+export interface GalleryPermissionProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<PostingParamList, 'GalleryPermission'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
+/* Chat */
+export interface ChatListProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<ChatParamList, 'ChatList'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
+/* Profile */
+export interface MyPageProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<ProfileParamList, 'MyPage'>,
     CompositeNavigationProp<
       BottomTabNavigationProp<MainParamList>,
       StackNavigationProp<AppNavParamList>
