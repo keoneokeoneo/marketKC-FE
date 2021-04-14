@@ -1,9 +1,11 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React from 'react';
 import { Provider } from 'react-redux';
 import AppNav from './navigations/AppNav';
 import store from './store';
 
 const App = () => {
+  //AsyncStorage.clear();
   return (
     <Provider store={store}>
       <AppNav />

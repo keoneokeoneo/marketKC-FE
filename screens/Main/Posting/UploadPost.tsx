@@ -24,6 +24,7 @@ import { inputFormatter, numberWithCommas } from '../../../utils';
 import { useKeyboard } from '../../../utils/useKeyboard';
 import { SelectImgButton } from '../../../components/Button/SelectImgButton';
 import CameraRoll from '@react-native-community/cameraroll';
+import ImagePicker from 'react-native-image-crop-picker';
 import SelectedImgButton, {
   Test,
 } from '../../../components/Button/SelectedImgButton';
@@ -46,21 +47,20 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   };
 
   const openAssetPicker = async () => {
-    console.log('aa');
     const permission = PERMISSIONS.IOS.PHOTO_LIBRARY;
     const result = await check(permission);
 
     if (result) {
       console.log('이미 승인됨');
-      navigation.navigate('ImagePicker');
-    }
-
-    const status = await request(permission);
-    if (status === 'granted') {
-      console.log('승인됨');
-      navigation.navigate('ImagePicker');
+      ImagePicker.openPicker({ multiple: true });
     } else {
-      navigation.navigate('GalleryPermission');
+      const status = await request(permission);
+      if (status === 'granted') {
+        console.log('승인됨');
+        ImagePicker.openPicker({ multiple: true });
+      } else {
+        navigation.navigate('GalleryPermission');
+      }
     }
   };
 

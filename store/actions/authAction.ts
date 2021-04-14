@@ -16,7 +16,8 @@ import {
   AUTH_REGISTER_SUCCESS,
 } from './authActionTypes';
 
-const BASE_URL = 'http://localhost:3000/api';
+//const BASE_URL = 'http://localhost:3001/api';
+const BASE_URL = 'http://52.78.169.229:3001/api';
 
 export const registerRequest = (regData: RegData) => {
   return (dispatch: Dispatch<AuthDispatch>) => {
@@ -37,7 +38,8 @@ export const registerRequest = (regData: RegData) => {
         }
       })
       .catch(error => {
-        dispatch(registerFailure(error));
+        console.log(error);
+        dispatch(registerFailure('error'));
       });
   };
 };
@@ -54,14 +56,16 @@ export const loginRequest = (loginData: LoginData) => {
         username: loginData.userEmail,
         password: loginData.userPW,
       },
-    }).then(res => {
-      console.log(res.data);
-      if (res.data.code === 1) {
-        dispatch(loginSuccess(res.data.access_token, res.data.userID));
-      } else {
-        dispatch(loginFailure(res.data.data));
-      }
-    });
+    })
+      .then(res => {
+        console.log(res.data);
+        if (res.data.code === 1) {
+          dispatch(loginSuccess(res.data.access_token, res.data.userID));
+        } else {
+          dispatch(loginFailure(res.data.data));
+        }
+      })
+      .catch(err => console.log(err));
   };
 };
 

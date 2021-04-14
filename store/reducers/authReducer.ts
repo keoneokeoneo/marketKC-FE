@@ -22,7 +22,7 @@ const initialState: AuthState = {
   },
   status: {
     valid: false,
-    isLoggedIn: true,
+    isLoggedIn: false,
     currentUserToken: '',
     currentUserID: '',
   },
