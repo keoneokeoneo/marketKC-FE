@@ -23,7 +23,7 @@ export interface Test {
 
 interface Props {
   data: Image;
-  onRemove?: (id: string) => void;
+  onRemove: (id: string) => void;
   onChange?: (id: string) => void;
   isCover?: boolean;
 }
@@ -36,7 +36,7 @@ const SelectedImgButton = ({
 }: Props): JSX.Element => {
   const [chip, setChip] = useState({ width: 0, height: 0 });
   const [isLoading, setLoading] = useState(false);
-  const [uri, setUri] = useState(data.sourceURL);
+  const [uri, setUri] = useState(data.sourceURL ? data.sourceURL : data.path);
 
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -94,7 +94,7 @@ const SelectedImgButton = ({
       </ImageBackground>
       <TouchableOpacity
         onPress={() => {
-          //onRemove(data.id);
+          onRemove(data.path);
         }}
         style={styles.closeButton}
         activeOpacity={1}>

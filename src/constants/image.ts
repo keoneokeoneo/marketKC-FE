@@ -1,5 +1,5 @@
 export const IMAGES = {
   defaultImage: require('../../assets/defaultImage.png'),
-  //avatar: require('../assets/defaultAvatar.png'),
+  defaultUserImage: require('../../assets/defaultUserImage.png'),
   ethLogo: require('../../assets/ethLogo.png'),
 };

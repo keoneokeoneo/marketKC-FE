@@ -110,6 +110,17 @@ export interface ChatListProps {
   >;
 }
 
+export interface ChatRoomProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<ChatParamList, 'ChatRoom'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+  route: RouteProp<ChatParamList, 'ChatRoom'>;
+}
+
 /* Profile */
 export interface MyPageProps {
   navigation: CompositeNavigationProp<

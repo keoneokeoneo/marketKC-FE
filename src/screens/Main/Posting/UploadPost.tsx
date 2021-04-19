@@ -19,6 +19,7 @@ import {
   FlatList,
   ActionSheetIOS,
   Image,
+  Alert,
 } from 'react-native';
 import HeaderSide from '../../../components/HeaderSide';
 import PressableIcon from '../../../components/PressableIcon';
@@ -36,6 +37,9 @@ import SelectedImgButton from '../../../components/Button/SelectedImgButton';
 import { check, PERMISSIONS, request } from 'react-native-permissions';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store/reducers';
+import NoticeModal from '../../../components/Modal/NoticeModal';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { PostingSchema } from '../../../constants/schema';
 
 interface FormInput {
   postTitle: string;
@@ -53,15 +57,32 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     control,
     handleSubmit,
     reset,
-    formState: { errors },
-  } = useForm<FormInput>();
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<FormInput>({
+    resolver: yupResolver(PostingSchema),
+    defaultValues: {
+      postTitle: '',
+      postContent: '',
+      postPriceN: 0,
+      postPriceS: '0',
+    },
+  });
   const [keyboardHeight] = useKeyboard();
   const [assets, setAssets] = useState<ImageType[]>([]);
   const [permission, setPermission] = useState(false);
+  const [noticeModal, setNoticeModal] = useState({
+    open: false,
+    content: '',
+  });
   const postingState = useSelector((state: RootState) => state.posting);
 
   const onSubmit = (data: FormInput) => {
     console.log(data);
+  };
+
+  const onRemove = (id: string) => {
+    setAssets(prev => prev.filter(asset => asset.path !== id));
   };
 
   const getPermission = async (index: number) => {
@@ -85,7 +106,33 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     }
   };
 
+  useEffect(() => {
+    const test = () => {
+      if (errors.postTitle || errors.postContent || errors.postCategoryID) {
+        let msg = '';
+        if (errors.postTitle) msg += `- ${errors.postTitle.message}\n`;
+        if (errors.postContent) msg += `- ${errors.postContent.message}\n`;
+        if (errors.postCategoryID)
+          msg += `- ${errors.postCategoryID.message}\n`;
+        setNoticeModal({ open: true, content: msg });
+      }
+    };
+    if (isSubmitting) test();
+  }, [
+    isSubmitting,
+    errors.postTitle,
+    errors.postContent,
+    errors.postCategoryID,
+  ]);
+
   const openAssetPicker = () => {
+    if (assets.length === 5) {
+      setNoticeModal({
+        open: true,
+        content: '사진은 최대 5장까지 첨부할 수 있습니다.',
+      });
+      return;
+    }
     ActionSheetIOS.showActionSheetWithOptions(
       {
         options: ['닫기', '앨범에서 선택', '사진 촬영하기'],
@@ -99,10 +146,14 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
           // 앨범에서 선택
           getPermission(buttonIndex);
           if (permission) {
-            ImagePicker.openPicker({ mediaType: 'photo', multiple: true })
+            ImagePicker.openPicker({
+              mediaType: 'photo',
+              multiple: true,
+              //cropping: true,
+            })
               .then(res => {
                 console.log(res);
-                setAssets(res);
+                setAssets([...assets, ...res]);
               })
               .catch(err => console.log(err));
           }
@@ -110,8 +161,11 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
           // 사진 촬영하기
           getPermission(buttonIndex);
           if (permission) {
-            ImagePicker.openCamera({})
-              .then(res => console.log(res))
+            ImagePicker.openCamera({ mediaType: 'photo' })
+              .then(res => {
+                console.log(res);
+                setAssets([...assets, res]);
+              })
               .catch(err => console.log(err));
           }
         }
@@ -154,222 +208,227 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   );
 
   return (
-    <TouchableWithoutFeedback
-      onPress={() => Keyboard.dismiss()}
-      style={{ flex: 1 }}>
-      <KeyboardAvoidingView style={{ flex: 1 }}>
-        <ScrollView style={styles.container}>
-          <View style={styles.section}>
-            <View style={styles.labelContainer}>
-              <Text style={styles.label}>사진</Text>
-              <Text style={styles.helper}>
-                사진을 선택하시면 대표 이미지를 변경할 수 있습니다
-              </Text>
-            </View>
-            <FlatList
-              style={{ paddingVertical: 8 }}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              ListHeaderComponent={
-                <SelectImgButton
-                  maximumCount={10}
-                  currentCount={assets.length}
-                  onPress={openAssetPicker}
-                />
-              }
-              data={assets}
-              keyExtractor={item => item.path}
-              renderItem={({ item }) => (
-                <SelectedImgButton
-                  data={item}
-                  //isCover={item.id === coverID}
-                  //   onChange={onCoverChange}
-                  //   onRemove={onRemoveAsset}
+    // <TouchableWithoutFeedback
+    //   onPress={() => Keyboard.dismiss()}
+    //   style={{ flex: 1 }}>
+    <KeyboardAvoidingView style={{ flex: 1 }}>
+      <ScrollView style={styles.container}>
+        <NoticeModal
+          isOpen={noticeModal.open}
+          content={noticeModal.content}
+          onClose={() => setNoticeModal({ open: false, content: '' })}
+        />
+        <View style={styles.section}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>사진</Text>
+            <Text style={styles.helper}>
+              사진을 선택하시면 대표 이미지를 변경할 수 있습니다
+            </Text>
+          </View>
+          <FlatList
+            style={{ paddingVertical: 8 }}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            ListHeaderComponent={
+              <SelectImgButton
+                maximumCount={5}
+                currentCount={assets.length}
+                onPress={openAssetPicker}
+              />
+            }
+            data={assets}
+            keyExtractor={item => item.path}
+            renderItem={({ item }) => (
+              <SelectedImgButton
+                data={item}
+                //isCover={item.id === coverID}
+                //   onChange={onCoverChange}
+                onRemove={onRemove}
+              />
+            )}
+          />
+        </View>
+        <View style={styles.section}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>글 제목</Text>
+          </View>
+          <View style={styles.textArea}>
+            <Controller
+              control={control}
+              name="postTitle"
+              defaultValue=""
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  placeholder="글 제목"
+                  style={styles.textInput}
+                  value={value}
+                  onChangeText={value => onChange(value)}
+                  onBlur={onBlur}
                 />
               )}
             />
           </View>
-          <View style={styles.section}>
-            <View style={styles.labelContainer}>
-              <Text style={styles.label}>글 제목</Text>
-            </View>
-            <View style={styles.textArea}>
-              <Controller
-                control={control}
-                name="postTitle"
-                defaultValue=""
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    placeholder="글 제목"
-                    style={styles.textInput}
-                    value={value}
-                    onChangeText={value => onChange(value)}
-                    onBlur={onBlur}
-                  />
-                )}
-              />
-            </View>
+        </View>
+        <View style={styles.section}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>카테고리</Text>
           </View>
-          <View style={styles.section}>
-            <View style={styles.labelContainer}>
-              <Text style={styles.label}>카테고리</Text>
-            </View>
-            <TouchableOpacity
-              activeOpacity={1}
+          <TouchableOpacity
+            activeOpacity={1}
+            style={[
+              styles.textArea,
+              {
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              },
+            ]}
+            onPress={() => navigation.navigate('SelectCategory')}>
+            <TextInput
+              editable={false}
+              placeholder="카테고리 선택"
+              style={styles.textInput}
+              value={postingState.formData.category.name}
+            />
+
+            <Ionicons name="chevron-forward-sharp" size={14} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.section}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>판매가격</Text>
+            {/* <Text style={styles.helper}>{`1 ETH = ₩ ${numberWithCommas(
+                ETH,
+              )}`}</Text> */}
+          </View>
+          <View style={{ flexDirection: 'row' }}>
+            <View
               style={[
                 styles.textArea,
                 {
+                  flex: 1,
+                  marginRight: 4,
                   flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  paddingHorizontal: 0,
                 },
-              ]}
-              onPress={() => navigation.navigate('SelectCategory')}>
-              <TextInput
-                editable={false}
-                placeholder="카테고리 선택"
-                style={styles.textInput}
-                value={postingState.formData.category.name}
-              />
-
-              <Ionicons name="chevron-forward-sharp" size={14} />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.section}>
-            <View style={styles.labelContainer}>
-              <Text style={styles.label}>판매가격</Text>
-              {/* <Text style={styles.helper}>{`1 ETH = ₩ ${numberWithCommas(
-                ETH,
-              )}`}</Text> */}
-            </View>
-            <View style={{ flexDirection: 'row' }}>
-              <View
-                style={[
-                  styles.textArea,
-                  {
-                    flex: 1,
-                    marginRight: 4,
-                    flexDirection: 'row',
-                    paddingHorizontal: 0,
-                  },
-                ]}>
-                <Text
-                  style={{
-                    alignSelf: 'center',
-                    marginHorizontal: 8,
-                  }}>
-                  ₩
-                </Text>
-                <Controller
-                  control={control}
-                  name="postPriceS"
-                  defaultValue=""
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      placeholder="판매 금액"
-                      style={styles.textInput}
-                      value={value}
-                      editable={
-                        postingState.formData.category.name === '무료나눔'
-                          ? false
-                          : true
-                      }
-                      keyboardType="numeric"
-                      onChangeText={value => {
-                        setValue('postPriceN', Number(inputFormatter(value)));
-                        onChange(numberWithCommas(inputFormatter(value)));
-                        //const formatted = inputFormatter(value);
-                        // const eth = (Number(formatted) / ETH)
-                        //   .toFixed(8)
-                        //   .toString();
-                        // setEthP(eth);
-                        //onChange(numberWithCommas(value));
-                        //onChange(value);
-                      }}
-                      onBlur={onBlur}
-                    />
-                  )}
-                />
-              </View>
-              <View
-                style={[
-                  styles.textArea,
-                  {
-                    flex: 1,
-                    marginLeft: 4,
-                    flexDirection: 'row',
-                    paddingHorizontal: 0,
-                    alignItems: 'center',
-                  },
-                ]}>
-                <Image
-                  source={IMAGES.ethLogo}
-                  style={{ width: 20, height: 20 }}
-                />
-                <TextInput
-                  editable={false}
-                  placeholder="ETH"
-                  style={styles.textInput}
-                  //value={ethP}
-                />
-              </View>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-              }}>
-              <Text>{'1분 전 갱신'}</Text>
-              <PressableIcon
-                size={24}
-                name="refresh-circle-outline"
-                onPress={() => {
-                  //getData();
-                }}
-              />
-            </View>
-          </View>
-          <View style={styles.section}>
-            <View style={styles.labelContainer}>
-              <Text style={styles.label}>상품 설명</Text>
-            </View>
-            <View style={[styles.textArea]}>
+              ]}>
+              <Text
+                style={{
+                  alignSelf: 'center',
+                  marginHorizontal: 8,
+                }}>
+                ₩
+              </Text>
               <Controller
                 control={control}
-                name="postContent"
+                name="postPriceS"
                 defaultValue=""
                 render={({ field: { onChange, onBlur, value } }) => (
                   <TextInput
-                    multiline
-                    placeholder="사이즈, 색상, 사용감, 사용기간, 보증기간 등 상세한 상품정보를 입력하면 더욱 수월하게 거래할 수 있습니다."
-                    style={[styles.textInput, { height: 100 }]}
+                    placeholder="판매 금액"
+                    style={styles.textInput}
                     value={value}
-                    onChangeText={value => onChange(value)}
+                    editable={
+                      postingState.formData.category.name === '무료나눔'
+                        ? false
+                        : true
+                    }
+                    keyboardType="numeric"
+                    onChangeText={value => {
+                      setValue('postPriceN', Number(inputFormatter(value)));
+                      onChange(numberWithCommas(inputFormatter(value)));
+                      //const formatted = inputFormatter(value);
+                      // const eth = (Number(formatted) / ETH)
+                      //   .toFixed(8)
+                      //   .toString();
+                      // setEthP(eth);
+                      //onChange(numberWithCommas(value));
+                      //onChange(value);
+                    }}
                     onBlur={onBlur}
                   />
                 )}
               />
             </View>
+            <View
+              style={[
+                styles.textArea,
+                {
+                  flex: 1,
+                  marginLeft: 4,
+                  flexDirection: 'row',
+                  paddingHorizontal: 0,
+                  alignItems: 'center',
+                },
+              ]}>
+              <Image
+                source={IMAGES.ethLogo}
+                style={{ width: 20, height: 20 }}
+              />
+              <TextInput
+                editable={false}
+                placeholder="ETH"
+                style={styles.textInput}
+                //value={ethP}
+              />
+            </View>
           </View>
-        </ScrollView>
-        <View
-          style={[
-            styles.bottomContainer,
-            {
-              marginBottom: keyboardHeight,
-              paddingBottom:
-                keyboardHeight > 0 ? 0 : Platform.OS === 'ios' ? 24 : 0,
-            },
-          ]}>
-          <TouchableOpacity
-            style={styles.bottomButton}
-            onPress={handleSubmit(onSubmit)}>
-            <Text style={styles.bottomButtonText}>등록완료</Text>
-          </TouchableOpacity>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+            }}>
+            <Text>{'1분 전 갱신'}</Text>
+            <PressableIcon
+              size={24}
+              name="refresh-circle-outline"
+              onPress={() => {
+                //getData();
+              }}
+            />
+          </View>
         </View>
-      </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
+        <View style={styles.section}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>상품 설명</Text>
+          </View>
+          <View style={[styles.textArea]}>
+            <Controller
+              control={control}
+              name="postContent"
+              defaultValue=""
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  multiline
+                  placeholder="사이즈, 색상, 사용감, 사용기간, 보증기간 등 상세한 상품정보를 입력하면 더욱 수월하게 거래할 수 있습니다."
+                  style={[styles.textInput, { height: 100 }]}
+                  value={value}
+                  onChangeText={value => onChange(value)}
+                  onBlur={onBlur}
+                />
+              )}
+            />
+          </View>
+        </View>
+      </ScrollView>
+      <View
+        style={[
+          styles.bottomContainer,
+          {
+            marginBottom: keyboardHeight,
+            paddingBottom:
+              keyboardHeight > 0 ? 0 : Platform.OS === 'ios' ? 24 : 0,
+          },
+        ]}>
+        <TouchableOpacity
+          style={styles.bottomButton}
+          onPress={handleSubmit(onSubmit)}>
+          <Text style={styles.bottomButtonText}>등록완료</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
+    // </TouchableWithoutFeedback>
   );
 };
 
