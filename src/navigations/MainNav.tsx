@@ -104,6 +104,8 @@ const MainNav = () => {
           tabBarVisible: (route => {
             const routeName = getFocusedRouteNameFromRoute(route) ?? '';
             switch (routeName) {
+              case 'ChatRoom':
+                return false;
               default:
                 return true;
             }
