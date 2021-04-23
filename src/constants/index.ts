@@ -1,4 +1,5 @@
 import { Category } from '../store/types';
+import { IFeedItem } from '../types';
 
 export const CATEGORIES: Category[] = [
   {
@@ -50,3 +51,22 @@ export const CATEGORIES: Category[] = [
     name: '무료나눔',
   },
 ];
+
+const dummyData: IFeedItem[] = [];
+
+for (let i = 0; i < 30; i++) {
+  const tmp: IFeedItem = {
+    id: i.toString(),
+    thumbnailUri: 'https://picsum.photos/600/600/?random',
+    title: `판매글 ${i}`,
+    location: '위치 정보',
+    date: `${i + 1}분 전`,
+    price: (i + 1) * 10000,
+    chats: Math.floor(Math.random() * 10),
+    likes: Math.floor(Math.random() * 10),
+    status: 'ㅁㅁㅁㅁ',
+  };
+  dummyData.push(tmp);
+}
+
+export { dummyData };

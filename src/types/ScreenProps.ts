@@ -37,6 +37,17 @@ export interface FeedProps {
   >;
 }
 
+export interface PostProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<HomeParamList, 'Post'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+  route: RouteProp<HomeParamList, 'Post'>;
+}
+
 export interface SetCategoryProps {
   navigation: CompositeNavigationProp<
     StackNavigationProp<HomeParamList, 'SetCategory'>,

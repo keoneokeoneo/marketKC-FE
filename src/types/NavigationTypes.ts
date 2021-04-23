@@ -1,3 +1,5 @@
+import { IFeedItem } from '.';
+
 export type NestedNavigatorParams<ParamList> = {
   [K in keyof ParamList]: undefined extends ParamList[K]
     ? { screen: K; params?: ParamList[K] }
@@ -24,7 +26,7 @@ export type MainParamList = {
 
 export type HomeParamList = {
   Feed: undefined;
-  Post: undefined;
+  Post: { post: IFeedItem };
   Search: undefined;
   SetCategory: undefined;
   SetLocation: undefined;
