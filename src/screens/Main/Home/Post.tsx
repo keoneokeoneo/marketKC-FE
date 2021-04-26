@@ -92,6 +92,10 @@ const Post = ({ navigation, route }: PostProps) => {
             indicatorInactiveColor="#808080"
             onImagePress={() => {}}
           /> */}
+          <Image
+            source={{ uri: data.thumbnailUri }}
+            style={{ width: '100%', height: '100%' }}
+          />
         </View>
         <View style={styles.container}>
           <TouchableOpacity
@@ -114,13 +118,27 @@ const Post = ({ navigation, route }: PostProps) => {
                   style={{
                     flexDirection: 'row',
                   }}>
+                  {/* <Ionicons name="star-outline" style={styles.profileRate} />
                   <Ionicons name="star-outline" style={styles.profileRate} />
                   <Ionicons name="star-outline" style={styles.profileRate} />
                   <Ionicons name="star-outline" style={styles.profileRate} />
-                  <Ionicons name="star-outline" style={styles.profileRate} />
-                  <Ionicons name="star-outline" style={styles.profileRate} />
+                  <Ionicons name="star-outline" style={styles.profileRate} /> */}
                 </View>
-                <Text style={styles.profileRate}>0.0/5.0</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text
+                    style={{
+                      fontWeight: 'bold',
+                      fontSize: 16,
+                      color: PALETTE.main,
+                      marginRight: 4,
+                    }}>
+                    4.7
+                  </Text>
+                  <Text style={{ marginRight: 2, color: PALETTE.line1 }}>
+                    /
+                  </Text>
+                  <Text style={{ color: PALETTE.line1 }}>5.0</Text>
+                </View>
               </View>
             </View>
           </TouchableOpacity>
@@ -137,7 +155,10 @@ const Post = ({ navigation, route }: PostProps) => {
               <Text style={styles.contentInfoText}>방금 전</Text>
             </View>
             <View style={styles.content}>
-              <Text style={styles.contentText}>머그컵 싸게 판매합니다~~</Text>
+              <Text
+                style={
+                  styles.contentText
+                }>{`게시글의 본문이 들어갈 자리입니다`}</Text>
             </View>
             <View style={styles.contentInfo}>
               <Ionicons
@@ -174,7 +195,10 @@ const Post = ({ navigation, route }: PostProps) => {
               <Text style={[styles.priceText]}>{`${numberWithCommas(
                 data.price,
               )} ₩`}</Text>
-              <Text style={[styles.priceText]}>{`${(data.price / 2813000)
+              <Text style={[styles.priceText]}>{`${(
+                (data.price / 1000) *
+                0.00036
+              )
                 .toFixed(6)
                 .toString()} ETH`}</Text>
             </View>

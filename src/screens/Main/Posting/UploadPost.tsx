@@ -369,11 +369,11 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
                 editable={false}
                 placeholder="ETH"
                 style={styles.textInput}
-                //value={ethP}
+                value={'0.0011'}
               />
             </View>
           </View>
-          <View
+          {/* <View
             style={{
               flexDirection: 'row',
               justifyContent: 'flex-end',
@@ -387,7 +387,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
                 //getData();
               }}
             />
-          </View>
+          </View> */}
         </View>
         <View style={styles.section}>
           <View style={styles.labelContainer}>

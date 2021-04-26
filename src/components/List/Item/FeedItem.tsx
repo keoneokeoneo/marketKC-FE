@@ -5,6 +5,8 @@ import { numberWithCommas } from '../../../utils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { PALETTE } from '../../../constants/color';
 
+const eth = 0.00036;
+
 interface IProps {
   data: IFeedItem;
   onClick: (data: IFeedItem) => void;
@@ -25,7 +27,14 @@ const FeedItem = ({ data, onClick }: IProps) => {
             <Text style={styles.info}>·</Text>
             <Text style={styles.info}>{date}</Text>
           </View>
-          <Text style={styles.price}>{`₩ ${numberWithCommas(price)}`}</Text>
+          <View style={styles.priceContainer}>
+            <Text style={styles.price}>{`ETH ${((price / 1000) * eth).toFixed(
+              5,
+            )}`}</Text>
+            <Text style={styles.price}>{`[ ₩ ${numberWithCommas(
+              price,
+            )} ]`}</Text>
+          </View>
           <View style={styles.subInfoContainer}>
             {chats > 0 ? (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -61,11 +70,11 @@ const styles = StyleSheet.create({
   },
   thumbnail: {
     borderRadius: 6,
-    width: 52,
-    height: 52,
+    width: 84,
+    height: 84,
   },
   cardRight: {
-    flex: 2,
+    flex: 2.5,
     padding: 4,
   },
   title: {
@@ -81,11 +90,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: PALETTE.grey,
   },
-  price: {
-    fontSize: 15,
-    fontWeight: '600',
+  priceContainer: {
+    flexDirection: 'row',
     marginVertical: 4,
-    alignSelf: 'flex-start',
+  },
+  price: {
+    fontWeight: '600',
+    marginRight: 4,
   },
   subInfoContainer: {
     flexDirection: 'row',

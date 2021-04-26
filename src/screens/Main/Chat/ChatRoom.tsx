@@ -139,7 +139,7 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
                 <Text style={{ fontWeight: '500' }}>{`[KRW ${'3,000'}]`}</Text>
               </View>
             </View>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               activeOpacity={1}
               onPress={() => {}}
               style={{
@@ -155,7 +155,7 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
                   textAlign: 'center',
                   fontSize: 13,
                 }}>{`작성한\n후기 보기`}</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </TouchableOpacity>
           <ScrollView style={styles.content}>
             <ChatMsg isMe={true} msg="Text 메세지입니다" date="오후 7:32" />
