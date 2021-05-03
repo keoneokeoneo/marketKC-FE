@@ -6,7 +6,7 @@ import { PALETTE } from '../../constants/color';
 interface Props {
   currentCount: number;
   maximumCount: number;
-  onPress?: () => void;
+  onPress: () => void;
 }
 
 export const SelectImgButton = ({
@@ -17,10 +17,10 @@ export const SelectImgButton = ({
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <Ionicons name="camera-sharp" size={24} />
-      <View style={styles.textContainer}>
+      {/* <View style={styles.textContainer}>
         <Text style={[styles.text, styles.textSelected]}>{currentCount}</Text>
         <Text style={styles.text}>{`/${maximumCount}`}</Text>
-      </View>
+      </View> */}
     </TouchableOpacity>
   );
 };

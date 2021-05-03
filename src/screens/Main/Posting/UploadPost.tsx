@@ -73,7 +73,6 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   });
   const [keyboardHeight] = useKeyboard();
   const [assets, setAssets] = useState<ImageType[]>([]);
-  const [cover, setCover] = useState('');
   const [permission, setPermission] = useState(false);
   const [noticeModal, setNoticeModal] = useState({
     open: false,
@@ -125,10 +124,6 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     setAssets(prev => prev.filter(asset => asset.path !== id));
   }, []);
 
-  const onCoverChange = useCallback((id: string) => {
-    setCover(id);
-  }, []);
-
   const getPermission = async (index: number) => {
     let permissionName;
     permissionName =
@@ -151,13 +146,6 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   };
 
   const openAssetPicker = () => {
-    if (assets.length > 5) {
-      setNoticeModal({
-        open: true,
-        content: '사진은 최대 5장까지 첨부할 수 있습니다.',
-      });
-      return;
-    }
     ActionSheetIOS.showActionSheetWithOptions(
       {
         options: ['닫기', '앨범에서 선택', '사진 촬영하기'],
@@ -174,11 +162,12 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
             ImagePicker.openPicker({
               mediaType: 'photo',
               multiple: true,
-              //cropping: true,
             })
               .then(res => {
-                setAssets([...assets, ...res]);
-                if (cover === '') setCover(res[0].path);
+                res.map(r => {
+                  assets.findIndex(asset => asset.path === r.path) === -1 &&
+                    setAssets([...assets, r]);
+                });
               })
               .catch(err => console.log(err));
           }
@@ -189,7 +178,6 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
             ImagePicker.openCamera({ mediaType: 'photo' })
               .then(res => {
                 setAssets([...assets, res]);
-                if (cover === '') setCover(res.path);
               })
               .catch(err => console.log(err));
           }
@@ -245,9 +233,6 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
         <View style={styles.section}>
           <View style={styles.labelContainer}>
             <Text style={styles.label}>사진</Text>
-            <Text style={styles.helper}>
-              사진을 선택하시면 대표 이미지를 변경할 수 있습니다
-            </Text>
           </View>
           <FlatList
             style={{ paddingVertical: 8 }}
@@ -263,12 +248,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
             data={assets}
             keyExtractor={item => item.path}
             renderItem={({ item }) => (
-              <SelectedImgButton
-                data={item}
-                isCover={item.path === cover}
-                onChange={onCoverChange}
-                onRemove={onRemove}
-              />
+              <SelectedImgButton data={item} onRemove={onRemove} />
             )}
           />
         </View>

@@ -93,7 +93,10 @@ const Post = ({ navigation, route }: PostProps) => {
             onImagePress={() => {}}
           /> */}
           <Image
-            source={{ uri: data.thumbnailUri }}
+            source={{
+              uri:
+                'https://market-kc-bucket.s3.ap-northeast-2.amazonaws.com/postImgs/4e047835-4acd-4279-b976-c9608720016d.jpg',
+            }}
             style={{ width: '100%', height: '100%' }}
           />
         </View>

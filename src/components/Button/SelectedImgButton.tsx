@@ -24,16 +24,9 @@ export interface Test {
 interface Props {
   data: Image;
   onRemove: (id: string) => void;
-  onChange: (id: string) => void;
-  isCover?: boolean;
 }
 
-const SelectedImgButton = ({
-  data,
-  onRemove,
-  onChange,
-  isCover,
-}: Props): JSX.Element => {
+const SelectedImgButton = ({ data, onRemove }: Props): JSX.Element => {
   const [chip, setChip] = useState({ width: 0, height: 0 });
   const [isLoading, setLoading] = useState(false);
   const [uri, setUri] = useState(data.sourceURL ? data.sourceURL : data.path);
@@ -62,12 +55,7 @@ const SelectedImgButton = ({
   ) => {};
 
   return (
-    <TouchableOpacity
-      onPress={() => {
-        onChange(data.path);
-      }}
-      style={styles.container}
-      activeOpacity={1}>
+    <TouchableOpacity style={styles.container} activeOpacity={1}>
       <ImageBackground
         source={{ uri: uri }}
         style={{
@@ -100,7 +88,7 @@ const SelectedImgButton = ({
         activeOpacity={1}>
         <Ionicons name="close" size={14} color="white" />
       </TouchableOpacity>
-      {isCover && (
+      {/* {isCover && (
         <View
           style={[
             styles.chip,
@@ -109,7 +97,7 @@ const SelectedImgButton = ({
           onLayout={onLayout}>
           <Text style={{ color: 'white', fontSize: 10 }}>대표</Text>
         </View>
-      )}
+      )} */}
     </TouchableOpacity>
   );
 };
