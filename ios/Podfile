@@ -22,8 +22,6 @@ target 'marketKC' do
   pod 'Permission-LocationAlways', :path => "#{permissions_path}/LocationAlways"
   pod 'Permission-LocationWhenInUse', :path => "#{permissions_path}/LocationWhenInUse"
 
-  pod 'react-native-cameraroll', :path => '../node_modules/@react-native-community/cameraroll'
-
   target 'marketKCTests' do
     inherit! :complete
     # Pods for testing

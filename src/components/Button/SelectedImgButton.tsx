@@ -24,7 +24,7 @@ export interface Test {
 interface Props {
   data: Image;
   onRemove: (id: string) => void;
-  onChange?: (id: string) => void;
+  onChange: (id: string) => void;
   isCover?: boolean;
 }
 
@@ -64,7 +64,7 @@ const SelectedImgButton = ({
   return (
     <TouchableOpacity
       onPress={() => {
-        //onChange(data.id);
+        onChange(data.path);
       }}
       style={styles.container}
       activeOpacity={1}>

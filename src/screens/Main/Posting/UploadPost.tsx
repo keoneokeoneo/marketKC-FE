@@ -11,15 +11,12 @@ import {
   Text,
   StyleSheet,
   KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Keyboard,
   ScrollView,
   TextInput,
   TouchableOpacity,
   FlatList,
   ActionSheetIOS,
   Image,
-  Alert,
 } from 'react-native';
 import HeaderSide from '../../../components/HeaderSide';
 import PressableIcon from '../../../components/PressableIcon';
@@ -40,6 +37,14 @@ import { RootState } from '../../../store/reducers';
 import NoticeModal from '../../../components/Modal/NoticeModal';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { PostingSchema } from '../../../constants/schema';
+import {
+  ACCESS_KEY_ID,
+  BUCKET_NAME,
+  BUCKET_REGION,
+  SECRET_ACCESS_KEY,
+} from '../../../config';
+import S3 from 'aws-sdk/clients/s3';
+import { v4 as uuid } from 'uuid';
 
 interface FormInput {
   postTitle: string;
@@ -53,11 +58,9 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   const {
     register,
     setValue,
-    getValues,
     control,
     handleSubmit,
     reset,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormInput>({
     resolver: yupResolver(PostingSchema),
@@ -70,6 +73,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   });
   const [keyboardHeight] = useKeyboard();
   const [assets, setAssets] = useState<ImageType[]>([]);
+  const [cover, setCover] = useState('');
   const [permission, setPermission] = useState(false);
   const [noticeModal, setNoticeModal] = useState({
     open: false,
@@ -78,12 +82,52 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   const postingState = useSelector((state: RootState) => state.posting);
 
   const onSubmit = (data: FormInput) => {
-    console.log(data);
+    console.log(data, assets.length);
+
+    if (assets.length > 0) {
+      assets.map(asset => uploadToS3(asset));
+    }
   };
 
-  const onRemove = (id: string) => {
-    setAssets(prev => prev.filter(asset => asset.path !== id));
+  const uploadToS3 = async (file: ImageType) => {
+    const response = await fetch(file.path);
+    const blob = await response.blob();
+
+    const client = new S3({
+      credentials: {
+        accessKeyId: ACCESS_KEY_ID,
+        secretAccessKey: SECRET_ACCESS_KEY,
+      },
+      region: BUCKET_REGION,
+      signatureVersion: 'v4',
+    });
+
+    const newID = uuid();
+
+    const params = {
+      Bucket: BUCKET_NAME + '/postImgs',
+      Key: `${newID}.${file.path.split('.')[1]}`,
+      Body: blob,
+      ContentType: file.mime,
+      ACL: 'public-read',
+    };
+
+    client.upload(
+      params,
+      (err: globalThis.Error, data: S3.ManagedUpload.SendData) => {
+        if (err) console.log('에러 발생 : ', err);
+        else console.log('성공 : ', data);
+      },
+    );
   };
+
+  const onRemove = useCallback((id: string) => {
+    setAssets(prev => prev.filter(asset => asset.path !== id));
+  }, []);
+
+  const onCoverChange = useCallback((id: string) => {
+    setCover(id);
+  }, []);
 
   const getPermission = async (index: number) => {
     let permissionName;
@@ -106,27 +150,8 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     }
   };
 
-  useEffect(() => {
-    const test = () => {
-      if (errors.postTitle || errors.postContent || errors.postCategoryID) {
-        let msg = '';
-        if (errors.postTitle) msg += `- ${errors.postTitle.message}\n`;
-        if (errors.postContent) msg += `- ${errors.postContent.message}\n`;
-        if (errors.postCategoryID)
-          msg += `- ${errors.postCategoryID.message}\n`;
-        setNoticeModal({ open: true, content: msg });
-      }
-    };
-    if (isSubmitting) test();
-  }, [
-    isSubmitting,
-    errors.postTitle,
-    errors.postContent,
-    errors.postCategoryID,
-  ]);
-
   const openAssetPicker = () => {
-    if (assets.length === 5) {
+    if (assets.length > 5) {
       setNoticeModal({
         open: true,
         content: '사진은 최대 5장까지 첨부할 수 있습니다.',
@@ -152,8 +177,8 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
               //cropping: true,
             })
               .then(res => {
-                console.log(res);
                 setAssets([...assets, ...res]);
+                if (cover === '') setCover(res[0].path);
               })
               .catch(err => console.log(err));
           }
@@ -163,8 +188,8 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
           if (permission) {
             ImagePicker.openCamera({ mediaType: 'photo' })
               .then(res => {
-                console.log(res);
                 setAssets([...assets, res]);
+                if (cover === '') setCover(res.path);
               })
               .catch(err => console.log(err));
           }
@@ -198,7 +223,6 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
 
   useFocusEffect(
     useCallback(() => {
-      reset();
       if (postingState.formData.category.name === '무료나눔') {
         setValue('postPriceN', 0);
         setValue('postPriceS', '무료나눔');
@@ -241,8 +265,8 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
             renderItem={({ item }) => (
               <SelectedImgButton
                 data={item}
-                //isCover={item.id === coverID}
-                //   onChange={onCoverChange}
+                isCover={item.path === cover}
+                onChange={onCoverChange}
                 onRemove={onRemove}
               />
             )}
