@@ -9,6 +9,7 @@ export type NestedNavigatorParams<ParamList> = {
 export type AppNavParamList = {
   Landing: NestedNavigatorParams<LandingParamList>;
   Main: NestedNavigatorParams<MainParamList>;
+  Intro: undefined;
 };
 
 export type LandingParamList = {

@@ -1,5 +1,11 @@
 import React, { useLayoutEffect } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 import HeaderSide from '../../../components/HeaderSide';
 import HeaderText from '../../../components/HeaderText';
 import PressableIcon from '../../../components/PressableIcon';
@@ -14,7 +20,11 @@ const Feed = ({ navigation }: FeedProps) => {
       title: '',
       headerLeft: () => (
         <HeaderSide left>
-          <HeaderText title="Feed" />
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => navigation.navigate('SetLocation')}>
+            <HeaderText title="Feed" />
+          </TouchableOpacity>
         </HeaderSide>
       ),
       headerRight: () => (

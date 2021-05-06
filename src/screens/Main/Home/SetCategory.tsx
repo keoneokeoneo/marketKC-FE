@@ -12,6 +12,9 @@ import { CATEGORIES } from '../../../constants';
 import { PALETTE } from '../../../constants/color';
 import { SetCategoryProps } from '../../../types/ScreenProps';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useDispatch } from 'react-redux';
+import { loadCategories } from '../../../store/actions/userAction';
+import SimpleToast from 'react-native-simple-toast';
 
 interface Category {
   id: number;
@@ -43,6 +46,7 @@ const CategoryItem = ({
 
 const SetCategory = ({ navigation }: SetCategoryProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const dispatch = useDispatch();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -70,6 +74,7 @@ const SetCategory = ({ navigation }: SetCategoryProps) => {
       //   };
       //   setCategories(prev => [...prev, tmp]);
     });
+    dispatch(loadCategories());
   }, []);
 
   const onPress = (id: number) => {

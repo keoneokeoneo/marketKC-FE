@@ -9,3 +9,12 @@ export interface IFeedItem {
   chats: number;
   status: string;
 }
+
+export interface Category {
+  categoryID: number;
+  categoryName: string;
+}
+
+export interface FeedCategory extends Category {
+  isSelected: boolean;
+}

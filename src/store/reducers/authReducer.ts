@@ -1,6 +1,7 @@
 import { AuthActions } from '../actions/authAction';
 import {
-  AUTH_INIT,
+  AUTH_INIT_FAILURE,
+  AUTH_INIT_SUCCESS,
   AUTH_LOGIN,
   AUTH_LOGIN_FAILURE,
   AUTH_LOGIN_INIT,
@@ -22,10 +23,10 @@ const initialState: AuthState = {
     error: '',
   },
   status: {
-    valid: false,
-    isLoggedIn: true,
-    currentUserToken: '',
+    isLoggedIn: false,
+    isValid: false,
     currentUserID: '',
+    currentUserToken: '',
   },
 };
 
@@ -34,12 +35,22 @@ export const authReducer = (
   action: AuthActions,
 ): AuthState => {
   switch (action.type) {
-    case AUTH_INIT:
+    case AUTH_INIT_SUCCESS:
       return {
         ...state,
         status: {
-          valid: true,
           isLoggedIn: true,
+          isValid: true,
+          currentUserID: action.userID,
+          currentUserToken: action.userToken,
+        },
+      };
+    case AUTH_INIT_FAILURE:
+      return {
+        ...state,
+        status: {
+          isLoggedIn: true,
+          isValid: false,
           currentUserID: action.userID,
           currentUserToken: action.userToken,
         },
@@ -92,8 +103,8 @@ export const authReducer = (
           status: 'SUCCESS',
         },
         status: {
-          valid: true,
           isLoggedIn: true,
+          isValid: true,
           currentUserID: action.userID,
           currentUserToken: action.userToken,
         },

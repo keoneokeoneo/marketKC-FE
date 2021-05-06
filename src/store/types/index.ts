@@ -1,12 +1,13 @@
-export interface UserData {
+import { Category, FeedCategory } from '../../types';
+
+export interface User {
   userID: string;
   userName: string;
   userEmail: string;
-}
-
-export interface Category {
-  id: number;
-  name: string;
+  userProfileImgUrl: string;
+  userWalletAddr: string;
+  userCreatedAt: string;
+  userUpdatedAt: string;
 }
 
 export type AuthState = {
@@ -19,8 +20,8 @@ export type AuthState = {
     error: string;
   };
   status: {
-    valid: boolean;
     isLoggedIn: boolean;
+    isValid: boolean;
     currentUserToken: string;
     currentUserID: string;
   };
@@ -32,4 +33,9 @@ export type PostingState = {
     content: string;
     category: Category;
   };
+};
+
+export type UserState = {
+  user: User;
+  feedCategoreis: FeedCategory[];
 };

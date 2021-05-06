@@ -12,6 +12,10 @@ import {
   ProfileParamList,
 } from './NavigationTypes';
 
+export interface IntroProps {
+  navigation: StackNavigationProp<AppNavParamList, 'Intro'>;
+}
+
 export interface SignInProps {
   navigation: CompositeNavigationProp<
     StackNavigationProp<LandingParamList, 'SignIn'>,
@@ -51,6 +55,16 @@ export interface PostProps {
 export interface SetCategoryProps {
   navigation: CompositeNavigationProp<
     StackNavigationProp<HomeParamList, 'SetCategory'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
+export interface SetLocationProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<HomeParamList, 'SetLocation'>,
     CompositeNavigationProp<
       BottomTabNavigationProp<MainParamList>,
       StackNavigationProp<AppNavParamList>

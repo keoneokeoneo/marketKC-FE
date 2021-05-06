@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Dispatch } from 'react';
-import { Alert } from 'react-native';
+import { API_BASE_URL } from '../../config';
 import { LoginData, RegData } from '../../types/APITypes';
 import {
   AuthDispatch,
-  AUTH_INIT,
+  AUTH_INIT_FAILURE,
+  AUTH_INIT_SUCCESS,
   AUTH_LOGIN,
   AUTH_LOGIN_FAILURE,
   AUTH_LOGIN_INIT,
@@ -16,17 +17,14 @@ import {
   AUTH_REGISTER_SUCCESS,
 } from './authActionTypes';
 
-//const BASE_URL = 'http://localhost:3001/api';
-const BASE_URL = 'http://52.78.169.229:3001/api';
-
 export const registerRequest = (regData: RegData) => {
   return (dispatch: Dispatch<AuthDispatch>) => {
     dispatch(register());
 
     return axios({
       method: 'POST',
-      baseURL: BASE_URL,
-      url: '/auth/register',
+      baseURL: API_BASE_URL,
+      url: '/api/auth/register',
       data: regData,
     })
       .then(res => {
@@ -50,8 +48,8 @@ export const loginRequest = (loginData: LoginData) => {
 
     return axios({
       method: 'POST',
-      baseURL: BASE_URL,
-      url: '/auth/login',
+      baseURL: API_BASE_URL,
+      url: '/api/auth/login',
       data: {
         username: loginData.userEmail,
         password: loginData.userPW,
@@ -59,7 +57,8 @@ export const loginRequest = (loginData: LoginData) => {
     })
       .then(res => {
         console.log(res.data);
-        if (res.data.code === 1) {
+        // code, access_token, user data
+        if (res.data.code === 200) {
           dispatch(loginSuccess(res.data.access_token, res.data.userID));
         } else {
           dispatch(loginFailure(res.data.data));
@@ -69,8 +68,34 @@ export const loginRequest = (loginData: LoginData) => {
   };
 };
 
-export const authInit = (userToken: string, userID: string) => {
-  return { type: AUTH_INIT, userToken: userToken, userID: userID };
+export const requestTokenValidation = (userToken: string, userID: string) => {
+  return (dispatch: Dispatch<AuthDispatch>) => {
+    return axios({
+      method: 'GET',
+      baseURL: API_BASE_URL,
+      url: '/profile',
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    })
+      .then(res => {
+        console.log(res);
+        if (res.data.userID === userID) {
+          dispatch(authInitSuccess(userToken, userID));
+        } else {
+          dispatch(authInitFailure(userToken, userID));
+        }
+      })
+      .catch(err => console.log(err));
+  };
+};
+
+export const authInitSuccess = (userToken: string, userID: string) => {
+  return { type: AUTH_INIT_SUCCESS, userToken: userToken, userID: userID };
+};
+
+export const authInitFailure = (userToken: string, userID: string) => {
+  return { type: AUTH_INIT_FAILURE, userToken: userToken, userID: userID };
 };
 
 export const registerInit = () => {
@@ -94,12 +119,11 @@ export const loginSuccess = (userToken: string, userID: string) => {
   const saveData = async (token: string, id: string) => {
     try {
       await AsyncStorage.setItem(
-        'userData',
+        'authData',
         JSON.stringify({ userToken: token, userID: id }),
       );
-      Alert.alert('Success');
     } catch (e) {
-      Alert.alert('Fail');
+      console.log(e);
     }
   };
   saveData(userToken, userID);
@@ -115,7 +139,8 @@ export const loginInit = () => {
 };
 
 export type AuthActions =
-  | ReturnType<typeof authInit>
+  | ReturnType<typeof authInitSuccess>
+  | ReturnType<typeof authInitFailure>
   | ReturnType<typeof register>
   | ReturnType<typeof registerSuccess>
   | ReturnType<typeof registerFailure>
