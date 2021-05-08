@@ -53,7 +53,6 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
           />
         </HeaderSide>
       ),
-      headerStyle: { backgroundColor: PALETTE.bg1 },
     });
   }, [navigation]);
 
@@ -212,9 +211,9 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
               </View>
               <PressableIcon
                 name="send-sharp"
-                size={21}
+                size={26}
                 color={
-                  msgWatch && msgWatch.length > 0 ? PALETTE.line2 : PALETTE.grey
+                  msgWatch && msgWatch.length > 0 ? PALETTE.main : PALETTE.grey
                 }
                 mh={6}
                 onPress={handleSubmit(onSubmit)}
@@ -230,7 +229,7 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: PALETTE.bg1,
+    backgroundColor: 'rgb(235,235,235)',
   },
   header: {
     backgroundColor: 'white',
@@ -247,8 +246,10 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     flexDirection: 'row',
-    padding: 8,
     justifyContent: 'center',
+    paddingTop: 8,
+    paddingBottom: 14,
+    paddingHorizontal: 14,
   },
   bottomInput: {
     backgroundColor: 'white',
@@ -256,6 +257,8 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     paddingHorizontal: 12,
     paddingVertical: 6,
+    marginRight: 8,
+    marginLeft: 4,
   },
   bottomInputText: { paddingLeft: 0, paddingTop: 0, fontSize: 16 },
   bottomBtn: {},

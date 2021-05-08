@@ -17,6 +17,7 @@ import {
   FlatList,
   ActionSheetIOS,
   Image,
+  Alert,
 } from 'react-native';
 import HeaderSide from '../../../components/HeaderSide';
 import PressableIcon from '../../../components/PressableIcon';
@@ -31,7 +32,12 @@ import ImagePicker, {
   Image as ImageType,
 } from 'react-native-image-crop-picker';
 import SelectedImgButton from '../../../components/Button/SelectedImgButton';
-import { check, PERMISSIONS, request } from 'react-native-permissions';
+import {
+  check,
+  checkMultiple,
+  PERMISSIONS,
+  request,
+} from 'react-native-permissions';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store/reducers';
 import NoticeModal from '../../../components/Modal/NoticeModal';
@@ -45,6 +51,8 @@ import {
 } from '../../../config';
 import S3 from 'aws-sdk/clients/s3';
 import { v4 as uuid } from 'uuid';
+import MultipleImagePicker from '@baronha/react-native-multiple-image-picker';
+import { ImagePickerRes } from '../../../types';
 
 interface FormInput {
   postTitle: string;
@@ -61,6 +69,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormInput>({
     resolver: yupResolver(PostingSchema),
@@ -72,6 +81,8 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     },
   });
   const [keyboardHeight] = useKeyboard();
+  const [selectedAssets, setSelectedAssets] = useState<ImagePickerRes[]>([]);
+  const [cover, setCover] = useState('');
   const [assets, setAssets] = useState<ImageType[]>([]);
   const [permission, setPermission] = useState(false);
   const [noticeModal, setNoticeModal] = useState({
@@ -79,6 +90,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     content: '',
   });
   const postingState = useSelector((state: RootState) => state.posting);
+  const watchFields = watch(['']);
 
   const onSubmit = (data: FormInput) => {
     console.log(data, assets.length);
@@ -121,69 +133,108 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   };
 
   const onRemove = useCallback((id: string) => {
-    setAssets(prev => prev.filter(asset => asset.path !== id));
+    if (id === cover) {
+      console.log('delete cover');
+      if (selectedAssets.length === 1) setCover('');
+      else {
+        setCover(selectedAssets[0].localIdentifier);
+      }
+    }
+    setSelectedAssets(prev =>
+      prev.filter(asset => asset.localIdentifier !== id),
+    );
   }, []);
 
-  const getPermission = async (index: number) => {
-    let permissionName;
-    permissionName =
-      index === 1 ? PERMISSIONS.IOS.PHOTO_LIBRARY : PERMISSIONS.IOS.CAMERA;
-    const result = await check(permissionName);
+  const onCoverChange = useCallback((id: string) => {
+    setCover(id);
+  }, []);
 
-    if (result) {
-      // 이미 승인된 상태
-      setPermission(true);
-    } else {
-      const status = await request(permissionName);
-      if (status === 'granted') {
-        // 요청해서 승인한 상태
-        setPermission(true);
-      } else {
-        // 요청해서 거절된 상태
-        setPermission(false);
-      }
+  const getPermission = async () => {
+    const checkPermissionsResult = await checkMultiple([
+      PERMISSIONS.IOS.CAMERA,
+      PERMISSIONS.IOS.PHOTO_LIBRARY,
+    ]);
+
+    // let permissions = {
+    //   camera:false,
+    //   gallery:false
+    // }
+
+    switch (checkPermissionsResult['ios.permission.PHOTO_LIBRARY']) {
+      case 'granted':
+        console.log('앨범 권한 check : granted');
+        break;
+      case 'unavailable':
+        Alert.alert('이 기기에서 앨범 사용이 불가합니다');
+        break;
+      case 'blocked':
+        console.log('앨범 권한 check : blocked');
+        break;
+      case 'denied':
+        console.log('앨범 권한 요청');
+        const requestGalleryPermission = await request(
+          PERMISSIONS.IOS.PHOTO_LIBRARY,
+        );
+        if (requestGalleryPermission === 'granted')
+          console.log('앨범 권한 request : granted');
+        else console.log('앨범 권한 request : blocked');
+        break;
+    }
+    switch (checkPermissionsResult['ios.permission.CAMERA']) {
+      case 'granted':
+        console.log('카메라 권한 check : granted');
+        break;
+      case 'unavailable':
+        Alert.alert('이 기기에서 카메라 사용이 불가합니다');
+        break;
+      case 'blocked':
+        console.log('카메라 권한 check : blocked');
+        break;
+      case 'denied':
+        console.log('카메라 권한 요청');
+        const requestCameraPermission = await request(PERMISSIONS.IOS.CAMERA);
+        if (requestCameraPermission === 'granted')
+          console.log('카메라 권한 request : granted');
+        else console.log('카메라 권한 request : blocked');
+        break;
     }
   };
 
-  const openAssetPicker = () => {
-    ActionSheetIOS.showActionSheetWithOptions(
-      {
-        options: ['닫기', '앨범에서 선택', '사진 촬영하기'],
-        cancelButtonIndex: 0,
-        userInterfaceStyle: 'dark',
-      },
-      buttonIndex => {
-        if (buttonIndex === 0) {
-          // cancel action
-        } else if (buttonIndex === 1) {
-          // 앨범에서 선택
-          getPermission(buttonIndex);
-          if (permission) {
-            ImagePicker.openPicker({
-              mediaType: 'photo',
-              multiple: true,
-            })
-              .then(res => {
-                res.map(r => {
-                  assets.findIndex(asset => asset.path === r.path) === -1 &&
-                    setAssets([...assets, r]);
-                });
-              })
-              .catch(err => console.log(err));
-          }
-        } else if (buttonIndex === 2) {
-          // 사진 촬영하기
-          getPermission(buttonIndex);
-          if (permission) {
-            ImagePicker.openCamera({ mediaType: 'photo' })
-              .then(res => {
-                setAssets([...assets, res]);
-              })
-              .catch(err => console.log(err));
-          }
-        }
-      },
-    );
+  // const getPermission = async (index: number) => {
+  //   let permissionName;
+  //   permissionName =
+  //     index === 1 ? PERMISSIONS.IOS.PHOTO_LIBRARY : PERMISSIONS.IOS.CAMERA;
+  //   const result = await check(permissionName);
+
+  //   if (result) {
+  //     // 이미 승인된 상태
+  //     setPermission(true);
+  //   } else {
+  //     const status = await request(permissionName);
+  //     if (status === 'granted') {
+  //       // 요청해서 승인한 상태
+  //       setPermission(true);
+  //     } else {
+  //       // 요청해서 거절된 상태
+  //       setPermission(false);
+  //     }
+  //   }
+  // };
+
+  const openImagePicker = async () => {
+    getPermission();
+    // const res: ImagePickerRes[] = await MultipleImagePicker.openPicker({
+    //   mediaType: 'image',
+    //   selectedColor: PALETTE.main,
+    //   maxSelectedAssets: 5,
+    //   maximumMessage: '최대 5장 까지 선택할 수 있습니다.',
+    //   maximumMessageTitle: '알림',
+    // });
+    // console.log(res);
+    // setSelectedAssets(res);
+    // if (cover === '' && res.length > 0) {
+    //   setCover(res[0].localIdentifier);
+    // }
   };
 
   useLayoutEffect(() => {
@@ -211,11 +262,11 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
 
   useFocusEffect(
     useCallback(() => {
-      if (postingState.formData.category.name === '무료나눔') {
+      if (postingState.formData.category.categoryName === '무료나눔') {
         setValue('postPriceN', 0);
         setValue('postPriceS', '무료나눔');
       }
-      setValue('postCategoryID', postingState.formData.category.id);
+      setValue('postCategoryID', postingState.formData.category.categoryID);
     }, [postingState]),
   );
 
@@ -241,14 +292,19 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
             ListHeaderComponent={
               <SelectImgButton
                 maximumCount={5}
-                currentCount={assets.length}
-                onPress={openAssetPicker}
+                currentCount={selectedAssets.length}
+                onPress={openImagePicker}
               />
             }
-            data={assets}
+            data={selectedAssets}
             keyExtractor={item => item.path}
             renderItem={({ item }) => (
-              <SelectedImgButton data={item} onRemove={onRemove} />
+              <SelectedImgButton
+                data={item}
+                onRemove={onRemove}
+                isCover={item.localIdentifier === cover}
+                onCoverChange={onCoverChange}
+              />
             )}
           />
         </View>

@@ -79,9 +79,10 @@ export const requestTokenValidation = (userToken: string, userID: string) => {
       },
     })
       .then(res => {
-        console.log(res);
         if (res.data.userID === userID) {
           dispatch(authInitSuccess(userToken, userID));
+          // 야매로 마지막 로그인 시점 업데이트
+          axios.put(`${API_BASE_URL}/api/user/updateLastActivity/${userID}`);
         } else {
           dispatch(authInitFailure(userToken, userID));
         }

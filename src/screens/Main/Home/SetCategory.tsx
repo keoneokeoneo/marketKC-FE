@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -14,7 +14,6 @@ import { SetCategoryProps } from '../../../types/ScreenProps';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useDispatch } from 'react-redux';
 import { loadCategories } from '../../../store/actions/userAction';
-import SimpleToast from 'react-native-simple-toast';
 
 interface Category {
   id: number;
@@ -47,6 +46,7 @@ const CategoryItem = ({
 const SetCategory = ({ navigation }: SetCategoryProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const dispatch = useDispatch();
+  const toast = useRef();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -118,6 +118,9 @@ const SetCategory = ({ navigation }: SetCategoryProps) => {
 };
 
 const styles = StyleSheet.create({
+  toast: {
+    backgroundColor: 'red',
+  },
   container: {
     flex: 1,
     backgroundColor: 'white',

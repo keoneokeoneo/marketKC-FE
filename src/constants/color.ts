@@ -1,5 +1,6 @@
 const PALETTE = {
-  main: '#508164',
+  main: '#52a58e',
+  sub: '#6cbea7',
   line1: '#44564a',
   line2: '#8e6d6e',
   heart: '#e5c7b7',

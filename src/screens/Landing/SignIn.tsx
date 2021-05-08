@@ -20,6 +20,7 @@ import { LoginData } from '../../types/APITypes';
 import { RootState } from '../../store/reducers';
 import NoticeModal from '../../components/Modal/NoticeModal';
 import { SignInSchema } from '../../constants/schema';
+import { requestUserInit } from '../../store/actions/userAction';
 
 interface FormInput {
   email: string;
@@ -52,10 +53,11 @@ const SignIn = ({ navigation }: SignInProps) => {
       setModalOpen(true);
     } else if (authState.login.status === 'SUCCESS') {
       dispatch(loginInit());
-      navigation.navigate('Main', {
-        screen: 'Home',
-        params: { screen: 'Feed' },
-      });
+      //dispatch(requestUserInit(authState.status.currentUserID))
+      // navigation.navigate('Main', {
+      //   screen: 'Home',
+      //   params: { screen: 'Feed' },
+      // });
     }
   }, [authState.login.status]);
 

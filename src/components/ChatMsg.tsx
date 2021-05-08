@@ -14,13 +14,13 @@ const ChatMsg = ({ isMe, msg, date }: Props) => {
       {isMe ? (
         <View style={[styles.wrapper, { justifyContent: 'flex-end' }]}>
           {date && <Text style={styles.date}>{date}</Text>}
-          <View style={[styles.msg, { backgroundColor: PALETTE.main }]}>
+          <View style={[styles.msg, { backgroundColor: PALETTE.sub }]}>
             <Text style={{ color: 'white' }}>{msg}</Text>
           </View>
         </View>
       ) : (
         <View style={[styles.wrapper, { justifyContent: 'flex-start' }]}>
-          <View style={[styles.msg, { backgroundColor: PALETTE.bg2 }]}>
+          <View style={[styles.msg, { backgroundColor: 'rgb(225,225,225)' }]}>
             <Text style={{}}>{msg}</Text>
           </View>
 

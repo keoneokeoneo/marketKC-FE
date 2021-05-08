@@ -1,4 +1,4 @@
-import { Category, FeedCategory } from '../../types';
+import { Category, FeedCategory, Location } from '../../types';
 
 export interface User {
   userID: string;
@@ -6,8 +6,8 @@ export interface User {
   userEmail: string;
   userProfileImgUrl: string;
   userWalletAddr: string;
-  userCreatedAt: string;
-  userUpdatedAt: string;
+  userCreatedAt: Date;
+  userUpdatedAt: Date;
 }
 
 export type AuthState = {
@@ -36,6 +36,7 @@ export type PostingState = {
 };
 
 export type UserState = {
-  user: User;
-  feedCategoreis: FeedCategory[];
+  userData: User;
+  feedCategories: FeedCategory[];
+  currentLocation: Location;
 };

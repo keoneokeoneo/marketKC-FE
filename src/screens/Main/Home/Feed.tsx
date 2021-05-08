@@ -13,8 +13,11 @@ import { IFeedItem } from '../../../types';
 import { FeedProps } from '../../../types/ScreenProps';
 import FeedItem from '../../../components/List/Item/FeedItem';
 import { dummyData } from '../../../constants';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store/reducers';
 
 const Feed = ({ navigation }: FeedProps) => {
+  const userState = useSelector((state: RootState) => state.user);
   useLayoutEffect(() => {
     navigation.setOptions({
       title: '',
@@ -23,7 +26,7 @@ const Feed = ({ navigation }: FeedProps) => {
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => navigation.navigate('SetLocation')}>
-            <HeaderText title="Feed" />
+            <HeaderText title={userState.currentLocation.area3} />
           </TouchableOpacity>
         </HeaderSide>
       ),
@@ -46,7 +49,7 @@ const Feed = ({ navigation }: FeedProps) => {
         </HeaderSide>
       ),
     });
-  }, [navigation]);
+  }, [navigation, userState.currentLocation.area3]);
 
   const onSelect = (data: IFeedItem) => {
     navigation.navigate('Post', { post: data });

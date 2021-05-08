@@ -15,21 +15,28 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { PALETTE } from '../../constants/color';
 import { IMAGES } from '../../constants/image';
-import { Image } from 'react-native-image-crop-picker';
+import { ImagePickerRes } from '../../types';
 
 export interface Test {
   uri: string;
 }
 
 interface Props {
-  data: Image;
+  data: ImagePickerRes;
   onRemove: (id: string) => void;
+  onCoverChange: (id: string) => void;
+  isCover: boolean;
 }
 
-const SelectedImgButton = ({ data, onRemove }: Props): JSX.Element => {
+const SelectedImgButton = ({
+  data,
+  onRemove,
+  isCover,
+  onCoverChange,
+}: Props): JSX.Element => {
   const [chip, setChip] = useState({ width: 0, height: 0 });
   const [isLoading, setLoading] = useState(false);
-  const [uri, setUri] = useState(data.sourceURL ? data.sourceURL : data.path);
+  const [uri, setUri] = useState(data.path);
 
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -55,7 +62,10 @@ const SelectedImgButton = ({ data, onRemove }: Props): JSX.Element => {
   ) => {};
 
   return (
-    <TouchableOpacity style={styles.container} activeOpacity={1}>
+    <TouchableOpacity
+      style={styles.container}
+      activeOpacity={1}
+      onPress={() => onCoverChange(data.localIdentifier)}>
       <ImageBackground
         source={{ uri: uri }}
         style={{
@@ -82,13 +92,13 @@ const SelectedImgButton = ({ data, onRemove }: Props): JSX.Element => {
       </ImageBackground>
       <TouchableOpacity
         onPress={() => {
-          onRemove(data.path);
+          onRemove(data.localIdentifier);
         }}
         style={styles.closeButton}
         activeOpacity={1}>
         <Ionicons name="close" size={14} color="white" />
       </TouchableOpacity>
-      {/* {isCover && (
+      {isCover && (
         <View
           style={[
             styles.chip,
@@ -97,7 +107,7 @@ const SelectedImgButton = ({ data, onRemove }: Props): JSX.Element => {
           onLayout={onLayout}>
           <Text style={{ color: 'white', fontSize: 10 }}>대표</Text>
         </View>
-      )} */}
+      )}
     </TouchableOpacity>
   );
 };
@@ -123,16 +133,16 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 4,
-    right: 4,
+    top: -8,
+    right: -8,
     padding: 3,
-    backgroundColor: PALETTE.line1,
+    backgroundColor: 'rgb(216,216,216)',
     borderRadius: 30,
   },
   chip: {
     position: 'absolute',
     padding: 3,
-    backgroundColor: PALETTE.main,
+    backgroundColor: PALETTE.sub,
     borderRadius: 6,
   },
 });
