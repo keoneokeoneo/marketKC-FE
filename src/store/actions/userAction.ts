@@ -20,6 +20,7 @@ import {
   UserDispatch,
 } from './userActionTypes';
 import { LoadUserRes } from '../../types/APITypes';
+import Toast from 'react-native-simple-toast';
 
 // const createGETRequest = async <Response extends any>(
 //   path: string,
@@ -117,9 +118,12 @@ export const requestLocation = (long: number, lat: number) => {
   };
 };
 
-export const requestUpdateCategories = (id: string, categories: number[]) => {
+export const requestUpdateCategories = (
+  id: string,
+  categories: number[],
+  flag: boolean,
+) => {
   categories.sort((a, b) => a - b);
-  console.log('카테고리 수정 요청', id, categories);
   return async (dispatch: Dispatch<UserDispatch>) => {
     dispatch(updateUserCategories());
     try {
@@ -127,7 +131,12 @@ export const requestUpdateCategories = (id: string, categories: number[]) => {
         `${API_BASE_URL}/users/${id}/categories`,
         categories,
       );
-      if (res.status === 200) dispatch(updateUserCategoriesSuccess(categories));
+      if (res.status === 200) {
+        dispatch(updateUserCategoriesSuccess(categories));
+        Toast.show(flag ? '추가되었습니다.' : '해제되었습니다.', Toast.SHORT, [
+          'UIAlertController',
+        ]);
+      }
     } catch (error) {
       if (axios.isAxiosError(error)) console.log(error);
       else console.log(error);

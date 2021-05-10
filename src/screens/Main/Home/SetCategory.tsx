@@ -14,6 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store/reducers';
 import { requestUpdateCategories } from '../../../store/actions/userAction';
+import Toast from 'react-native-simple-toast';
 
 interface SelectedCategory {
   id: number;
@@ -82,12 +83,24 @@ const SetCategory = ({ navigation }: SetCategoryProps) => {
   }, [navigation]);
 
   const onPress = (id: number) => {
+    if (userState.categories.status.stage === 'FETCHING') {
+      Toast.show(
+        '이전 요청을 처리중입니다. 잠시 뒤에 다시 시도해주세요.',
+        Toast.SHORT,
+        ['UIAlertController'],
+      );
+      return;
+    }
+
+    // 1이면 추가, 0이면 제거
+    const flag = userState.categories.ids.find(el => el === id) === undefined;
     dispatch(
       requestUpdateCategories(
         userState.user.id,
-        userState.categories.ids.find(el => el === id) === undefined
+        flag
           ? userState.categories.ids.concat(id)
           : userState.categories.ids.filter(el => el !== id),
+        flag,
       ),
     );
   };

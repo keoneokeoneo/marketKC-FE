@@ -54,7 +54,7 @@ type UpdateUserCategories = {
 };
 
 type UpdateUserCategoriesSuccess = {
-  type: typeof UPDATE_USER_LOCATION_SUCCESS;
+  type: typeof UPDATE_USER_CATEGORIES_SUCCESS;
   ids: number[];
 };
 
