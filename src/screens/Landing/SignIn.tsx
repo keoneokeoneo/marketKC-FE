@@ -20,7 +20,7 @@ import { LoginData } from '../../types/APITypes';
 import { RootState } from '../../store/reducers';
 import NoticeModal from '../../components/Modal/NoticeModal';
 import { SignInSchema } from '../../constants/schema';
-import { requestUserInit } from '../../store/actions/userAction';
+import { requestLoadUser } from '../../store/actions/userAction';
 
 interface FormInput {
   email: string;
@@ -33,6 +33,7 @@ const SignIn = ({ navigation }: SignInProps) => {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormInput>({
     resolver: yupResolver(SignInSchema),
@@ -42,27 +43,27 @@ const SignIn = ({ navigation }: SignInProps) => {
 
   const onSubmit = (data: FormInput) => {
     const loginData: LoginData = {
-      userEmail: data.email,
-      userPW: data.password,
+      username: data.email,
+      password: data.password,
     };
     dispatch(loginRequest(loginData));
   };
 
   useEffect(() => {
-    if (authState.login.status === 'FAILURE') {
+    if (authState.login.stage === 'FAILURE') {
       setModalOpen(true);
-    } else if (authState.login.status === 'SUCCESS') {
+    } else if (authState.login.stage === 'SUCCESS') {
       dispatch(loginInit());
-      //dispatch(requestUserInit(authState.status.currentUserID))
+      dispatch(requestLoadUser(authState.validation.currentUserID));
+      //dispatch(requestUserInit(authState.validation.currentUserID))
       // navigation.navigate('Main', {
       //   screen: 'Home',
       //   params: { screen: 'Feed' },
       // });
     }
-  }, [authState.login.status]);
+  }, [authState.login.stage]);
 
   return (
-    //<KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
     <TouchableWithoutFeedback
       style={{ flex: 1 }}
       onPress={() => Keyboard.dismiss()}>
@@ -70,7 +71,7 @@ const SignIn = ({ navigation }: SignInProps) => {
         <NoticeModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          content={authState.login.error}
+          content={authState.login.message}
         />
         <View style={styles.container}>
           <View style={styles.logoContainer}>
@@ -156,7 +157,11 @@ const SignIn = ({ navigation }: SignInProps) => {
             <Text style={[styles.joinText]}>Don't you have any account?</Text>
             <TouchableOpacity
               activeOpacity={1}
-              onPress={() => navigation.navigate('SignUp')}>
+              onPress={() => {
+                navigation.navigate('SignUp');
+                dispatch(loginInit());
+                reset();
+              }}>
               <Text
                 style={[
                   styles.joinText,
@@ -169,7 +174,6 @@ const SignIn = ({ navigation }: SignInProps) => {
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
-    //</KeyboardAvoidingView>
   );
 };
 

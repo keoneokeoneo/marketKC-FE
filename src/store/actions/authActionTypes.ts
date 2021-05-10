@@ -1,3 +1,4 @@
+export const AUTH_INIT = 'AUTH_INIT' as const;
 export const AUTH_INIT_SUCCESS = 'AUTH_INIT_SUCCESS' as const;
 export const AUTH_INIT_FAILURE = 'AUTH_INIT_FAILURE' as const;
 export const AUTH_REGISTER = 'AUTH_REGISTER' as const;
@@ -8,6 +9,11 @@ export const AUTH_LOGIN = 'AUTH_LOGIN' as const;
 export const AUTH_LOGIN_SUCCESS = 'AUTH_LOGIN_SUCCESS' as const;
 export const AUTH_LOGIN_FAILURE = 'AUTH_LOGIN_FAILURE' as const;
 export const AUTH_LOGIN_INIT = 'AUTH_LOGIN_INIT' as const;
+export const AUTH_LOGOUT = 'AUTH_LOGOUT' as const;
+
+type AuthInit = {
+  type: typeof AUTH_INIT;
+};
 
 type AuthInitSuccess = {
   type: typeof AUTH_INIT_SUCCESS;
@@ -19,6 +25,8 @@ type AuthInitFailure = {
   type: typeof AUTH_INIT_FAILURE;
   userToken: string;
   userID: string;
+  code: number;
+  message: string;
 };
 
 type AuthRegister = {
@@ -31,7 +39,8 @@ type AuthRegisterSuccess = {
 
 type AuthRegisterFailure = {
   type: typeof AUTH_REGISTER_FAILURE;
-  error: string;
+  code: number;
+  message: string;
 };
 
 type AuthRegisterInit = {
@@ -50,14 +59,20 @@ type AuthLoginSuccess = {
 
 type AuthLoginFailure = {
   type: typeof AUTH_LOGIN_FAILURE;
-  error: string;
+  code: number;
+  message: string;
 };
 
 type AuthLoginInit = {
   type: typeof AUTH_LOGIN_INIT;
 };
 
+type AuthLogout = {
+  type: typeof AUTH_LOGOUT;
+};
+
 export type AuthDispatch =
+  | AuthInit
   | AuthInitSuccess
   | AuthInitFailure
   | AuthRegister
@@ -67,4 +82,5 @@ export type AuthDispatch =
   | AuthLogin
   | AuthLoginSuccess
   | AuthLoginFailure
-  | AuthLoginInit;
+  | AuthLoginInit
+  | AuthLogout;

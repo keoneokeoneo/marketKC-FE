@@ -46,7 +46,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
 
   const onClose = () => {
     setModalOpen(false);
-    if (authState.register.status === 'SUCCESS') {
+    if (authState.register.stage === 'SUCCESS') {
       navigation.navigate('SignIn');
       dispatch(registerInit());
     }
@@ -54,21 +54,21 @@ const SignUp = ({ navigation }: SignUpProps) => {
 
   const onSubmit = (data: FormInput) => {
     const regData: RegData = {
-      userName: data.name,
-      userEmail: data.email,
-      userPW: data.password,
+      name: data.name,
+      email: data.email,
+      password: data.password,
     };
     dispatch(registerRequest(regData));
   };
 
   useEffect(() => {
     if (
-      authState.register.status === 'FAILURE' ||
-      authState.register.status === 'SUCCESS'
+      authState.register.stage === 'FAILURE' ||
+      authState.register.stage === 'SUCCESS'
     ) {
       setModalOpen(true);
     }
-  }, [authState.register.status]);
+  }, [authState.register.stage]);
 
   return (
     <TouchableWithoutFeedback
@@ -78,11 +78,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
         <NoticeModal
           isOpen={modalOpen}
           onClose={onClose}
-          content={
-            authState.register.status === 'SUCCESS'
-              ? '회원가입이 완료되었습니다'
-              : authState.register.error
-          }
+          content={authState.register.message}
         />
         <View style={styles.container}>
           <Text style={styles.logo}>Join Us!</Text>

@@ -4,21 +4,16 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { PALETTE } from '../constants/color';
 import { requestTokenValidation } from '../store/actions/authAction';
-import {
-  requestUserInit,
-  userChangeLocation,
-} from '../store/actions/userAction';
 import { RootState } from '../store/reducers';
 import { IntroProps } from '../types/ScreenProps';
 import Geolocation from 'react-native-geolocation-service';
-import axios from 'axios';
-import { NAVER_MAP_CLIENT_ID, NAVER_MAP_CLIENT_SECRET } from '../config';
-import { Location } from '../types';
 import { IMAGES } from '../constants/image';
+import { requestLoadCategories } from '../store/actions/categoryAction';
+import { requestLoadUser, requestLocation } from '../store/actions/userAction';
 
 const Intro = ({ navigation }: IntroProps) => {
   const dispatch = useDispatch();
-  const authState = useSelector((state: RootState) => state.auth.status);
+  const authState = useSelector((state: RootState) => state.auth);
 
   const requestLocationPermission = async () => {
     try {
@@ -33,8 +28,9 @@ const Intro = ({ navigation }: IntroProps) => {
       if (res === 'granted') {
         Geolocation.getCurrentPosition(
           pos => {
-            console.log(pos);
-            reverseGeocode(pos.coords.longitude, pos.coords.latitude);
+            dispatch(
+              requestLocation(pos.coords.longitude, pos.coords.latitude),
+            );
           },
           err => {
             console.log(err);
@@ -45,36 +41,9 @@ const Intro = ({ navigation }: IntroProps) => {
     });
   };
 
-  const reverseGeocode = async (long: number, lat: number) => {
-    await axios
-      .get(
-        `https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?request=coordsToaddr&coords=${long},${lat}&orders=admcode&output=json`,
-        {
-          headers: {
-            'X-NCP-APIGW-API-KEY-ID': NAVER_MAP_CLIENT_ID,
-            'X-NCP-APIGW-API-KEY': NAVER_MAP_CLIENT_SECRET,
-          },
-        },
-      )
-      .then(res => {
-        console.log(res);
-        if (res.status === 200) {
-          const newLocation: Location = {
-            long: long,
-            lat: lat,
-            area1: res.data.results[0].region.area1.name,
-            area2: res.data.results[0].region.area2.name,
-            area3: res.data.results[0].region.area3.name,
-          };
-          dispatch(userChangeLocation(newLocation));
-        }
-      })
-      .catch(err => console.log(err));
-  };
-
   const initState = async () => {
     try {
-      const userDataFromStorage = await AsyncStorage.getItem('authData');
+      const userDataFromStorage = await AsyncStorage.getItem('UserData');
       if (userDataFromStorage !== null) {
         const parsedData = JSON.parse(userDataFromStorage);
         console.log('Local Storage : ', parsedData);
@@ -95,15 +64,16 @@ const Intro = ({ navigation }: IntroProps) => {
   }, []);
 
   useEffect(() => {
-    if (authState.isLoggedIn && authState.isValid) {
-      dispatch(requestUserInit(authState.currentUserID));
+    if (authState.validation.isLoggedIn) {
+      dispatch(requestLoadUser(authState.validation.currentUserID));
+      dispatch(requestLoadCategories());
       getLocation();
       navigation.navigate('Main', {
         screen: 'Home',
         params: { screen: 'Feed' },
       });
     }
-  }, [authState.isLoggedIn, authState.isValid]);
+  }, [authState.validation.isLoggedIn]);
 
   return (
     <View style={styles.container}>

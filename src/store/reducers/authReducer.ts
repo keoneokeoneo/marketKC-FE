@@ -1,11 +1,13 @@
 import { AuthActions } from '../actions/authAction';
 import {
+  AUTH_INIT,
   AUTH_INIT_FAILURE,
   AUTH_INIT_SUCCESS,
   AUTH_LOGIN,
   AUTH_LOGIN_FAILURE,
   AUTH_LOGIN_INIT,
   AUTH_LOGIN_SUCCESS,
+  AUTH_LOGOUT,
   AUTH_REGISTER,
   AUTH_REGISTER_FAILURE,
   AUTH_REGISTER_INIT,
@@ -15,18 +17,24 @@ import { AuthState } from '../types';
 
 const initialState: AuthState = {
   login: {
-    status: 'INIT',
-    error: '',
+    code: 0,
+    message: '',
+    stage: 'INIT',
   },
   register: {
-    status: 'INIT',
-    error: '',
+    code: 0,
+    message: '',
+    stage: 'INIT',
   },
-  status: {
+  validation: {
     isLoggedIn: false,
-    isValid: false,
     currentUserID: '',
     currentUserToken: '',
+    status: {
+      code: 0,
+      message: '',
+      stage: 'INIT',
+    },
   },
 };
 
@@ -35,56 +43,76 @@ export const authReducer = (
   action: AuthActions,
 ): AuthState => {
   switch (action.type) {
+    case AUTH_INIT:
+      return {
+        ...state,
+        validation: {
+          ...state.validation,
+          status: {
+            ...state.validation.status,
+            stage: 'FETCHING',
+          },
+        },
+      };
     case AUTH_INIT_SUCCESS:
       return {
         ...state,
-        status: {
+        validation: {
           isLoggedIn: true,
-          isValid: true,
           currentUserID: action.userID,
           currentUserToken: action.userToken,
+          status: {
+            code: 200,
+            message: '사용자 인증에 성공했습니다.',
+            stage: 'SUCCESS',
+          },
         },
       };
     case AUTH_INIT_FAILURE:
       return {
         ...state,
-        status: {
-          isLoggedIn: true,
-          isValid: false,
-          currentUserID: action.userID,
-          currentUserToken: action.userToken,
+        validation: {
+          ...state.validation,
+          status: {
+            code: action.code,
+            message: action.message,
+            stage: 'FAILURE',
+          },
         },
       };
     case AUTH_REGISTER:
       return {
         ...state,
         register: {
-          status: 'WAITING',
-          error: '',
+          ...state.register,
+          stage: 'FETCHING',
         },
       };
     case AUTH_REGISTER_SUCCESS:
       return {
         ...state,
         register: {
-          ...state.register,
-          status: 'SUCCESS',
+          code: 201,
+          message: '회원가입에 성공했습니다.',
+          stage: 'SUCCESS',
         },
       };
     case AUTH_REGISTER_FAILURE:
       return {
         ...state,
         register: {
-          status: 'FAILURE',
-          error: action.error,
+          code: action.code,
+          message: action.message,
+          stage: 'FAILURE',
         },
       };
     case AUTH_REGISTER_INIT:
       return {
         ...state,
         register: {
-          status: 'INIT',
-          error: '',
+          code: 0,
+          message: '',
+          stage: 'INIT',
         },
       };
     case AUTH_LOGIN:
@@ -92,37 +120,54 @@ export const authReducer = (
         ...state,
         login: {
           ...state.login,
-          status: 'WAITING',
+          stage: 'FETCHING',
         },
       };
     case AUTH_LOGIN_SUCCESS:
       return {
         ...state,
         login: {
-          ...state.login,
-          status: 'SUCCESS',
+          code: 201,
+          message: '로그인에 성공했습니다.',
+          stage: 'SUCCESS',
         },
-        status: {
-          isLoggedIn: true,
-          isValid: true,
+        validation: {
+          ...state.validation,
           currentUserID: action.userID,
           currentUserToken: action.userToken,
+          isLoggedIn: true,
         },
       };
     case AUTH_LOGIN_FAILURE:
       return {
         ...state,
         login: {
-          status: 'FAILURE',
-          error: action.error,
+          code: action.code,
+          message: action.message,
+          stage: 'FAILURE',
         },
       };
     case AUTH_LOGIN_INIT:
       return {
         ...state,
         login: {
-          status: 'INIT',
-          error: '',
+          code: 0,
+          message: '',
+          stage: 'INIT',
+        },
+      };
+    case AUTH_LOGOUT:
+      return {
+        ...state,
+        validation: {
+          currentUserID: '',
+          currentUserToken: '',
+          isLoggedIn: false,
+          status: {
+            code: 0,
+            message: '',
+            stage: 'INIT',
+          },
         },
       };
     default:

@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -8,24 +8,24 @@ import {
 } from 'react-native';
 import HeaderSide from '../../../components/HeaderSide';
 import PressableIcon from '../../../components/PressableIcon';
-import { CATEGORIES } from '../../../constants';
 import { PALETTE } from '../../../constants/color';
 import { SetCategoryProps } from '../../../types/ScreenProps';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useDispatch } from 'react-redux';
-import { loadCategories } from '../../../store/actions/userAction';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../store/reducers';
+import { requestUpdateCategories } from '../../../store/actions/userAction';
 
-interface Category {
+interface SelectedCategory {
   id: number;
   name: string;
-  isActive: boolean;
+  isSelected: boolean;
 }
 
 const CategoryItem = ({
   data,
   onPress,
 }: {
-  data: Category;
+  data: SelectedCategory;
   onPress: (id: number) => void;
 }) => {
   return (
@@ -34,9 +34,11 @@ const CategoryItem = ({
       activeOpacity={1}
       onPress={() => onPress(data.id)}>
       <Ionicons
-        name={data.isActive ? 'checkmark-circle' : 'checkmark-circle-outline'}
+        name={data.isSelected ? 'checkmark-circle' : 'checkmark-circle-outline'}
         size={24}
-        style={data.isActive ? styles.itemIconActive : styles.itemIconInactive}
+        style={
+          data.isSelected ? styles.itemIconActive : styles.itemIconInactive
+        }
       />
       <Text style={styles.itemText}>{data.name}</Text>
     </TouchableOpacity>
@@ -44,9 +46,24 @@ const CategoryItem = ({
 };
 
 const SetCategory = ({ navigation }: SetCategoryProps) => {
-  const [categories, setCategories] = useState<Category[]>([]);
   const dispatch = useDispatch();
-  const toast = useRef();
+  const categoryState = useSelector((state: RootState) => state.categories);
+  const userState = useSelector((state: RootState) => state.user);
+
+  const [categories, setCategories] = useState<SelectedCategory[]>([]);
+
+  useEffect(() => {
+    setCategories(
+      categoryState.categories.map(category => {
+        return {
+          ...category,
+          isSelected:
+            userState.categories.ids.find(el => el === category.id) !==
+            undefined,
+        };
+      }),
+    );
+  }, [categoryState.categories, userState.categories.ids]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -64,30 +81,18 @@ const SetCategory = ({ navigation }: SetCategoryProps) => {
     });
   }, [navigation]);
 
-  useEffect(() => {
-    setCategories([]);
-    CATEGORIES.map(category => {
-      setCategories(prev => prev.concat({ ...category, isActive: true }));
-      //   const tmp: Category = {
-      //     ...category,
-      //     isActive: true,
-      //   };
-      //   setCategories(prev => [...prev, tmp]);
-    });
-    dispatch(loadCategories());
-  }, []);
-
   const onPress = (id: number) => {
-    setCategories(prev =>
-      prev.map(category =>
-        category.id === id
-          ? { ...category, isActive: !category.isActive }
-          : category,
+    dispatch(
+      requestUpdateCategories(
+        userState.user.id,
+        userState.categories.ids.find(el => el === id) === undefined
+          ? userState.categories.ids.concat(id)
+          : userState.categories.ids.filter(el => el !== id),
       ),
     );
   };
 
-  const renderItem = ({ item }: { item: Category }) => (
+  const renderItem = ({ item }: { item: SelectedCategory }) => (
     <CategoryItem data={item} onPress={onPress} />
   );
 

@@ -26,7 +26,7 @@ const Feed = ({ navigation }: FeedProps) => {
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => navigation.navigate('SetLocation')}>
-            <HeaderText title={userState.currentLocation.area3} />
+            <HeaderText title={userState.location.area3} />
           </TouchableOpacity>
         </HeaderSide>
       ),
@@ -49,7 +49,7 @@ const Feed = ({ navigation }: FeedProps) => {
         </HeaderSide>
       ),
     });
-  }, [navigation, userState.currentLocation.area3]);
+  }, [navigation, userState.location.area3]);
 
   const onSelect = (data: IFeedItem) => {
     navigation.navigate('Post', { post: data });

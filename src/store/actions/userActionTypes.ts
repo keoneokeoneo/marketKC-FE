@@ -1,24 +1,77 @@
-import { FeedCategory, Location } from '../../types';
-import { User } from '../types';
+import { Location, User } from '../../types';
 
-export const USER_INIT = 'USER_INIT' as const;
-export const USER_TOGGLE_CATEGORIES = 'USER_TOGGLE_CATEGORIES' as const;
-export const USER_CHANGE_LOCATION = 'USER_CHANGE_LOCATION' as const;
+export const INIT_USER = 'INIT_USER' as const;
 
-type UserInit = {
-  type: typeof USER_INIT;
-  userData: User;
-  userCategories: FeedCategory[];
+export const LOAD_USER = ' LOAD_USER' as const;
+export const LOAD_USER_SUCCESS = ' LOAD_USER_SUCCESS' as const;
+export const LOAD_USER_FAILURE = ' LOAD_USER_FAILURE' as const;
+
+export const UPDATE_USER_LOCATION = 'UPDATE_USER_LOCATION' as const;
+export const UPDATE_USER_LOCATION_SUCCESS = 'UPDATE_USER_LOCATION_SUCCESS' as const;
+export const UPDATE_USER_LOCATION_FAILURE = 'UPDATE_USER_LOCATION_FAILURE' as const;
+
+export const UPDATE_USER_CATEGORIES = 'UPDATE_USER_CATEGORIES' as const;
+export const UPDATE_USER_CATEGORIES_SUCCESS = 'UPDATE_USER_CATEGORIES_SUCCESS' as const;
+export const UPDATE_USER_CATEGORIES_FAILURE = 'UPDATE_USER_CATEGORIES_FAILURE' as const;
+
+type InitUser = {
+  type: typeof INIT_USER;
 };
 
-type UserToggleCategories = {
-  type: typeof USER_TOGGLE_CATEGORIES;
-  categoryID: number;
+type LoadUser = {
+  type: typeof LOAD_USER;
 };
 
-type UserChangeLocation = {
-  type: typeof USER_CHANGE_LOCATION;
-  currentLocation: Location;
+type LoadUserSuccess = {
+  type: typeof LOAD_USER_SUCCESS;
+  user: User;
+  categories: number[];
 };
 
-export type UserDispatch = UserInit | UserToggleCategories | UserChangeLocation;
+type LoadUserFailure = {
+  type: typeof LOAD_USER_FAILURE;
+  code: number;
+  message: string;
+};
+
+type UpdateUserLocation = {
+  type: typeof UPDATE_USER_LOCATION;
+};
+
+type UpdateUserLocationSuccess = {
+  type: typeof UPDATE_USER_LOCATION_SUCCESS;
+  location: Location;
+};
+
+type UpdateUserLocationFailure = {
+  type: typeof UPDATE_USER_LOCATION_FAILURE;
+  code: number;
+  message: string;
+};
+
+type UpdateUserCategories = {
+  type: typeof UPDATE_USER_CATEGORIES;
+};
+
+type UpdateUserCategoriesSuccess = {
+  type: typeof UPDATE_USER_LOCATION_SUCCESS;
+  ids: number[];
+};
+
+type UpdateUserCategoriesFailure = {
+  type: typeof UPDATE_USER_CATEGORIES_FAILURE;
+  code: number;
+  message: string;
+};
+
+export type UserDispatch =
+  | InitUser
+  | LoadUser
+  | LoadUserSuccess
+  | LoadUserFailure
+  | UpdateUserCategories
+  | UpdateUserCategoriesSuccess
+  | UpdateUserCategoriesFailure
+  | UpdateUserLocation
+  | UpdateUserLocationSuccess
+  | UpdateUserLocationFailure;

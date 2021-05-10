@@ -11,12 +11,8 @@ export interface IFeedItem {
 }
 
 export interface Category {
-  categoryID: number;
-  categoryName: string;
-}
-
-export interface FeedCategory extends Category {
-  isSelected: boolean;
+  id: number;
+  name: string;
 }
 
 export interface ImagePickerRes {
@@ -37,3 +33,13 @@ export interface Location {
   area2: string;
   area3: string;
 }
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  profileImgUrl: string;
+  walletAddr: string;
+  createdAt: Date;
+  updatedAt: Date;
+};

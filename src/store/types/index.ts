@@ -1,42 +1,47 @@
-import { Category, FeedCategory, Location } from '../../types';
+import { Category, ImagePickerRes, Location, User } from '../../types';
 
-export interface User {
-  userID: string;
-  userName: string;
-  userEmail: string;
-  userProfileImgUrl: string;
-  userWalletAddr: string;
-  userCreatedAt: Date;
-  userUpdatedAt: Date;
-}
+export type Status = {
+  stage: 'INIT' | 'FETCHING' | 'SUCCESS' | 'FAILURE';
+  code: number;
+  message: string;
+};
 
 export type AuthState = {
-  login: {
-    status: 'WAITING' | 'SUCCESS' | 'FAILURE' | 'INIT';
-    error: string;
-  };
-  register: {
-    status: 'WAITING' | 'SUCCESS' | 'FAILURE' | 'INIT';
-    error: string;
-  };
-  status: {
+  login: Status;
+  register: Status;
+  validation: {
+    status: Status;
     isLoggedIn: boolean;
-    isValid: boolean;
     currentUserToken: string;
     currentUserID: string;
   };
 };
 
 export type PostingState = {
-  formData: {
+  form: {
     title: string;
     content: string;
-    category: Category;
+    category: number;
+    price: number;
+    cover: string;
+    status: Status;
+  };
+  files: {
+    imgs: ImagePickerRes[];
+    status: Status;
   };
 };
 
 export type UserState = {
-  userData: User;
-  feedCategories: FeedCategory[];
-  currentLocation: Location;
+  user: User & { status: Status };
+  categories: {
+    status: Status;
+    ids: number[];
+  };
+  location: Location & { status: Status };
+};
+
+export type CategoryState = {
+  status: Status;
+  categories: Category[];
 };
