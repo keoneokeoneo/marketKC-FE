@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -8,23 +8,25 @@ import {
 } from 'react-native';
 import HeaderSide from '../../../components/HeaderSide';
 import PressableIcon from '../../../components/PressableIcon';
-import { CATEGORIES } from '../../../constants';
 import { PALETTE } from '../../../constants/color';
 import { SelectCategoryProps } from '../../../types/ScreenProps';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Category } from '../../../store/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store/reducers';
 import { selectCategory } from '../../../store/actions/postingAction';
+import { Category } from '../../../types';
 
 const SelectCategory = ({ navigation }: SelectCategoryProps) => {
   const currentCategory = useSelector(
-    (state: RootState) => state.posting.formData.category,
+    (state: RootState) => state.posting.form.category,
+  );
+  const categories = useSelector(
+    (state: RootState) => state.categories.categories,
   );
   const dispatch = useDispatch();
 
-  const onPress = (id: number) => {
-    dispatch(selectCategory(id));
+  const onPress = (category: Category) => {
+    dispatch(selectCategory(category));
     navigation.goBack();
   };
 
@@ -35,7 +37,7 @@ const SelectCategory = ({ navigation }: SelectCategoryProps) => {
           <PressableIcon
             name="arrow-back-sharp"
             size={26}
-            onPress={() => onPress(currentCategory.id)}
+            onPress={() => onPress(currentCategory)}
           />
         </HeaderSide>
       ),
@@ -46,7 +48,7 @@ const SelectCategory = ({ navigation }: SelectCategoryProps) => {
     <TouchableOpacity
       style={styles.item}
       activeOpacity={1}
-      onPress={() => onPress(item.id)}>
+      onPress={() => onPress(item)}>
       <Text
         style={[
           styles.itemText,
@@ -66,7 +68,7 @@ const SelectCategory = ({ navigation }: SelectCategoryProps) => {
 
   return (
     <View style={styles.container}>
-      <FlatList data={CATEGORIES} renderItem={renderItem} />
+      <FlatList data={categories} renderItem={renderItem} />
     </View>
   );
 };

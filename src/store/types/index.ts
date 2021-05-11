@@ -18,12 +18,13 @@ export type AuthState = {
 };
 
 export type PostingState = {
+  status: 'Empty' | 'Saved';
   form: {
     title: string;
     content: string;
-    category: number;
+    category: Category;
     price: number;
-    cover: string;
+    urls: string[];
     status: Status;
   };
   files: {
@@ -44,4 +45,20 @@ export type UserState = {
 export type CategoryState = {
   status: Status;
   categories: Category[];
+};
+
+export type UploadPostForm = {
+  title: string;
+  content: string;
+  categoryID: number;
+  price: number;
+};
+
+export type UploadPostData = {
+  title: string;
+  content: string;
+  categoryID: number;
+  price: number;
+  userID: string;
+  location: string;
 };

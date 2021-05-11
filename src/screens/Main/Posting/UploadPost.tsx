@@ -15,7 +15,6 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  ActionSheetIOS,
   Image,
   Alert,
 } from 'react-native';
@@ -28,38 +27,32 @@ import { IMAGES } from '../../../constants/image';
 import { inputFormatter, numberWithCommas } from '../../../utils';
 import { useKeyboard } from '../../../utils/useKeyboard';
 import { SelectImgButton } from '../../../components/Button/SelectImgButton';
-import ImagePicker, {
-  Image as ImageType,
-} from 'react-native-image-crop-picker';
 import SelectedImgButton from '../../../components/Button/SelectedImgButton';
-import {
-  check,
-  checkMultiple,
-  PERMISSIONS,
-  request,
-} from 'react-native-permissions';
-import { useSelector } from 'react-redux';
+import { checkMultiple, PERMISSIONS, request } from 'react-native-permissions';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store/reducers';
-import NoticeModal from '../../../components/Modal/NoticeModal';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { PostingSchema } from '../../../constants/schema';
-import {
-  ACCESS_KEY_ID,
-  BUCKET_NAME,
-  BUCKET_REGION,
-  SECRET_ACCESS_KEY,
-} from '../../../config';
-import S3 from 'aws-sdk/clients/s3';
-import { v4 as uuid } from 'uuid';
 import MultipleImagePicker from '@baronha/react-native-multiple-image-picker';
 import { ImagePickerRes } from '../../../types';
+import { PostingData } from '../../../store/actions/postingActionTypes';
+import {
+  requestUpload,
+  requestUploadImages,
+  requestUploadPost,
+  saveToPosting,
+} from '../../../store/actions/postingAction';
+import Toast from 'react-native-simple-toast';
+import { UploadPostData, UploadPostForm } from '../../../store/types';
 
 interface FormInput {
-  postTitle: string;
-  postContent: string;
-  postCategoryID: number;
-  postPriceS: string;
-  postPriceN: number;
+  title: string;
+  content: string;
+  categoryID: number;
+  categoryName: string;
+  priceS: string;
+  priceN: number;
+  img: number;
 }
 
 const UploadPost = ({ navigation }: UploadPostProps) => {
@@ -68,85 +61,56 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     setValue,
     control,
     handleSubmit,
-    reset,
-    watch,
-    formState: { errors, isSubmitting },
+    getValues,
+    formState: { errors },
   } = useForm<FormInput>({
     resolver: yupResolver(PostingSchema),
-    defaultValues: {
-      postTitle: '',
-      postContent: '',
-      postPriceN: 0,
-      postPriceS: '0',
-    },
   });
-  const [keyboardHeight] = useKeyboard();
-  const [selectedAssets, setSelectedAssets] = useState<ImagePickerRes[]>([]);
-  const [cover, setCover] = useState('');
-  const [assets, setAssets] = useState<ImageType[]>([]);
-  const [permission, setPermission] = useState(false);
-  const [noticeModal, setNoticeModal] = useState({
-    open: false,
-    content: '',
-  });
+  const dispatch = useDispatch();
   const postingState = useSelector((state: RootState) => state.posting);
-  const watchFields = watch(['']);
+  const [keyboardHeight] = useKeyboard();
+  const [selectedAssets, setSelectedAssets] = useState<ImagePickerRes[]>(
+    postingState.files.imgs,
+  );
 
-  const onSubmit = (data: FormInput) => {
-    console.log(data, assets.length);
-
-    if (assets.length > 0) {
-      assets.map(asset => uploadToS3(asset));
-    }
+  const save = () => {
+    const { content, priceN, title, categoryID, categoryName } = getValues();
+    const data: PostingData = {
+      imgs: selectedAssets,
+      category: {
+        id: categoryID,
+        name: categoryName,
+      },
+      content: content,
+      price: priceN,
+      title: title,
+    };
+    dispatch(saveToPosting(data));
   };
 
-  const uploadToS3 = async (file: ImageType) => {
-    const response = await fetch(file.path);
-    const blob = await response.blob();
+  const onClose = () => {
+    save();
+    Toast.show('게시글이 임시 저장되었습니다.', Toast.SHORT, [
+      'UIAlertController',
+    ]);
+    navigation.goBack();
+  };
 
-    const client = new S3({
-      credentials: {
-        accessKeyId: ACCESS_KEY_ID,
-        secretAccessKey: SECRET_ACCESS_KEY,
-      },
-      region: BUCKET_REGION,
-      signatureVersion: 'v4',
-    });
-
-    const newID = uuid();
-
-    const params = {
-      Bucket: BUCKET_NAME + '/postImgs',
-      Key: `${newID}.${file.path.split('.')[1]}`,
-      Body: blob,
-      ContentType: file.mime,
-      ACL: 'public-read',
+  const onSubmit = async (data: FormInput) => {
+    const req: UploadPostForm = {
+      title: data.title,
+      content: data.content,
+      categoryID: data.categoryID,
+      price: data.priceN,
     };
-
-    client.upload(
-      params,
-      (err: globalThis.Error, data: S3.ManagedUpload.SendData) => {
-        if (err) console.log('에러 발생 : ', err);
-        else console.log('성공 : ', data);
-      },
-    );
+    await dispatch(requestUploadImages(selectedAssets));
+    await dispatch(requestUploadPost(req));
   };
 
   const onRemove = useCallback((id: string) => {
-    if (id === cover) {
-      console.log('delete cover');
-      if (selectedAssets.length === 1) setCover('');
-      else {
-        setCover(selectedAssets[0].localIdentifier);
-      }
-    }
     setSelectedAssets(prev =>
       prev.filter(asset => asset.localIdentifier !== id),
     );
-  }, []);
-
-  const onCoverChange = useCallback((id: string) => {
-    setCover(id);
   }, []);
 
   const getPermission = async () => {
@@ -155,99 +119,60 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
       PERMISSIONS.IOS.PHOTO_LIBRARY,
     ]);
 
-    // let permissions = {
-    //   camera:false,
-    //   gallery:false
-    // }
-
     switch (checkPermissionsResult['ios.permission.PHOTO_LIBRARY']) {
       case 'granted':
-        console.log('앨범 권한 check : granted');
         break;
       case 'unavailable':
-        Alert.alert('이 기기에서 앨범 사용이 불가합니다');
-        break;
+        return 'unavailable';
       case 'blocked':
-        console.log('앨범 권한 check : blocked');
-        break;
+        return 'blocked';
       case 'denied':
-        console.log('앨범 권한 요청');
         const requestGalleryPermission = await request(
           PERMISSIONS.IOS.PHOTO_LIBRARY,
         );
-        if (requestGalleryPermission === 'granted')
-          console.log('앨범 권한 request : granted');
-        else console.log('앨범 권한 request : blocked');
-        break;
+        if (requestGalleryPermission === 'granted') break;
+        else return 'blocked';
     }
     switch (checkPermissionsResult['ios.permission.CAMERA']) {
       case 'granted':
-        console.log('카메라 권한 check : granted');
-        break;
+        return 'granted';
       case 'unavailable':
-        Alert.alert('이 기기에서 카메라 사용이 불가합니다');
-        break;
+        return 'unavailable';
       case 'blocked':
-        console.log('카메라 권한 check : blocked');
-        break;
+        return 'blocked';
       case 'denied':
-        console.log('카메라 권한 요청');
         const requestCameraPermission = await request(PERMISSIONS.IOS.CAMERA);
-        if (requestCameraPermission === 'granted')
-          console.log('카메라 권한 request : granted');
-        else console.log('카메라 권한 request : blocked');
-        break;
+        if (requestCameraPermission === 'granted') return 'granted';
+        else return 'blocked';
     }
   };
 
-  // const getPermission = async (index: number) => {
-  //   let permissionName;
-  //   permissionName =
-  //     index === 1 ? PERMISSIONS.IOS.PHOTO_LIBRARY : PERMISSIONS.IOS.CAMERA;
-  //   const result = await check(permissionName);
-
-  //   if (result) {
-  //     // 이미 승인된 상태
-  //     setPermission(true);
-  //   } else {
-  //     const status = await request(permissionName);
-  //     if (status === 'granted') {
-  //       // 요청해서 승인한 상태
-  //       setPermission(true);
-  //     } else {
-  //       // 요청해서 거절된 상태
-  //       setPermission(false);
-  //     }
-  //   }
-  // };
-
   const openImagePicker = async () => {
-    getPermission();
-    // const res: ImagePickerRes[] = await MultipleImagePicker.openPicker({
-    //   mediaType: 'image',
-    //   selectedColor: PALETTE.main,
-    //   maxSelectedAssets: 5,
-    //   maximumMessage: '최대 5장 까지 선택할 수 있습니다.',
-    //   maximumMessageTitle: '알림',
-    // });
-    // console.log(res);
-    // setSelectedAssets(res);
-    // if (cover === '' && res.length > 0) {
-    //   setCover(res[0].localIdentifier);
-    // }
+    const permission = await getPermission();
+    if (permission === 'unavailable') {
+      Alert.alert('이 기기에선 사용이 불가합니다.');
+      return;
+    } else if (permission === 'blocked') {
+      navigation.navigate('GalleryPermission');
+      return;
+    }
+    const res: ImagePickerRes[] = await MultipleImagePicker.openPicker({
+      mediaType: 'image',
+      selectedColor: PALETTE.main,
+      maxSelectedAssets: 5,
+      maximumMessage: '최대 5장 까지 선택할 수 있습니다.',
+      maximumMessageTitle: '알림',
+      selectedAssets: selectedAssets,
+    });
+    setSelectedAssets(res);
+    setValue('img', res.length, { shouldValidate: true });
   };
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <HeaderSide left>
-          <PressableIcon
-            name="close-sharp"
-            size={26}
-            onPress={() => {
-              navigation.goBack();
-            }}
-          />
+          <PressableIcon name="close-sharp" size={26} onPress={onClose} />
         </HeaderSide>
       ),
       headerRight: () => null,
@@ -256,18 +181,31 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   }, [navigation]);
 
   useEffect(() => {
-    register('postCategoryID');
-    register('postPriceN');
-  }, []);
+    if (postingState.form.status.stage === 'SUCCESS')
+      navigation.navigate('Home', { screen: 'Feed' });
+  }, [postingState.form.status.stage]);
+
+  useEffect(() => {
+    register('categoryID');
+    register('priceN');
+    register('img');
+  }, [register]);
 
   useFocusEffect(
     useCallback(() => {
-      if (postingState.formData.category.categoryName === '무료나눔') {
-        setValue('postPriceN', 0);
-        setValue('postPriceS', '무료나눔');
+      setSelectedAssets(postingState.files.imgs);
+      setValue('title', postingState.form.title);
+      setValue('content', postingState.form.content);
+      setValue('categoryID', postingState.form.category.id);
+      setValue('categoryName', postingState.form.category.name);
+      if (postingState.form.category.name === '무료나눔') {
+        setValue('priceN', 0);
+        setValue('priceS', '무료나눔');
+      } else {
+        setValue('priceN', postingState.form.price);
       }
-      setValue('postCategoryID', postingState.formData.category.categoryID);
-    }, [postingState]),
+      setValue('img', postingState.files.imgs.length);
+    }, [postingState, setValue]),
   );
 
   return (
@@ -276,11 +214,6 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     //   style={{ flex: 1 }}>
     <KeyboardAvoidingView style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
-        <NoticeModal
-          isOpen={noticeModal.open}
-          content={noticeModal.content}
-          onClose={() => setNoticeModal({ open: false, content: '' })}
-        />
         <View style={styles.section}>
           <View style={styles.labelContainer}>
             <Text style={styles.label}>사진</Text>
@@ -299,23 +232,20 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
             data={selectedAssets}
             keyExtractor={item => item.path}
             renderItem={({ item }) => (
-              <SelectedImgButton
-                data={item}
-                onRemove={onRemove}
-                isCover={item.localIdentifier === cover}
-                onCoverChange={onCoverChange}
-              />
+              <SelectedImgButton data={item} onRemove={onRemove} />
             )}
           />
+          {errors.img && <Text style={styles.error}>{errors.img.message}</Text>}
         </View>
         <View style={styles.section}>
           <View style={styles.labelContainer}>
             <Text style={styles.label}>글 제목</Text>
           </View>
-          <View style={styles.textArea}>
+          <View
+            style={[styles.textArea, errors.title && { borderColor: 'red' }]}>
             <Controller
               control={control}
-              name="postTitle"
+              name="title"
               defaultValue=""
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
@@ -328,6 +258,9 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
               )}
             />
           </View>
+          {errors.title && (
+            <Text style={styles.error}>{errors.title.message}</Text>
+          )}
         </View>
         <View style={styles.section}>
           <View style={styles.labelContainer}>
@@ -342,17 +275,29 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
               },
+              errors.categoryID && { borderColor: 'red' },
             ]}
-            onPress={() => navigation.navigate('SelectCategory')}>
-            <TextInput
-              editable={false}
-              placeholder="카테고리 선택"
-              style={styles.textInput}
-              value={postingState.formData.category.name}
+            onPress={() => {
+              navigation.navigate('SelectCategory');
+              save();
+            }}>
+            <Controller
+              control={control}
+              name="categoryName"
+              render={({ field: { value } }) => (
+                <TextInput
+                  editable={false}
+                  placeholder="카테고리 선택"
+                  style={styles.textInput}
+                  value={value}
+                />
+              )}
             />
-
             <Ionicons name="chevron-forward-sharp" size={14} />
           </TouchableOpacity>
+          {errors.categoryID && (
+            <Text style={styles.error}>{errors.categoryID.message}</Text>
+          )}
         </View>
         <View style={styles.section}>
           <View style={styles.labelContainer}>
@@ -381,7 +326,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
               </Text>
               <Controller
                 control={control}
-                name="postPriceS"
+                name="priceS"
                 defaultValue=""
                 render={({ field: { onChange, onBlur, value } }) => (
                   <TextInput
@@ -389,13 +334,13 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
                     style={styles.textInput}
                     value={value}
                     editable={
-                      postingState.formData.category.name === '무료나눔'
+                      postingState.form.category.name === '무료나눔'
                         ? false
                         : true
                     }
                     keyboardType="numeric"
                     onChangeText={value => {
-                      setValue('postPriceN', Number(inputFormatter(value)));
+                      setValue('priceN', Number(inputFormatter(value)));
                       onChange(numberWithCommas(inputFormatter(value)));
                       //const formatted = inputFormatter(value);
                       // const eth = (Number(formatted) / ETH)
@@ -429,7 +374,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
                 editable={false}
                 placeholder="ETH"
                 style={styles.textInput}
-                value={'0.0011'}
+                value={''}
               />
             </View>
           </View>
@@ -453,10 +398,11 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
           <View style={styles.labelContainer}>
             <Text style={styles.label}>상품 설명</Text>
           </View>
-          <View style={[styles.textArea]}>
+          <View
+            style={[styles.textArea, errors.content && { borderColor: 'red' }]}>
             <Controller
               control={control}
-              name="postContent"
+              name="content"
               defaultValue=""
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
@@ -470,6 +416,9 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
               )}
             />
           </View>
+          {errors.content && (
+            <Text style={styles.error}>{errors.content.message}</Text>
+          )}
         </View>
       </ScrollView>
       <View
@@ -488,7 +437,6 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
-    // </TouchableWithoutFeedback>
   );
 };
 

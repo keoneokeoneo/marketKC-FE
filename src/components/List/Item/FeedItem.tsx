@@ -31,23 +31,31 @@ const FeedItem = ({ data, onClick }: IProps) => {
             <Text style={styles.price}>{`ETH ${((price / 1000) * eth).toFixed(
               5,
             )}`}</Text>
-            <Text style={styles.price}>{`[ ₩ ${numberWithCommas(
-              price,
-            )} ]`}</Text>
           </View>
           <View style={styles.subInfoContainer}>
-            {chats > 0 ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="chatbubbles-outline" style={styles.subInfo} />
-                <Text style={styles.subInfo}>{chats}</Text>
-              </View>
-            ) : null}
-            {likes > 0 ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="heart-outline" style={styles.subInfo} />
-                <Text style={styles.subInfo}>{likes}</Text>
-              </View>
-            ) : null}
+            <Text style={styles.subInfoLeftText}>{`₩ ${numberWithCommas(
+              price,
+            )}`}</Text>
+            <View style={styles.subInfoRight}>
+              {chats > 0 ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons
+                    name="chatbubbles-outline"
+                    style={styles.subInfoRightText}
+                  />
+                  <Text style={styles.subInfoRightText}>{chats}</Text>
+                </View>
+              ) : null}
+              {likes > 0 ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons
+                    name="heart-outline"
+                    style={styles.subInfoRightText}
+                  />
+                  <Text style={styles.subInfoRightText}>{likes}</Text>
+                </View>
+              ) : null}
+            </View>
           </View>
         </View>
       </View>
@@ -101,11 +109,14 @@ const styles = StyleSheet.create({
   subInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
   },
-  subInfo: {
-    fontSize: 13,
+  subInfoRightText: {
     marginHorizontal: 1.5,
+  },
+  subInfoLeftText: {},
+  subInfoRight: {
+    flexDirection: 'row',
   },
 });
 export default FeedItem;

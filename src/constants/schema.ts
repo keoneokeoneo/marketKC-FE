@@ -28,15 +28,17 @@ export const SignUpSchema = yup.object().shape({
 });
 
 export const PostingSchema = yup.object().shape({
-  postTitle: yup
+  title: yup
     .string()
     .required('글 제목은 필수 입력 항목입니다.')
     .max(30, '글 제목은 최대 30자까지 가능합니다.'),
-  postContent: yup.string().required('글 내용은 필수 입력 항목입니다.'),
-  postCategoryID: yup
+  content: yup.string().required('글 내용은 필수 입력 항목입니다.'),
+  categoryID: yup
     .number()
     .moreThan(0, '카테고리는 필수 입력 항목입니다')
     .required('카테고리는 필수 입력 항목입니다.'),
-  postPriceN: yup.number(),
-  postPriceS: yup.string(),
+  categoryName: yup.string(),
+  priceN: yup.number(),
+  priceS: yup.string(),
+  img: yup.number().moreThan(0, '최소 한장 이상의 사진을 첨부해주세요'),
 });

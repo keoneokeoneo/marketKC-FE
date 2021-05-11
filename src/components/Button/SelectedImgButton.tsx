@@ -1,14 +1,12 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   ImageBackground,
   ImageErrorEventData,
   ImageLoadEventData,
   ImageProgressEventDataIOS,
-  LayoutChangeEvent,
   NativeSyntheticEvent,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -17,31 +15,14 @@ import { PALETTE } from '../../constants/color';
 import { IMAGES } from '../../constants/image';
 import { ImagePickerRes } from '../../types';
 
-export interface Test {
-  uri: string;
-}
-
 interface Props {
   data: ImagePickerRes;
   onRemove: (id: string) => void;
-  onCoverChange: (id: string) => void;
-  isCover: boolean;
 }
 
-const SelectedImgButton = ({
-  data,
-  onRemove,
-  isCover,
-  onCoverChange,
-}: Props): JSX.Element => {
-  const [chip, setChip] = useState({ width: 0, height: 0 });
+const SelectedImgButton = ({ data, onRemove }: Props): JSX.Element => {
   const [isLoading, setLoading] = useState(false);
   const [uri, setUri] = useState(data.path);
-
-  const onLayout = useCallback((e: LayoutChangeEvent) => {
-    const { width, height } = e.nativeEvent.layout;
-    setChip({ width: width, height: height });
-  }, []);
 
   const handleLoadStart = () => {
     setLoading(true);
@@ -62,10 +43,7 @@ const SelectedImgButton = ({
   ) => {};
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      activeOpacity={1}
-      onPress={() => onCoverChange(data.localIdentifier)}>
+    <View style={styles.container}>
       <ImageBackground
         source={{ uri: uri }}
         style={{
@@ -98,17 +76,7 @@ const SelectedImgButton = ({
         activeOpacity={1}>
         <Ionicons name="close" size={14} color="white" />
       </TouchableOpacity>
-      {isCover && (
-        <View
-          style={[
-            styles.chip,
-            { bottom: -chip.height / 2, left: 44 - chip.width / 2 },
-          ]}
-          onLayout={onLayout}>
-          <Text style={{ color: 'white', fontSize: 10 }}>대표</Text>
-        </View>
-      )}
-    </TouchableOpacity>
+    </View>
   );
 };
 
@@ -138,12 +106,6 @@ const styles = StyleSheet.create({
     padding: 3,
     backgroundColor: 'rgb(216,216,216)',
     borderRadius: 30,
-  },
-  chip: {
-    position: 'absolute',
-    padding: 3,
-    backgroundColor: PALETTE.sub,
-    borderRadius: 6,
   },
 });
 

@@ -30,3 +30,13 @@ export type ValidateTokenRes = {
   name: string;
   email: string;
 };
+
+export type UploadPostReq = {
+  title: string;
+  content: string;
+  categoryID: number;
+  location: string;
+  price: number;
+  userID: string;
+  imgUrls: string[];
+};
