@@ -1,5 +1,6 @@
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/core';
+import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 import { StackNavigationProp } from '@react-navigation/stack';
 import {
   AppNavParamList,
@@ -10,6 +11,7 @@ import {
   MainParamList,
   PostingParamList,
   ProfileParamList,
+  TradeListParamList,
 } from './NavigationTypes';
 
 export interface IntroProps {
@@ -153,6 +155,29 @@ export interface MyPageProps {
     CompositeNavigationProp<
       BottomTabNavigationProp<MainParamList>,
       StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
+export interface LikeListProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<ProfileParamList, 'LikeList'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
+export interface BuyListProps {
+  navigation: CompositeNavigationProp<
+    MaterialTopTabNavigationProp<TradeListParamList, 'BuyList'>,
+    CompositeNavigationProp<
+      StackNavigationProp<ProfileParamList, 'TradeList'>,
+      CompositeNavigationProp<
+        BottomTabNavigationProp<MainParamList, 'Profile'>,
+        StackNavigationProp<AppNavParamList>
+      >
     >
   >;
 }

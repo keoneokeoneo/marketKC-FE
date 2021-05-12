@@ -57,4 +57,11 @@ export type ProfileParamList = {
   ProfileModification: undefined;
   UserProfile: undefined;
   MyPage: undefined;
+  LikeList: undefined;
+  TradeList: NestedNavigatorParams<TradeListParamList>;
+};
+
+export type TradeListParamList = {
+  BuyList: undefined;
+  SellList: undefined;
 };
