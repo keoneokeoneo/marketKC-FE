@@ -15,12 +15,12 @@ import PressableIcon from '../../components/PressableIcon';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginInit, loginRequest } from '../../store/actions/authAction';
-import { LoginData } from '../../types/APITypes';
-import { RootState } from '../../store/reducers';
 import NoticeModal from '../../components/Modal/NoticeModal';
 import { SignInSchema } from '../../constants/schema';
-import { requestLoadUser } from '../../store/actions/userAction';
+import { RootState } from '../../store/reducer';
+import { LoginReq } from '../../utils/api/auth/types';
+import { loginThunk } from '../../store/auth/thunk';
+import { loadUserThunk } from '../../store/user/thunk';
 
 interface FormInput {
   email: string;
@@ -42,26 +42,24 @@ const SignIn = ({ navigation }: SignInProps) => {
   const authState = useSelector((state: RootState) => state.auth);
 
   const onSubmit = (data: FormInput) => {
-    const loginData: LoginData = {
+    const loginData: LoginReq = {
       username: data.email,
       password: data.password,
     };
-    dispatch(loginRequest(loginData));
+    dispatch(loginThunk(loginData));
   };
 
   useEffect(() => {
-    if (authState.login.stage === 'FAILURE') {
+    if (authState.login.error) {
       setModalOpen(true);
-    } else if (authState.login.stage === 'SUCCESS') {
-      dispatch(loginInit());
-      dispatch(requestLoadUser(authState.validation.currentUserID));
-      //dispatch(requestUserInit(authState.validation.currentUserID))
-      // navigation.navigate('Main', {
-      //   screen: 'Home',
-      //   params: { screen: 'Feed' },
-      // });
+    } else {
+      dispatch(loadUserThunk(authState.validation.data.id));
+      navigation.navigate('Main', {
+        screen: 'Home',
+        params: { screen: 'Feed' },
+      });
     }
-  }, [authState.login.stage]);
+  }, [authState.login.error]);
 
   return (
     <TouchableWithoutFeedback
@@ -159,7 +157,6 @@ const SignIn = ({ navigation }: SignInProps) => {
               activeOpacity={1}
               onPress={() => {
                 navigation.navigate('SignUp');
-                dispatch(loginInit());
                 reset();
               }}>
               <Text

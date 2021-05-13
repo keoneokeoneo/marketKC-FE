@@ -10,3 +10,28 @@ export const inputFormatter = (input: string): string => {
 export const numberWithCommas = (input: number | string) => {
   return input.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
+
+// 두 위경도 사이의 거리 구하기
+export const getDistance = (
+  lat1: number,
+  long1: number,
+  lat2: number,
+  long2: number,
+) => {
+  const toRadian = (deg: number) => deg * (Math.PI / 180);
+
+  const R = 6371; // 지구 둘레 [Km]
+
+  const distanceBetweenLats = toRadian(lat2 - lat1);
+  const distanceBetweenLongs = toRadian(long2 - long1);
+
+  const a =
+    Math.pow(Math.sin(distanceBetweenLats / 2), 2) +
+    Math.cos(toRadian(lat1)) *
+      Math.cos(toRadian(lat2)) *
+      Math.pow(Math.sin(distanceBetweenLongs / 2), 2);
+
+  const result = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return result;
+};

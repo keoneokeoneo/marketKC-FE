@@ -4,55 +4,66 @@ import { IFeedItem } from '../../../types';
 import { numberWithCommas } from '../../../utils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { PALETTE } from '../../../constants/color';
+import { FeedRes } from '../../../screens/Main/Home/Feed';
+import { IMAGES } from '../../../constants/image';
 
-const eth = 0.00036;
+const eth = 2.1e-7;
 
 interface IProps {
-  data: IFeedItem;
-  onClick: (data: IFeedItem) => void;
+  data: FeedRes;
+  onClick: (id: number) => void;
 }
 
 const FeedItem = ({ data, onClick }: IProps) => {
-  const { thumbnailUri, chats, date, id, likes, location, price, title } = data;
+  const location = data.location.split(' ');
+  const date = new Date(data.updatedAt).toLocaleString().toString();
   return (
-    <TouchableOpacity onPress={() => onClick(data)} activeOpacity={1}>
+    <TouchableOpacity onPress={() => onClick(data.id)} activeOpacity={1}>
       <View style={styles.cardContainer}>
         <View style={styles.cardLeft}>
-          <Image source={{ uri: thumbnailUri }} style={styles.thumbnail} />
+          <Image
+            source={
+              data.postImgs.length > 0
+                ? { uri: data.postImgs[0].url }
+                : IMAGES.defaultImage
+            }
+            style={styles.thumbnail}
+          />
         </View>
         <View style={styles.cardRight}>
-          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.title}>{data.title}</Text>
           <View style={styles.infoContainer}>
-            <Text style={styles.info}>{location}</Text>
+            <Text style={styles.info}>{`${location[1]} ${location[2]}`}</Text>
             <Text style={styles.info}>·</Text>
             <Text style={styles.info}>{date}</Text>
           </View>
           <View style={styles.priceContainer}>
-            <Text style={styles.price}>{`ETH ${((price / 1000) * eth).toFixed(
-              5,
-            )}`}</Text>
+            <Text style={styles.price}>{`ETH ${(
+              (data.price / 1000) *
+              eth
+            ).toFixed(9)}`}</Text>
           </View>
           <View style={styles.subInfoContainer}>
             <Text style={styles.subInfoLeftText}>{`₩ ${numberWithCommas(
-              price,
+              data.price,
             )}`}</Text>
             <View style={styles.subInfoRight}>
-              {chats > 0 ? (
+              {data.chats > 0 ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Ionicons
                     name="chatbubbles-outline"
                     style={styles.subInfoRightText}
                   />
-                  <Text style={styles.subInfoRightText}>{chats}</Text>
+                  <Text style={styles.subInfoRightText}>{data.chats}</Text>
                 </View>
               ) : null}
-              {likes > 0 ? (
+              {data.likes > 0 ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Ionicons
                     name="heart-outline"
                     style={styles.subInfoRightText}
                   />
-                  <Text style={styles.subInfoRightText}>{likes}</Text>
+                  <Text style={styles.subInfoRightText}>{data.likes}</Text>
                 </View>
               ) : null}
             </View>

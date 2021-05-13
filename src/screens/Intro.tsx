@@ -3,13 +3,13 @@ import React, { useEffect } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { PALETTE } from '../constants/color';
-import { requestTokenValidation } from '../store/actions/authAction';
-import { RootState } from '../store/reducers';
 import { IntroProps } from '../types/ScreenProps';
 import Geolocation from 'react-native-geolocation-service';
 import { IMAGES } from '../constants/image';
-import { requestLoadCategories } from '../store/actions/categoryAction';
-import { requestLoadUser, requestLocation } from '../store/actions/userAction';
+import { RootState } from '../store/reducer';
+import { findCurrentLocationThunk, loadUserThunk } from '../store/user/thunk';
+import { validateTokenThunk } from '../store/auth/thunk';
+import { loadCategoriesThunk } from '../store/category';
 
 const Intro = ({ navigation }: IntroProps) => {
   const dispatch = useDispatch();
@@ -29,7 +29,10 @@ const Intro = ({ navigation }: IntroProps) => {
         Geolocation.getCurrentPosition(
           pos => {
             dispatch(
-              requestLocation(pos.coords.longitude, pos.coords.latitude),
+              findCurrentLocationThunk(
+                pos.coords.longitude,
+                pos.coords.latitude,
+              ),
             );
           },
           err => {
@@ -47,9 +50,7 @@ const Intro = ({ navigation }: IntroProps) => {
       if (userDataFromStorage !== null) {
         const parsedData = JSON.parse(userDataFromStorage);
         console.log('Local Storage : ', parsedData);
-        dispatch(
-          requestTokenValidation(parsedData.userToken, parsedData.userID),
-        );
+        dispatch(validateTokenThunk(parsedData.token));
       } else {
         console.log('Local Storage에 User Data가 없습니다.');
         navigation.navigate('Landing', { screen: 'SignIn' });
@@ -64,22 +65,31 @@ const Intro = ({ navigation }: IntroProps) => {
   }, []);
 
   useEffect(() => {
-    if (authState.validation.isLoggedIn) {
-      dispatch(requestLoadUser(authState.validation.currentUserID));
-      dispatch(requestLoadCategories());
+    if (authState.validation.data) {
+      dispatch(loadUserThunk(authState.validation.data.id));
+      dispatch(loadCategoriesThunk());
       getLocation();
       navigation.navigate('Main', {
         screen: 'Home',
         params: { screen: 'Feed' },
       });
     }
-  }, [authState.validation.isLoggedIn]);
+  }, [authState.validation.data]);
 
   return (
     <View style={styles.container}>
-      <Image source={IMAGES.appLogo} style={styles.logo} />
-      <Text style={styles.logoText}>에스마켙</Text>
-      <Text>중고 거래 그런데 암호화폐를 곁들인</Text>
+      <Image source={IMAGES.appLogo2} style={styles.logo} />
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'baseline',
+        }}>
+        <Text style={styles.text2}>중고 거래</Text>
+        <Text style={styles.text1}>그런데</Text>
+        <Text style={styles.text2}>암호화폐</Text>
+        <Text style={styles.text1}>{`를 곁들인`}</Text>
+      </View>
     </View>
   );
 };
@@ -91,11 +101,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logo: { width: 180, height: 180, padding: 10 },
+  logo: { width: 220, height: 220, padding: 10 },
   logoText: {
-    color: PALETTE.grey,
+    color: PALETTE.main,
     fontSize: 48,
     fontWeight: 'bold',
+  },
+  text1: { color: PALETTE.grey, fontSize: 18, marginHorizontal: 4 },
+  text2: {
+    color: PALETTE.main,
+    fontWeight: 'bold',
+    fontSize: 21,
+    marginHorizontal: 2,
   },
 });
 

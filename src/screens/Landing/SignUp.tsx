@@ -15,11 +15,11 @@ import PressableIcon from '../../components/PressableIcon';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
-import { RegData } from '../../types/APITypes';
-import { registerInit, registerRequest } from '../../store/actions/authAction';
-import { RootState } from '../../store/reducers';
 import NoticeModal from '../../components/Modal/NoticeModal';
 import { SignUpSchema } from '../../constants/schema';
+import { RootState } from '../../store/reducer';
+import { RegisterReq } from '../../utils/api/auth/types';
+import { registerThunk } from '../../store/auth/thunk';
 
 interface FormInput {
   name: string;
@@ -46,29 +46,26 @@ const SignUp = ({ navigation }: SignUpProps) => {
 
   const onClose = () => {
     setModalOpen(false);
-    if (authState.register.stage === 'SUCCESS') {
+    if (!authState.register.error) {
       navigation.navigate('SignIn');
-      dispatch(registerInit());
+      //dispatch(registerInit());
     }
   };
 
   const onSubmit = (data: FormInput) => {
-    const regData: RegData = {
+    const regData: RegisterReq = {
       name: data.name,
       email: data.email,
       password: data.password,
     };
-    dispatch(registerRequest(regData));
+    dispatch(registerThunk(regData));
   };
 
   useEffect(() => {
-    if (
-      authState.register.stage === 'FAILURE' ||
-      authState.register.stage === 'SUCCESS'
-    ) {
+    if (authState.register.error || authState.register.data !== '') {
       setModalOpen(true);
     }
-  }, [authState.register.stage]);
+  }, [authState.register.error, authState.register.data]);
 
   return (
     <TouchableWithoutFeedback
@@ -78,7 +75,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
         <NoticeModal
           isOpen={modalOpen}
           onClose={onClose}
-          content={authState.register.message}
+          content={authState.register.data}
         />
         <View style={styles.container}>
           <Text style={styles.logo}>Join Us!</Text>
@@ -254,7 +251,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('SignIn');
-              dispatch(registerInit());
+              //dispatch(registerInit());
             }}
             style={[
               styles.button,

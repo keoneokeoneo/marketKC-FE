@@ -15,20 +15,29 @@ import {
 } from 'react-native';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useDispatch, useSelector } from 'react-redux';
 import HeaderSide from '../../../components/HeaderSide';
 import PressableIcon from '../../../components/PressableIcon';
 import { PALETTE } from '../../../constants/color';
 import { IMAGES } from '../../../constants/image';
+import { RootState } from '../../../store/reducer';
+import { getPostThunk } from '../../../store/post/thunk';
 import { PostProps } from '../../../types/ScreenProps';
 import { numberWithCommas } from '../../../utils';
 
+const eth = 2.1e-7;
 const Post = ({ navigation, route }: PostProps) => {
-  const [images, setImages] = useState<{ uri: string }[]>([]);
   const [headerTransparent, setHeaderTranspaernt] = useState(true);
-  const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
+  const { height: windowHeight } = Dimensions.get('window');
   const sliderHeight = (windowHeight - 84) / 2;
   const [isLike, setIsLike] = useState(false);
-  const data = route.params.post;
+  const postID = route.params.id;
+  const dispatch = useDispatch();
+  const postState = useSelector((state: RootState) => state.post.post);
+
+  const getData = async () => {
+    dispatch(getPostThunk(postID));
+  };
 
   const onLikePress = () => {
     setIsLike(prev => !prev);
@@ -58,14 +67,7 @@ const Post = ({ navigation, route }: PostProps) => {
   }, [headerTransparent, navigation]);
 
   useEffect(() => {
-    let items = Array.apply(null, Array(1)).map((v, i) => {
-      //Loop to make image array to show in slider
-      return {
-        uri:
-          'assets-library://asset/asset.HEIC?id=300C2F7E-F036-40D2-BBC4-6D8180894DBC&ext=HEIC',
-      };
-    });
-    setImages(items);
+    getData();
   }, []);
 
   const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -79,12 +81,14 @@ const Post = ({ navigation, route }: PostProps) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView
-        style={{ flex: 1, backgroundColor: '#FFF' }}
-        onScroll={onScroll}
-        scrollEventThrottle={16}>
-        <View style={{ width: '100%', height: sliderHeight }}>
-          {/* <ImageSlider
+      {postState.data ? (
+        <View style={{ flex: 1 }}>
+          <ScrollView
+            style={{ flex: 1, backgroundColor: '#FFF' }}
+            onScroll={onScroll}
+            scrollEventThrottle={16}>
+            <View style={{ width: '100%', height: sliderHeight }}>
+              {/* <ImageSlider
             images={images}
             sliderHeight={sliderHeight}
             sliderWidth={windowWidth}
@@ -92,130 +96,156 @@ const Post = ({ navigation, route }: PostProps) => {
             indicatorInactiveColor="#808080"
             onImagePress={() => {}}
           /> */}
-          <Image
-            source={{
-              uri:
-                'https://market-kc-bucket.s3.ap-northeast-2.amazonaws.com/postImgs/4e047835-4acd-4279-b976-c9608720016d.jpg',
-            }}
-            style={{ width: '100%', height: '100%' }}
-          />
-        </View>
-        <View style={styles.container}>
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={() => {}}
-            style={styles.profileWrapper}>
-            <View style={styles.profileLeft}>
               <Image
-                source={IMAGES.defaultUserImage}
-                style={styles.profileThumbnail}
+                source={
+                  postState.data.postImgs.length > 0
+                    ? { uri: postState.data.postImgs[0].url }
+                    : IMAGES.defaultImage
+                }
+                style={{ width: '100%', height: '100%' }}
               />
-              <View style={styles.profileTextWrapper}>
-                <Text style={styles.profileTextP}>판매자의 닉네임</Text>
-                <Text style={styles.profileTextS}>판매자의 위치 정보</Text>
-              </View>
             </View>
-            <View style={styles.profileRight}>
-              <View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                  }}>
-                  {/* <Ionicons name="star-outline" style={styles.profileRate} />
+            <View style={styles.container}>
+              <TouchableOpacity
+                activeOpacity={1}
+                onPress={() => {}}
+                style={styles.profileWrapper}>
+                <View style={styles.profileLeft}>
+                  <Image
+                    source={IMAGES.defaultUserImage}
+                    style={styles.profileThumbnail}
+                  />
+                  <View style={styles.profileTextWrapper}>
+                    <Text style={styles.profileTextP}>
+                      {postState.data.user.name}
+                    </Text>
+                    <Text style={styles.profileTextS}>
+                      {postState.data.location}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.profileRight}>
+                  <View>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                      }}>
+                      {/* <Ionicons name="star-outline" style={styles.profileRate} />
                   <Ionicons name="star-outline" style={styles.profileRate} />
                   <Ionicons name="star-outline" style={styles.profileRate} />
                   <Ionicons name="star-outline" style={styles.profileRate} />
                   <Ionicons name="star-outline" style={styles.profileRate} /> */}
+                    </View>
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 16,
+                          color: PALETTE.main,
+                          marginRight: 4,
+                        }}>
+                        4.7
+                      </Text>
+                      <Text style={{ marginRight: 2, color: PALETTE.line1 }}>
+                        /
+                      </Text>
+                      <Text style={{ color: PALETTE.line1 }}>5.0</Text>
+                    </View>
+                  </View>
                 </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text
-                    style={{
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                      color: PALETTE.main,
-                      marginRight: 4,
-                    }}>
-                    4.7
+              </TouchableOpacity>
+
+              {/* <Divider /> */}
+
+              <View style={styles.contentWrapper}>
+                <View style={styles.contentTitle}>
+                  <Text style={styles.contentTitleText}>
+                    {postState.data.title}
                   </Text>
-                  <Text style={{ marginRight: 2, color: PALETTE.line1 }}>
-                    /
+                </View>
+                <View style={styles.contentInfo}>
+                  <Text style={styles.contentInfoText}>
+                    {postState.data.categoryName}
                   </Text>
-                  <Text style={{ color: PALETTE.line1 }}>5.0</Text>
+                  <Text style={styles.contentInfoText}>·</Text>
+                  <Text style={styles.contentInfoText}>
+                    {postState.data.updatedAt}
+                  </Text>
+                </View>
+                <View style={styles.content}>
+                  <Text style={styles.contentText}>
+                    {postState.data.content}
+                  </Text>
+                </View>
+                <View style={styles.contentInfo}>
+                  <Ionicons
+                    name="chatbubbles-outline"
+                    style={styles.contentInfoText}
+                  />
+                  <Text style={styles.contentInfoText}>
+                    {postState.data.chats}
+                  </Text>
+                  <Text style={styles.contentInfoText}>·</Text>
+                  <Ionicons
+                    name="heart-outline"
+                    style={styles.contentInfoText}
+                  />
+                  <Text style={styles.contentInfoText}>
+                    {postState.data.likes}
+                  </Text>
+                  <Text style={styles.contentInfoText}>·</Text>
+                  <Ionicons name="eye-outline" style={styles.contentInfoText} />
+                  <Text style={styles.contentInfoText}>
+                    {postState.data.views}
+                  </Text>
                 </View>
               </View>
-            </View>
-          </TouchableOpacity>
 
-          {/* <Divider /> */}
-
-          <View style={styles.contentWrapper}>
-            <View style={styles.contentTitle}>
-              <Text style={styles.contentTitleText}>{data.title}</Text>
+              {/* <Divider /> */}
             </View>
-            <View style={styles.contentInfo}>
-              <Text style={styles.contentInfoText}>{`생활용품`}</Text>
-              <Text style={styles.contentInfoText}>·</Text>
-              <Text style={styles.contentInfoText}>방금 전</Text>
+          </ScrollView>
+          <View style={styles.bottomBarContainer}>
+            <View style={styles.bottomBar}>
+              <View style={styles.bottomBarLeft}>
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  onPress={onLikePress}
+                  style={styles.iconWrapper}>
+                  {isLike ? (
+                    <Ionicons name="heart" size={32} color="#f29886" />
+                  ) : (
+                    <Ionicons name="heart-outline" size={32} color="#c0c0c0" />
+                  )}
+                </TouchableOpacity>
+                <View style={styles.priceWrapper}>
+                  <Text style={[styles.priceText]}>{`${numberWithCommas(
+                    postState.data.price,
+                  )} ₩`}</Text>
+                  <Text style={[styles.priceText]}>{`${(
+                    (postState.data.price / 1000) *
+                    eth
+                  )
+                    .toFixed(6)
+                    .toString()} ETH`}</Text>
+                </View>
+              </View>
+              <View style={styles.bottomBarRight}>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => {}}
+                  style={styles.button}>
+                  <Text style={styles.buttonText}>판매자와 대화</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.content}>
-              <Text
-                style={
-                  styles.contentText
-                }>{`게시글의 본문이 들어갈 자리입니다`}</Text>
-            </View>
-            <View style={styles.contentInfo}>
-              <Ionicons
-                name="chatbubbles-outline"
-                style={styles.contentInfoText}
-              />
-              <Text style={styles.contentInfoText}>{`${data.chats}`}</Text>
-              <Text style={styles.contentInfoText}>·</Text>
-              <Ionicons name="heart-outline" style={styles.contentInfoText} />
-              <Text style={styles.contentInfoText}>{`${data.likes}`}</Text>
-              <Text style={styles.contentInfoText}>·</Text>
-              <Ionicons name="eye-outline" style={styles.contentInfoText} />
-              <Text style={styles.contentInfoText}>{`${1}`}</Text>
-            </View>
-          </View>
-
-          {/* <Divider /> */}
-        </View>
-      </ScrollView>
-      <View style={styles.bottomBarContainer}>
-        <View style={styles.bottomBar}>
-          <View style={styles.bottomBarLeft}>
-            <TouchableOpacity
-              activeOpacity={0.9}
-              onPress={onLikePress}
-              style={styles.iconWrapper}>
-              {isLike ? (
-                <Ionicons name="heart" size={32} color="#f29886" />
-              ) : (
-                <Ionicons name="heart-outline" size={32} color="#c0c0c0" />
-              )}
-            </TouchableOpacity>
-            <View style={styles.priceWrapper}>
-              <Text style={[styles.priceText]}>{`${numberWithCommas(
-                data.price,
-              )} ₩`}</Text>
-              <Text style={[styles.priceText]}>{`${(
-                (data.price / 1000) *
-                0.00036
-              )
-                .toFixed(6)
-                .toString()} ETH`}</Text>
-            </View>
-          </View>
-          <View style={styles.bottomBarRight}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => {}}
-              style={styles.button}>
-              <Text style={styles.buttonText}>판매자와 대화</Text>
-            </TouchableOpacity>
           </View>
         </View>
-      </View>
+      ) : (
+        <View>
+          <Text>no data</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -297,23 +327,22 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
   },
   bottomBarLeft: {
-    flex: 1,
     flexDirection: 'row',
   },
   iconWrapper: {
-    flex: 1,
     padding: 8,
     borderWidth: 1,
     borderColor: PALETTE.grey,
     borderRadius: 4,
-    marginLeft: 10,
   },
   priceWrapper: {
-    flex: 2,
     justifyContent: 'center',
     alignItems: 'flex-end',
+    marginLeft: 16,
   },
   priceText: {
     fontSize: 16,
@@ -321,10 +350,8 @@ const styles = StyleSheet.create({
     marginVertical: 2,
   },
   bottomBarRight: {
-    flex: 1,
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
   },
   button: {
     padding: 12,

@@ -1,23 +1,59 @@
-import React, { useLayoutEffect } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-} from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { FlatList, StyleSheet, View, TouchableOpacity } from 'react-native';
 import HeaderSide from '../../../components/HeaderSide';
 import HeaderText from '../../../components/HeaderText';
 import PressableIcon from '../../../components/PressableIcon';
-import { IFeedItem } from '../../../types';
 import { FeedProps } from '../../../types/ScreenProps';
 import FeedItem from '../../../components/List/Item/FeedItem';
-import { dummyData } from '../../../constants';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store/reducers';
+import axios, { AxiosResponse } from 'axios';
+import { API_BASE_URL } from '../../../config';
+
+interface GetAllFeedsRes {
+  result: FeedRes[];
+  total: number;
+}
+
+export interface FeedImg {
+  id: number;
+  url: string;
+}
+
+export interface FeedRes {
+  id: number;
+  title: string;
+  price: number;
+  likes: number;
+  chats: number;
+  location: string;
+  updatedAt: string;
+  postImgs: FeedImg[];
+}
 
 const Feed = ({ navigation }: FeedProps) => {
   const userState = useSelector((state: RootState) => state.user);
+  const [data, setData] = useState<FeedRes[]>([]);
+
+  const getData = async () => {
+    try {
+      const res: AxiosResponse<GetAllFeedsRes> = await axios.get(
+        `${API_BASE_URL}/posts/feed`,
+      );
+      if (res.status === 200) {
+        // 성공
+        console.log(res.data.result);
+        setData(res.data.result);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: '',
@@ -51,15 +87,15 @@ const Feed = ({ navigation }: FeedProps) => {
     });
   }, [navigation, userState.location.area3]);
 
-  const onSelect = (data: IFeedItem) => {
-    navigation.navigate('Post', { post: data });
+  const onSelect = (id: number) => {
+    navigation.navigate('Post', { id: id });
   };
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={dummyData}
-        keyExtractor={item => item.id}
+        data={data}
+        keyExtractor={item => item.id.toString()}
         renderItem={({ item }) => <FeedItem data={item} onClick={onSelect} />}
         scrollIndicatorInsets={{ right: 1 }}
       />

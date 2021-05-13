@@ -3,4 +3,5 @@ export const IMAGES = {
   defaultUserImage: require('../../assets/defaultUserImage.png'),
   ethLogo: require('../../assets/ethLogo.png'),
   appLogo: require('../../assets/appLogo.png'),
+  appLogo2: require('../../assets/appLogo2.png'),
 };

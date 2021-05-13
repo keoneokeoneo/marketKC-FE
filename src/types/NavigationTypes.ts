@@ -27,7 +27,7 @@ export type MainParamList = {
 
 export type HomeParamList = {
   Feed: undefined;
-  Post: { post: IFeedItem };
+  Post: { id: number };
   Search: undefined;
   SetCategory: undefined;
   SetLocation: undefined;

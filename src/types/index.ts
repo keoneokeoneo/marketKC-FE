@@ -26,6 +26,13 @@ export interface ImagePickerRes {
   type: 'image';
 }
 
+export interface LoadedImage {
+  id: string;
+  path: string;
+  mime: 'image/png' | 'image/heic' | 'image/jpeg';
+  filename: string;
+}
+
 export interface Location {
   long: number;
   lat: number;
@@ -34,7 +41,7 @@ export interface Location {
   area3: string;
 }
 
-export type User = {
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -42,4 +49,26 @@ export type User = {
   walletAddr: string;
   createdAt: Date;
   updatedAt: Date;
-};
+}
+
+export interface S3Image {
+  id: number;
+  url: string;
+}
+
+export interface PostingData {
+  title: string;
+  content: string;
+  category: Category;
+  price: number;
+  images: LoadedImage[];
+}
+
+export interface UploadForm {
+  title: string;
+  content: string;
+  price: number;
+  categoryID: number;
+  userID: string;
+  location: string;
+}

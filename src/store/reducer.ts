@@ -1,14 +1,16 @@
 import { combineReducers } from 'redux';
-import { authReducer } from './authReducer';
-import { categoryReducer } from './categoryReducer';
-import { postingReducer } from './postingReducer';
-import { userReducer } from './userReducer';
+import { postReducer } from './post/reducer';
+import { authReducer } from './auth/reducer';
+import { categoryReducer } from './category';
+import { postingReducer } from './posting/reducer';
+import { userReducer } from './user/reducer';
 
 const rootReducer = combineReducers({
   auth: authReducer,
   posting: postingReducer,
   user: userReducer,
   categories: categoryReducer,
+  post: postReducer,
 });
 
 export default rootReducer;

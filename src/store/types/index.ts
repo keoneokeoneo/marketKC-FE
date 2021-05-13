@@ -1,4 +1,5 @@
 import { Category, ImagePickerRes, Location, User } from '../../types';
+import { PostRes } from '../../utils/api/post/types';
 
 export type Status = {
   stage: 'INIT' | 'FETCHING' | 'SUCCESS' | 'FAILURE';
@@ -6,6 +7,7 @@ export type Status = {
   message: string;
 };
 
+/* 리듀서 타입 정의 */
 export type AuthState = {
   login: Status;
   register: Status;
@@ -46,6 +48,14 @@ export type CategoryState = {
   status: Status;
   categories: Category[];
 };
+
+// 관리할 상태 타입
+export type PostState = {
+  post: PostRes | null; // 게시글 데이터
+  error: Error | null; // API에서 내려온 에러 메세지
+  loading: boolean; // 로딩 여부 판별
+};
+/* */
 
 export type UploadPostForm = {
   title: string;
