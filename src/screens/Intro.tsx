@@ -67,6 +67,10 @@ const Intro = ({ navigation }: IntroProps) => {
   }, []);
 
   useEffect(() => {
+    if (authState.validation.error) {
+      console.log('유효하지 않은 데이터. 로그인으로');
+      navigation.navigate('Landing', { screen: 'SignIn' });
+    }
     if (!loading && authState.validation.data) {
       console.log('인증성공');
       dispatch(loadUserThunk(authState.validation.data.id));
@@ -76,11 +80,8 @@ const Intro = ({ navigation }: IntroProps) => {
         screen: 'Home',
         params: { screen: 'Feed' },
       });
-    } else if (!loading && !authState.validation.data) {
-      console.log('유효하지 않은 데이터. 로그인으로');
-      navigation.navigate('Landing', { screen: 'SignIn' });
     }
-  }, [authState.validation.data]);
+  }, [authState.validation.data, authState.validation.error]);
 
   return (
     <View style={styles.container}>

@@ -1,6 +1,7 @@
-import React, { useEffect, useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
   ActionSheetIOS,
+  FlatList,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -22,16 +23,23 @@ import { useKeyboard } from '../../../utils/useKeyboard';
 import { IMAGES } from '../../../constants/image';
 import io from 'socket.io-client';
 import ChatMsg from '../../../components/ChatMsg';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store/reducer';
+import { socket } from '../../../../App';
 
-const socket = io.connect('http://localhost:31', {
-  jsonp: false,
-  transports: ['websocket'],
-});
+export interface MsgRes {
+  time: string;
+  msg: string;
+  senderID: string;
+}
 
 const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
   const { control, handleSubmit, watch, reset } = useForm<{ msg: string }>();
+  const [messages, setMessages] = useState<MsgRes[]>([]);
   const [keyboardHeight] = useKeyboard();
   const msgWatch = watch('msg');
+  const userState = useSelector((state: RootState) => state.user);
+  //const uri = 'http://3.36.111.68:3001/market-kc-chat';
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -57,11 +65,23 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
   }, [navigation]);
 
   const onSubmit = (data: { msg: string }) => {
-    socket.emit('test', data.msg, (res: any) => {
-      console.log(res);
+    const req = {
+      msg: data.msg,
+      userID: userState.user.data.id,
+    };
+    socket.emit('msgToServer', req, (res: MsgRes) => {
       reset();
+      setMessages(prev => [...prev, res]);
     });
   };
+
+  useEffect(() => {
+    socket.on('msgToClient', (res: MsgRes) => {
+      console.log('received data : ', res);
+      if (res.senderID !== userState.user.data.id)
+        setMessages(prev => [...prev, res]);
+    });
+  }, []);
 
   const openActionSheet = () => {
     ActionSheetIOS.showActionSheetWithOptions(
@@ -156,24 +176,18 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
                 }}>{`작성한\n후기 보기`}</Text>
             </TouchableOpacity> */}
           </TouchableOpacity>
-          <ScrollView style={styles.content}>
-            <ChatMsg isMe={true} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={false} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={false} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={true} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={false} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={true} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={true} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={false} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={true} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={false} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={false} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={true} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={false} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={true} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={true} msg="Text 메세지입니다" date="오후 7:32" />
-            <ChatMsg isMe={false} msg="Text 메세지입니다" date="오후 7:32" />
-          </ScrollView>
+          <FlatList
+            data={messages}
+            contentContainerStyle={{ backgroundColor: 'white' }}
+            renderItem={({ item }) => (
+              <ChatMsg
+                isMe={item.senderID === userState.user.data.id}
+                msg={item.msg}
+                date={item.time}
+              />
+            )}
+            keyExtractor={(item, index) => index.toString()}
+          />
           <View
             style={[
               styles.bottom,
@@ -229,7 +243,7 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgb(235,235,235)',
+    backgroundColor: 'white',
   },
   header: {
     backgroundColor: 'white',
@@ -243,6 +257,7 @@ const styles = StyleSheet.create({
   bottom: {
     justifyContent: 'flex-end',
     paddingBottom: 24,
+    backgroundColor: 'rgb(235,235,235)',
   },
   bottomContainer: {
     flexDirection: 'row',

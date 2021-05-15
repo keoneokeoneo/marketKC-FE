@@ -157,6 +157,8 @@ const MainNav = () => {
             tabBarVisible: (route => {
               const routeName = getFocusedRouteNameFromRoute(route) ?? '';
               switch (routeName) {
+                case 'ModifyProfile':
+                  return false;
                 default:
                   return true;
               }

@@ -34,6 +34,7 @@ export const validateTokenThunk = (
         dispatch(initError('유효하지 않은 정보입니다'));
       }
     } catch (e) {
+      console.log(Object.values(e), e.status);
       if (axios.isAxiosError(e) && e.response) dispatch(initError('아 몰랑'));
       else {
         dispatch(initError('알수없는에러'));

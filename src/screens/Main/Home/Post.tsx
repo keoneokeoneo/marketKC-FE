@@ -5,6 +5,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  Animated,
   Dimensions,
   Image,
   NativeScrollEvent,
@@ -24,7 +25,16 @@ import { RootState } from '../../../store/reducer';
 import { getPostThunk } from '../../../store/post/thunk';
 import { PostProps } from '../../../types/ScreenProps';
 import { numberWithCommas } from '../../../utils';
+import { SliderBox } from 'react-native-image-slider-box';
+import io from 'socket.io-client';
+import { socket } from '../../../../App';
+import Toast from 'react-native-simple-toast';
 
+interface SocketReq {
+  postUserID: string;
+  userID: string;
+  postID: number;
+}
 const eth = 2.1e-7;
 const Post = ({ navigation, route }: PostProps) => {
   const [headerTransparent, setHeaderTranspaernt] = useState(true);
@@ -34,6 +44,7 @@ const Post = ({ navigation, route }: PostProps) => {
   const postID = route.params.id;
   const dispatch = useDispatch();
   const postState = useSelector((state: RootState) => state.post.post);
+  const userState = useSelector((state: RootState) => state.user);
 
   const getData = async () => {
     dispatch(getPostThunk(postID));
@@ -41,6 +52,19 @@ const Post = ({ navigation, route }: PostProps) => {
 
   const onLikePress = () => {
     setIsLike(prev => !prev);
+  };
+
+  const createChat = () => {
+    socket.emit('test', 'fucku');
+    if (postState.data) {
+      const data: SocketReq = {
+        postID: postState.data.id,
+        postUserID: postState.data.user.id,
+        userID: userState.user.data.id,
+      };
+      console.log(data);
+      socket.emit('roomCreationRequest', data, (res: any) => console.log(res));
+    }
   };
 
   useLayoutEffect(() => {
@@ -88,21 +112,11 @@ const Post = ({ navigation, route }: PostProps) => {
             onScroll={onScroll}
             scrollEventThrottle={16}>
             <View style={{ width: '100%', height: sliderHeight }}>
-              {/* <ImageSlider
-            images={images}
-            sliderHeight={sliderHeight}
-            sliderWidth={windowWidth}
-            indicatorActiveColor="#fff"
-            indicatorInactiveColor="#808080"
-            onImagePress={() => {}}
-          /> */}
-              <Image
-                source={
-                  postState.data.postImgs.length > 0
-                    ? { uri: postState.data.postImgs[0].url }
-                    : IMAGES.defaultImage
-                }
-                style={{ width: '100%', height: '100%' }}
+              <SliderBox
+                images={postState.data.postImgs.map(img => {
+                  return img.url;
+                })}
+                sliderBoxHeight={sliderHeight}
               />
             </View>
             <View style={styles.container}>
@@ -233,7 +247,7 @@ const Post = ({ navigation, route }: PostProps) => {
               <View style={styles.bottomBarRight}>
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => {}}
+                  onPress={createChat}
                   style={styles.button}>
                   <Text style={styles.buttonText}>판매자와 대화</Text>
                 </TouchableOpacity>

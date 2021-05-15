@@ -34,9 +34,7 @@ const MyPage = ({ navigation }: MyPageProps) => {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ backgroundColor: 'rgb(216,216,216)' }}>
+      <ScrollView style={{ flex: 1 }}>
         <View style={styles.paper}>
           <View style={styles.profileContainer}>
             <TouchableOpacity
@@ -57,7 +55,10 @@ const MyPage = ({ navigation }: MyPageProps) => {
               } #${userState.user.data.id.split('-')[0]}`}</Text>
             </View>
           </View>
-          <TouchableOpacity activeOpacity={1} style={styles.profileBtn}>
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.profileBtn}
+            onPress={() => navigation.navigate('ModifyProfile')}>
             <Text style={styles.profileBtnText}>프로필 보기</Text>
           </TouchableOpacity>
           <View style={styles.profileList}>

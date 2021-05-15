@@ -1,4 +1,5 @@
 import Geolocation from 'react-native-geolocation-service';
+import { checkMultiple, PERMISSIONS, request } from 'react-native-permissions';
 
 export const regex_onlyNumber = /[^0-9]/g;
 export const regex_firstZero = /(^0+)/;
@@ -44,4 +45,38 @@ export const getDistance = (
   const result = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   return result;
+};
+
+export const getLibraryPermission = async () => {
+  const checkPermissionsResult = await checkMultiple([
+    PERMISSIONS.IOS.CAMERA,
+    PERMISSIONS.IOS.PHOTO_LIBRARY,
+  ]);
+
+  switch (checkPermissionsResult['ios.permission.PHOTO_LIBRARY']) {
+    case 'granted':
+      break;
+    case 'unavailable':
+      return 'unavailable';
+    case 'blocked':
+      return 'blocked';
+    case 'denied':
+      const requestGalleryPermission = await request(
+        PERMISSIONS.IOS.PHOTO_LIBRARY,
+      );
+      if (requestGalleryPermission === 'granted') break;
+      else return 'blocked';
+  }
+  switch (checkPermissionsResult['ios.permission.CAMERA']) {
+    case 'granted':
+      return 'granted';
+    case 'unavailable':
+      return 'unavailable';
+    case 'blocked':
+      return 'blocked';
+    case 'denied':
+      const requestCameraPermission = await request(PERMISSIONS.IOS.CAMERA);
+      if (requestCameraPermission === 'granted') return 'granted';
+      else return 'blocked';
+  }
 };

@@ -64,6 +64,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     control,
     handleSubmit,
     getValues,
+    clearErrors,
     formState: { errors },
   } = useForm<FormInput>({
     resolver: yupResolver(PostingSchema),
@@ -199,6 +200,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
 
   useFocusEffect(
     useCallback(() => {
+      clearErrors();
       setSelectedAssets(postingState.images.data);
       setValue('title', postingState.form.data.title);
       setValue('content', postingState.form.data.content);
@@ -211,7 +213,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
         setValue('priceN', postingState.form.data.price);
       }
       setValue('img', postingState.images.data.length);
-    }, [postingState, setValue]),
+    }, [postingState]),
   );
 
   return (
@@ -340,7 +342,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
                     style={styles.textInput}
                     value={value}
                     editable={
-                      postingState.form.category.name === '무료나눔'
+                      postingState.form.data.category.name === '무료나눔'
                         ? false
                         : true
                     }

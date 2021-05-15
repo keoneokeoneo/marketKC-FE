@@ -51,7 +51,7 @@ export type ProfileParamList = {
   Sales: undefined;
   Purchases: undefined;
   Wallet: undefined;
-  ProfileModification: undefined;
+  ModifyProfile: undefined;
   UserProfile: undefined;
   MyPage: undefined;
   LikeList: undefined;

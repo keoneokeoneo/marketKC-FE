@@ -42,3 +42,13 @@ export const PostingSchema = yup.object().shape({
   priceS: yup.string(),
   img: yup.number().moreThan(0, '최소 한장 이상의 사진을 첨부해주세요'),
 });
+
+export const ProfileSchema = yup.object().shape({
+  name: yup
+    .string()
+    .required('닉네임을 입력해주세요')
+    .matches(
+      /^[가-힣a-zA-Z0-9]+$/,
+      '닉네임은 띄어쓰기 없이 한글,영문,숫자만 가능해요',
+    ),
+});

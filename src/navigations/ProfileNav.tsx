@@ -12,6 +12,7 @@ import { PALETTE } from '../constants/color';
 import HeaderSide from '../components/HeaderSide';
 import PressableIcon from '../components/PressableIcon';
 import LikeList from '../screens/Main/Profile/LikeList';
+import ModifyProfile from '../screens/Main/Profile/ModifyProfile';
 
 const Tab = createMaterialTopTabNavigator<TradeListParamList>();
 interface NavProp {
@@ -71,6 +72,7 @@ const ProfileNav = () => {
   return (
     <Stack.Navigator initialRouteName="MyPage">
       <Stack.Screen name="MyPage" component={MyPage} />
+      <Stack.Screen name="ModifyProfile" component={ModifyProfile} />
       <Stack.Screen name="TradeList" component={TradeList} />
       <Stack.Screen name="LikeList" component={LikeList} />
     </Stack.Navigator>

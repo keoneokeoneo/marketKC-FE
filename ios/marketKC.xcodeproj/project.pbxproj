@@ -13,6 +13,7 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		20E58FCE6F6456B7BF22AE4D /* libPods-marketKC-marketKCTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4204D3FCA07D8CF6409E9861 /* libPods-marketKC-marketKCTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		961E9081264FC8E900BCB64F /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 961E9080264FC8E900BCB64F /* AudioToolbox.framework */; };
 		96794D792641047400F06016 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96794D782641047400F06016 /* File.swift */; };
 		F6672B7A4FC3ADBC41920993 /* libPods-marketKC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 40FDE9EC5D39DB2755E17E50 /* libPods-marketKC.a */; };
 /* End PBXBuildFile section */
@@ -43,6 +44,8 @@
 		4204D3FCA07D8CF6409E9861 /* libPods-marketKC-marketKCTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-marketKC-marketKCTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C1333CFC3467366164978CE /* Pods-marketKC-marketKCTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-marketKC-marketKCTests.release.xcconfig"; path = "Target Support Files/Pods-marketKC-marketKCTests/Pods-marketKC-marketKCTests.release.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = marketKC/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		961E907D264FC67100BCB64F /* marketKC.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = marketKC.entitlements; path = marketKC/marketKC.entitlements; sourceTree = "<group>"; };
+		961E9080264FC8E900BCB64F /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		96722265261D6DE40045BEB6 /* AntDesign.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = AntDesign.ttf; sourceTree = "<group>"; };
 		96722266261D6DE40045BEB6 /* Feather.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Feather.ttf; sourceTree = "<group>"; };
 		96722267261D6DE40045BEB6 /* Fontisto.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Fontisto.ttf; sourceTree = "<group>"; };
@@ -79,6 +82,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F6672B7A4FC3ADBC41920993 /* libPods-marketKC.a in Frameworks */,
+				961E9081264FC8E900BCB64F /* AudioToolbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,6 +109,7 @@
 		13B07FAE1A68108700A75B9A /* marketKC */ = {
 			isa = PBXGroup;
 			children = (
+				961E907D264FC67100BCB64F /* marketKC.entitlements */,
 				96722264261D6D9A0045BEB6 /* Fonts */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -128,6 +133,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				961E9080264FC8E900BCB64F /* AudioToolbox.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				40FDE9EC5D39DB2755E17E50 /* libPods-marketKC.a */,
 				4204D3FCA07D8CF6409E9861 /* libPods-marketKC-marketKCTests.a */,
@@ -543,6 +549,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = marketKC/marketKC.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = MV9FMKBQ7N;
 				ENABLE_BITCODE = NO;
@@ -572,6 +579,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = marketKC/marketKC.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = MV9FMKBQ7N;
 				HEADER_SEARCH_PATHS = "$(inherited)";

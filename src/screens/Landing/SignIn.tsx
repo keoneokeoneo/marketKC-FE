@@ -85,7 +85,7 @@ const SignIn = ({ navigation }: SignInProps) => {
   };
 
   useEffect(() => {
-    if (authState.login.error) {
+    if (authState.login.error && !authState.validation.data) {
       setModalOpen(true);
     } else {
       if (authState.login.data && authState.validation.data) {

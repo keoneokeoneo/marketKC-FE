@@ -96,16 +96,6 @@ export interface UploadPostProps {
   >;
 }
 
-export interface ImagePickerProps {
-  navigation: CompositeNavigationProp<
-    StackNavigationProp<PostingParamList, 'ImagePicker'>,
-    CompositeNavigationProp<
-      BottomTabNavigationProp<MainParamList>,
-      StackNavigationProp<AppNavParamList>
-    >
-  >;
-}
-
 export interface GalleryPermissionProps {
   navigation: CompositeNavigationProp<
     StackNavigationProp<PostingParamList, 'GalleryPermission'>,
@@ -152,6 +142,16 @@ export interface ChatRoomProps {
 export interface MyPageProps {
   navigation: CompositeNavigationProp<
     StackNavigationProp<ProfileParamList, 'MyPage'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
+export interface ModifyProfileProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<ProfileParamList, 'ModifyProfile'>,
     CompositeNavigationProp<
       BottomTabNavigationProp<MainParamList>,
       StackNavigationProp<AppNavParamList>
