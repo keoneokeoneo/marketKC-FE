@@ -12,9 +12,9 @@ import { PALETTE } from '../../../constants/color';
 import { SetCategoryProps } from '../../../types/ScreenProps';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../store/reducers';
-import { requestUpdateCategories } from '../../../store/actions/userAction';
 import Toast from 'react-native-simple-toast';
+import { RootState } from '../../../store/reducer';
+import { updateUserCategoriesThunk } from '../../../store/user/thunk';
 
 interface SelectedCategory {
   id: number;
@@ -55,7 +55,7 @@ const SetCategory = ({ navigation }: SetCategoryProps) => {
 
   useEffect(() => {
     setCategories(
-      categoryState.categories.map(category => {
+      categoryState.data.map(category => {
         return {
           ...category,
           isSelected:
@@ -64,7 +64,7 @@ const SetCategory = ({ navigation }: SetCategoryProps) => {
         };
       }),
     );
-  }, [categoryState.categories, userState.categories.ids]);
+  }, [categoryState.data, userState.categories.ids]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -95,8 +95,8 @@ const SetCategory = ({ navigation }: SetCategoryProps) => {
     // 1이면 추가, 0이면 제거
     const flag = userState.categories.ids.find(el => el === id) === undefined;
     dispatch(
-      requestUpdateCategories(
-        userState.user.id,
+      updateUserCategoriesThunk(
+        userState.user.data.id,
         flag
           ? userState.categories.ids.concat(id)
           : userState.categories.ids.filter(el => el !== id),

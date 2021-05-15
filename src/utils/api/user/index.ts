@@ -4,9 +4,10 @@ import {
   NAVER_MAP_CLIENT_ID,
   NAVER_MAP_CLIENT_SECRET,
 } from '../../../config';
+import { LoadUserRes } from './types';
 
-const loadUserByID = async <T>(id: string) => {
-  return await axios.get<T>(`${API_BASE_URL}/users/${id}`);
+const loadUserByID = async (id: string) => {
+  return await axios.get<LoadUserRes>(`${API_BASE_URL}/users/${id}`);
 };
 
 const updateUserCategories = async (id: string, categories: number[]) => {

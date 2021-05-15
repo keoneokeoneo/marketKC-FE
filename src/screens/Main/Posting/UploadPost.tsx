@@ -30,20 +30,22 @@ import { SelectImgButton } from '../../../components/Button/SelectImgButton';
 import SelectedImgButton from '../../../components/Button/SelectedImgButton';
 import { checkMultiple, PERMISSIONS, request } from 'react-native-permissions';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../store/reducers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { PostingSchema } from '../../../constants/schema';
 import MultipleImagePicker from '@baronha/react-native-multiple-image-picker';
-import { ImagePickerRes } from '../../../types';
-import { PostingData } from '../../../store/actions/postingActionTypes';
-import {
-  requestUpload,
-  requestUploadImages,
-  requestUploadPost,
-  saveToPosting,
-} from '../../../store/actions/postingAction';
 import Toast from 'react-native-simple-toast';
-import { UploadPostData, UploadPostForm } from '../../../store/types';
+import { RootState } from '../../../store/reducer';
+import {
+  LoadedImage,
+  PostingData,
+  UploadForm,
+  ImagePickerRes,
+} from '../../../types';
+import { savePosting } from '../../../store/posting/action';
+import {
+  uploadImagesThunk,
+  uploadPostThunk,
+} from '../../../store/posting/thunk';
 
 interface FormInput {
   title: string;
@@ -69,14 +71,14 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   const dispatch = useDispatch();
   const postingState = useSelector((state: RootState) => state.posting);
   const [keyboardHeight] = useKeyboard();
-  const [selectedAssets, setSelectedAssets] = useState<ImagePickerRes[]>(
-    postingState.files.imgs,
+  const [selectedAssets, setSelectedAssets] = useState<LoadedImage[]>(
+    postingState.images.data,
   );
 
   const save = () => {
     const { content, priceN, title, categoryID, categoryName } = getValues();
     const data: PostingData = {
-      imgs: selectedAssets,
+      images: selectedAssets,
       category: {
         id: categoryID,
         name: categoryName,
@@ -85,7 +87,7 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
       price: priceN,
       title: title,
     };
-    dispatch(saveToPosting(data));
+    dispatch(savePosting(data));
   };
 
   const onClose = () => {
@@ -97,20 +99,18 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   };
 
   const onSubmit = async (data: FormInput) => {
-    const req: UploadPostForm = {
+    const req: UploadForm = {
       title: data.title,
       content: data.content,
       categoryID: data.categoryID,
       price: data.priceN,
     };
-    await dispatch(requestUploadImages(selectedAssets));
-    await dispatch(requestUploadPost(req));
+    await dispatch(uploadImagesThunk(selectedAssets));
+    await dispatch(uploadPostThunk(req));
   };
 
   const onRemove = useCallback((id: string) => {
-    setSelectedAssets(prev =>
-      prev.filter(asset => asset.localIdentifier !== id),
-    );
+    setSelectedAssets(prev => prev.filter(asset => asset.id !== id));
   }, []);
 
   const getPermission = async () => {
@@ -164,7 +164,14 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
       maximumMessageTitle: '알림',
       selectedAssets: selectedAssets,
     });
-    setSelectedAssets(res);
+    setSelectedAssets(
+      res.map(r => ({
+        id: r.localIdentifier,
+        filename: r.filename,
+        mime: r.mime,
+        path: r.path,
+      })),
+    );
     setValue('img', res.length, { shouldValidate: true });
   };
 
@@ -181,9 +188,8 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   }, [navigation]);
 
   useEffect(() => {
-    if (postingState.form.status.stage === 'SUCCESS')
-      navigation.navigate('Home', { screen: 'Feed' });
-  }, [postingState.form.status.stage]);
+    if (postingState.success) navigation.navigate('Home', { screen: 'Feed' });
+  }, [postingState.success]);
 
   useEffect(() => {
     register('categoryID');
@@ -193,18 +199,18 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
 
   useFocusEffect(
     useCallback(() => {
-      setSelectedAssets(postingState.files.imgs);
-      setValue('title', postingState.form.title);
-      setValue('content', postingState.form.content);
-      setValue('categoryID', postingState.form.category.id);
-      setValue('categoryName', postingState.form.category.name);
-      if (postingState.form.category.name === '무료나눔') {
+      setSelectedAssets(postingState.images.data);
+      setValue('title', postingState.form.data.title);
+      setValue('content', postingState.form.data.content);
+      setValue('categoryID', postingState.form.data.category.id);
+      setValue('categoryName', postingState.form.data.category.name);
+      if (postingState.form.data.category.name === '무료나눔') {
         setValue('priceN', 0);
         setValue('priceS', '무료나눔');
       } else {
-        setValue('priceN', postingState.form.price);
+        setValue('priceN', postingState.form.data.price);
       }
-      setValue('img', postingState.files.imgs.length);
+      setValue('img', postingState.images.data.length);
     }, [postingState, setValue]),
   );
 

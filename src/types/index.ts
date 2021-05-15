@@ -69,6 +69,4 @@ export interface UploadForm {
   content: string;
   price: number;
   categoryID: number;
-  userID: string;
-  location: string;
 }

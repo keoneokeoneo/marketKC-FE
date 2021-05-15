@@ -2,17 +2,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AxiosError } from 'axios';
 import {
   AUTH_INIT,
+  AUTH_INITIATE,
   AUTH_INIT_ERROR,
   AUTH_INIT_SUCCESS,
   AUTH_LOGIN,
   AUTH_LOGIN_ERROR,
   AUTH_LOGIN_SUCCESS,
+  AUTH_LOGOUT,
   AUTH_REGISTER,
   AUTH_REGISTER_ERROR,
   AUTH_REGISTER_SUCCESS,
 } from './types';
 
 /* ---------------------- 액션 생성 함수 ---------------------- */
+export const initiate = () => ({ type: AUTH_INITIATE });
+
 export const init = () => ({ type: AUTH_INIT });
 export const initSuccess = (id: string, token: string) => ({
   type: AUTH_INIT_SUCCESS,
@@ -21,7 +25,7 @@ export const initSuccess = (id: string, token: string) => ({
     token: token,
   },
 });
-export const initError = (error: Error | AxiosError) => ({
+export const initError = (error: string) => ({
   type: AUTH_INIT_ERROR,
   error: error,
 });
@@ -41,10 +45,14 @@ export const loginSuccess = (id: string, token: string) => {
   saveToLS(id, token);
   return {
     type: AUTH_LOGIN_SUCCESS,
-    data: '로그인 성공',
+    message: '로그인 성공',
+    data: {
+      id: id,
+      token: token,
+    },
   };
 };
-export const loginError = (error: Error | AxiosError) => ({
+export const loginError = (error: string) => ({
   type: AUTH_LOGIN_ERROR,
   error: error,
 });
@@ -54,10 +62,23 @@ export const registerSuccess = (message: string) => ({
   type: AUTH_REGISTER_SUCCESS,
   data: message,
 });
-export const registerError = (error: Error | AxiosError) => ({
+export const registerError = (error: string) => ({
   type: AUTH_REGISTER_ERROR,
   error: error,
 });
+
+export const logout = () => {
+  const clear = async () => {
+    try {
+      await AsyncStorage.removeItem('UserData');
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
+  };
+  clear();
+  return { type: AUTH_LOGOUT };
+};
 /* --------------------------------------------------------- */
 
 /* ---------------------- 액션 생성 함수 타입 ---------------------- */
@@ -76,5 +97,10 @@ type AuthRegisterAction =
   | ReturnType<typeof registerSuccess>
   | ReturnType<typeof registerError>;
 
-export type AuthAction = AuthInitAction | AuthLoginAction | AuthRegisterAction;
+export type AuthAction =
+  | AuthInitAction
+  | AuthLoginAction
+  | AuthRegisterAction
+  | ReturnType<typeof initiate>
+  | ReturnType<typeof logout>;
 /* ------------------------------------------------------------ */

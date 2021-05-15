@@ -37,7 +37,7 @@ export type CategoryAction = CategoryLoadAction;
 export type CategoryState = {
   loading: boolean;
   error: Error | AxiosError | null;
-  data: Category[] | null;
+  data: Category[];
 };
 
 export const loadCategoriesThunk = (): ThunkAction<
@@ -63,7 +63,7 @@ export const loadCategoriesThunk = (): ThunkAction<
 const initialState: CategoryState = {
   loading: false,
   error: null,
-  data: null,
+  data: [],
 };
 
 export const categoryReducer = (
@@ -88,5 +88,7 @@ export const categoryReducer = (
         loading: false,
         error: action.error,
       };
+    default:
+      return state;
   }
 };

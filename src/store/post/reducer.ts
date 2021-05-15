@@ -1,4 +1,9 @@
-import { PostState } from './types';
+import {
+  GET_POSTS,
+  GET_POSTS_ERROR,
+  GET_POSTS_SUCCESS,
+  PostState,
+} from './types';
 import { PostAction } from './action';
 import { GET_POST, GET_POST_ERROR, GET_POST_SUCCESS } from './types';
 
@@ -7,6 +12,12 @@ const initialState: PostState = {
     loading: false,
     error: null,
     data: null,
+  },
+  posting: {
+    loading: false,
+    error: null,
+    data: null,
+    total: 0,
   },
 };
 
@@ -17,6 +28,7 @@ export const postReducer = (
   switch (action.type) {
     case GET_POST:
       return {
+        ...state,
         post: {
           ...state.post,
           loading: true,
@@ -24,6 +36,7 @@ export const postReducer = (
       };
     case GET_POST_SUCCESS:
       return {
+        ...state,
         post: {
           ...state.post,
           loading: false,
@@ -32,8 +45,36 @@ export const postReducer = (
       };
     case GET_POST_ERROR:
       return {
+        ...state,
         post: {
           ...state.post,
+          error: action.error,
+          loading: false,
+        },
+      };
+    case GET_POSTS:
+      return {
+        ...state,
+        posting: {
+          ...state.posting,
+          loading: true,
+        },
+      };
+    case GET_POSTS_SUCCESS:
+      return {
+        ...state,
+        posting: {
+          ...state.posting,
+          loading: false,
+          data: action.data,
+          total: action.total,
+        },
+      };
+    case GET_POSTS_ERROR:
+      return {
+        ...state,
+        posting: {
+          ...state.posting,
           error: action.error,
           loading: false,
         },

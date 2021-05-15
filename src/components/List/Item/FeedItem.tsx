@@ -1,16 +1,15 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { IFeedItem } from '../../../types';
 import { numberWithCommas } from '../../../utils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { PALETTE } from '../../../constants/color';
-import { FeedRes } from '../../../screens/Main/Home/Feed';
 import { IMAGES } from '../../../constants/image';
+import { FeedPost } from '../../../utils/api/post/types';
 
 const eth = 2.1e-7;
 
 interface IProps {
-  data: FeedRes;
+  data: FeedPost;
   onClick: (id: number) => void;
 }
 

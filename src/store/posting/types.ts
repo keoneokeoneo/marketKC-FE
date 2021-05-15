@@ -31,6 +31,7 @@ export type POSTING_ACTION_TYPE =
 
 export type PostingState = {
   empty: boolean;
+  success: boolean;
   form: {
     loading: boolean;
     error: Error | AxiosError | null;

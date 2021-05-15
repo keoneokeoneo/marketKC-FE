@@ -20,7 +20,13 @@ import { SignInSchema } from '../../constants/schema';
 import { RootState } from '../../store/reducer';
 import { LoginReq } from '../../utils/api/auth/types';
 import { loginThunk } from '../../store/auth/thunk';
-import { loadUserThunk } from '../../store/user/thunk';
+import {
+  findCurrentLocationThunk,
+  loadUserThunk,
+} from '../../store/user/thunk';
+import { initiate } from '../../store/auth/action';
+import { loadCategoriesThunk } from '../../store/category';
+import Geolocation from 'react-native-geolocation-service';
 
 interface FormInput {
   email: string;
@@ -49,17 +55,51 @@ const SignIn = ({ navigation }: SignInProps) => {
     dispatch(loginThunk(loginData));
   };
 
+  const requestLocationPermission = async () => {
+    try {
+      return await Geolocation.requestAuthorization('whenInUse');
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getLocation = () => {
+    requestLocationPermission().then(res => {
+      if (res === 'granted') {
+        Geolocation.getCurrentPosition(
+          pos => {
+            dispatch(
+              findCurrentLocationThunk(
+                pos.coords.longitude,
+                pos.coords.latitude,
+              ),
+            );
+          },
+          err => {
+            console.log(err);
+          },
+          { enableHighAccuracy: true, timeout: 3600, maximumAge: 3600 },
+        );
+      }
+    });
+  };
+
   useEffect(() => {
     if (authState.login.error) {
       setModalOpen(true);
     } else {
-      dispatch(loadUserThunk(authState.validation.data.id));
-      navigation.navigate('Main', {
-        screen: 'Home',
-        params: { screen: 'Feed' },
-      });
+      if (authState.login.data && authState.validation.data) {
+        dispatch(loadUserThunk(authState.validation.data.id));
+        dispatch(loadCategoriesThunk());
+        getLocation();
+        navigation.navigate('Main', {
+          screen: 'Home',
+          params: { screen: 'Feed' },
+        });
+        dispatch(initiate());
+      }
     }
-  }, [authState.login.error]);
+  }, [authState.login.error, authState.login.data, authState.validation.data]);
 
   return (
     <TouchableWithoutFeedback
@@ -69,7 +109,7 @@ const SignIn = ({ navigation }: SignInProps) => {
         <NoticeModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          content={authState.login.message}
+          content={authState.login.error ? authState.login.error : ''}
         />
         <View style={styles.container}>
           <View style={styles.logoContainer}>
@@ -158,6 +198,7 @@ const SignIn = ({ navigation }: SignInProps) => {
               onPress={() => {
                 navigation.navigate('SignUp');
                 reset();
+                dispatch(initiate());
               }}>
               <Text
                 style={[

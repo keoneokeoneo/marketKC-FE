@@ -1,3 +1,5 @@
+import Geolocation from 'react-native-geolocation-service';
+
 export const regex_onlyNumber = /[^0-9]/g;
 export const regex_firstZero = /(^0+)/;
 
@@ -9,6 +11,14 @@ export const inputFormatter = (input: string): string => {
 
 export const numberWithCommas = (input: number | string) => {
   return input.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
+const requestLocationPermission = async () => {
+  try {
+    return await Geolocation.requestAuthorization('whenInUse');
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 // 두 위경도 사이의 거리 구하기

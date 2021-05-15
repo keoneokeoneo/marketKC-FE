@@ -20,6 +20,7 @@ import { SignUpSchema } from '../../constants/schema';
 import { RootState } from '../../store/reducer';
 import { RegisterReq } from '../../utils/api/auth/types';
 import { registerThunk } from '../../store/auth/thunk';
+import { initiate } from '../../store/auth/action';
 
 interface FormInput {
   name: string;
@@ -48,7 +49,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
     setModalOpen(false);
     if (!authState.register.error) {
       navigation.navigate('SignIn');
-      //dispatch(registerInit());
+      dispatch(initiate());
     }
   };
 
@@ -62,7 +63,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
   };
 
   useEffect(() => {
-    if (authState.register.error || authState.register.data !== '') {
+    if (authState.register.error || authState.register.data) {
       setModalOpen(true);
     }
   }, [authState.register.error, authState.register.data]);
@@ -75,7 +76,13 @@ const SignUp = ({ navigation }: SignUpProps) => {
         <NoticeModal
           isOpen={modalOpen}
           onClose={onClose}
-          content={authState.register.data}
+          content={
+            authState.register.error
+              ? authState.register.error
+              : authState.register.data
+              ? authState.register.data
+              : ''
+          }
         />
         <View style={styles.container}>
           <Text style={styles.logo}>Join Us!</Text>
@@ -251,7 +258,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('SignIn');
-              //dispatch(registerInit());
+              dispatch(initiate());
             }}
             style={[
               styles.button,

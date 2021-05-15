@@ -18,8 +18,8 @@ import { PALETTE } from '../constants/color';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Modal2 from '../components/Modal/Modal2';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../store/reducers';
-import { initPosting } from '../store/actions/postingAction';
+import { RootState } from '../store/reducer';
+import { initPosting } from '../store/posting/action';
 
 const Tab = createBottomTabNavigator<MainParamList>();
 
@@ -27,7 +27,7 @@ const MainNav = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
-  const postingStatus = useSelector((state: RootState) => state.posting.status);
+  const postingStatus = useSelector((state: RootState) => state.posting);
   const onSelect = (flag: boolean) => {
     setOpen(false);
     // true => 이어서 작성
@@ -107,7 +107,7 @@ const MainNav = () => {
           listeners={{
             tabPress: e => {
               e.preventDefault();
-              if (postingStatus === 'Saved') setOpen(true);
+              if (!postingStatus.empty) setOpen(true);
               else navigation.navigate('Posting');
             },
           }}

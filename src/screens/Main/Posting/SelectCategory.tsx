@@ -12,17 +12,15 @@ import { PALETTE } from '../../../constants/color';
 import { SelectCategoryProps } from '../../../types/ScreenProps';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../store/reducers';
-import { selectCategory } from '../../../store/actions/postingAction';
 import { Category } from '../../../types';
+import { RootState } from '../../../store/reducer';
+import { selectCategory } from '../../../store/posting/action';
 
 const SelectCategory = ({ navigation }: SelectCategoryProps) => {
   const currentCategory = useSelector(
-    (state: RootState) => state.posting.form.category,
+    (state: RootState) => state.posting.form.data.category,
   );
-  const categories = useSelector(
-    (state: RootState) => state.categories.categories,
-  );
+  const categories = useSelector((state: RootState) => state.categories.data);
   const dispatch = useDispatch();
 
   const onPress = (category: Category) => {

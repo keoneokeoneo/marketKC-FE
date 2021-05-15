@@ -14,6 +14,7 @@ import {
 
 const initialState: PostingState = {
   empty: true,
+  success: false,
   form: {
     loading: false,
     error: null,
@@ -44,6 +45,7 @@ export const postingReducer = (
       return initialState;
     case POSTING_SAVE:
       return {
+        ...state,
         empty: false,
         form: {
           ...state.form,
@@ -116,6 +118,7 @@ export const postingReducer = (
     case POSTING_UPLOAD_POST_ERROR:
       return {
         ...state,
+        success: true,
         form: {
           ...state.form,
           loading: false,

@@ -7,17 +7,19 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import HeaderSide from '../../../components/HeaderSide';
 import HeaderText from '../../../components/HeaderText';
-import { RootState } from '../../../store/reducers';
 import { MyPageProps } from '../../../types/ScreenProps';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { PALETTE } from '../../../constants/color';
 import TextChip from '../../../components/Button/TextChip';
+import { RootState } from '../../../store/reducer';
+import { logout } from '../../../store/auth/action';
 
 const MyPage = ({ navigation }: MyPageProps) => {
   const userState = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch();
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -41,7 +43,7 @@ const MyPage = ({ navigation }: MyPageProps) => {
               style={styles.profileImgContainer}
               activeOpacity={1}>
               <Image
-                source={{ uri: userState.user.profileImgUrl }}
+                source={{ uri: userState.user.data.profileImgUrl }}
                 style={styles.profileImg}
               />
               <View style={styles.profileImgIcon}>
@@ -49,10 +51,10 @@ const MyPage = ({ navigation }: MyPageProps) => {
               </View>
             </TouchableOpacity>
             <View style={styles.profileInfoContainer}>
-              <Text style={styles.profileName}>{userState.user.name}</Text>
+              <Text style={styles.profileName}>{userState.user.data.name}</Text>
               <Text style={styles.profileSubInfo}>{`${
-                userState.location.area3
-              } #${userState.user.id.split('-')[0]}`}</Text>
+                userState.location.data.area3
+              } #${userState.user.data.id.split('-')[0]}`}</Text>
             </View>
           </View>
           <TouchableOpacity activeOpacity={1} style={styles.profileBtn}>
@@ -88,7 +90,7 @@ const MyPage = ({ navigation }: MyPageProps) => {
               <Text style={styles.menuListItemText}>아이디(이메일)</Text>
               <Text
                 style={[styles.menuListItemText, styles.menuListItemSubText]}>
-                {userState.user.email}
+                {userState.user.data.email}
               </Text>
             </View>
           </View>
@@ -98,9 +100,9 @@ const MyPage = ({ navigation }: MyPageProps) => {
               <Text style={styles.menuListItemText}>암호화폐 지갑주소</Text>
               <Text
                 style={[styles.menuListItemText, styles.menuListItemSubText]}>
-                {userState.user.walletAddr === ''
+                {userState.user.data.walletAddr === ''
                   ? '인증되지않음'
-                  : userState.user.walletAddr}
+                  : userState.user.data.walletAddr}
               </Text>
             </View>
             <TextChip text="인증하기" />
@@ -111,16 +113,22 @@ const MyPage = ({ navigation }: MyPageProps) => {
               <Text style={styles.menuListItemText}>암호화폐 잔액</Text>
               <Text
                 style={[styles.menuListItemText, styles.menuListItemSubText]}>
-                {userState.user.walletAddr === ''
+                {userState.user.data.walletAddr === ''
                   ? '인증되지않음'
                   : `ETH    ${0.22}`}
               </Text>
             </View>
           </View>
 
-          <View style={styles.menuListItem}>
+          <TouchableOpacity
+            style={styles.menuListItem}
+            activeOpacity={1}
+            onPress={() => {
+              dispatch(logout());
+              navigation.navigate('Landing', { screen: 'SignIn' });
+            }}>
             <Text style={styles.menuListItemText}>로그아웃</Text>
-          </View>
+          </TouchableOpacity>
           <View style={styles.menuListItem}>
             <Text style={styles.menuListItemText}>회원탈퇴</Text>
           </View>

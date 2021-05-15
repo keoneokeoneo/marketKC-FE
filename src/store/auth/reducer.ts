@@ -1,11 +1,13 @@
 import {
   AuthState,
   AUTH_INIT,
+  AUTH_INITIATE,
   AUTH_INIT_ERROR,
   AUTH_INIT_SUCCESS,
   AUTH_LOGIN,
   AUTH_LOGIN_ERROR,
   AUTH_LOGIN_SUCCESS,
+  AUTH_LOGOUT,
   AUTH_REGISTER,
   AUTH_REGISTER_ERROR,
   AUTH_REGISTER_SUCCESS,
@@ -15,21 +17,18 @@ import { AuthAction } from './action';
 const initialState: AuthState = {
   login: {
     loading: false,
-    data: '',
+    data: null,
     error: null,
   },
   register: {
     loading: false,
-    data: '',
+    data: null,
     error: null,
   },
   validation: {
     loading: false,
     error: null,
-    data: {
-      id: '',
-      token: '',
-    },
+    data: null,
   },
 };
 
@@ -38,6 +37,10 @@ export const authReducer = (
   action: AuthAction,
 ): AuthState => {
   switch (action.type) {
+    case AUTH_INITIATE:
+      return initialState;
+    case AUTH_LOGOUT:
+      return initialState;
     case AUTH_INIT:
       return {
         ...state,
@@ -78,6 +81,10 @@ export const authReducer = (
         login: {
           ...state.login,
           loading: false,
+          data: action.message,
+        },
+        validation: {
+          ...state.validation,
           data: action.data,
         },
       };

@@ -27,7 +27,7 @@ export const uploadPostThunk = (
   return async (dispatch, getState) => {
     dispatch(uploadPost());
     try {
-      if (getState().user.user && getState().user.location) {
+      if (getState().user.user.data && getState().user.location.data) {
         const { area1, area2, area3 } = getState().user.location.data;
         const { id } = getState().user.user.data;
         const { urls } = getState().posting.form.data;
@@ -37,7 +37,7 @@ export const uploadPostThunk = (
           userID: id,
           urls: urls,
         };
-        const res = await postingAPI.uploadPost<string>(req);
+        const res = await postingAPI.uploadPost(req);
 
         if (res.status === 200) {
           dispatch(uploadPostSuccess());

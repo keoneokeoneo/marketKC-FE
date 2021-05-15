@@ -1,57 +1,28 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { FlatList, StyleSheet, View, TouchableOpacity } from 'react-native';
+import {
+  FlatList,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
 import HeaderSide from '../../../components/HeaderSide';
 import HeaderText from '../../../components/HeaderText';
 import PressableIcon from '../../../components/PressableIcon';
 import { FeedProps } from '../../../types/ScreenProps';
 import FeedItem from '../../../components/List/Item/FeedItem';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../store/reducers';
-import axios, { AxiosResponse } from 'axios';
-import { API_BASE_URL } from '../../../config';
-
-interface GetAllFeedsRes {
-  result: FeedRes[];
-  total: number;
-}
-
-export interface FeedImg {
-  id: number;
-  url: string;
-}
-
-export interface FeedRes {
-  id: number;
-  title: string;
-  price: number;
-  likes: number;
-  chats: number;
-  location: string;
-  updatedAt: string;
-  postImgs: FeedImg[];
-}
+import { RootState } from '../../../store/reducer';
+import { getPostsThunk } from '../../../store/post/thunk';
+import Indicator from '../../../components/Indicator';
 
 const Feed = ({ navigation }: FeedProps) => {
   const userState = useSelector((state: RootState) => state.user);
-  const [data, setData] = useState<FeedRes[]>([]);
-
-  const getData = async () => {
-    try {
-      const res: AxiosResponse<GetAllFeedsRes> = await axios.get(
-        `${API_BASE_URL}/posts/feed`,
-      );
-      if (res.status === 200) {
-        // 성공
-        console.log(res.data.result);
-        setData(res.data.result);
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
+  const postState = useSelector((state: RootState) => state.post);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    getData();
+    dispatch(getPostsThunk());
   }, []);
 
   useLayoutEffect(() => {
@@ -62,7 +33,7 @@ const Feed = ({ navigation }: FeedProps) => {
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => navigation.navigate('SetLocation')}>
-            <HeaderText title={userState.location.area3} />
+            <HeaderText title={userState.location.data.area3} />
           </TouchableOpacity>
         </HeaderSide>
       ),
@@ -85,7 +56,7 @@ const Feed = ({ navigation }: FeedProps) => {
         </HeaderSide>
       ),
     });
-  }, [navigation, userState.location.area3]);
+  }, [navigation, userState.location.data]);
 
   const onSelect = (id: number) => {
     navigation.navigate('Post', { id: id });
@@ -93,12 +64,19 @@ const Feed = ({ navigation }: FeedProps) => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={data}
-        keyExtractor={item => item.id.toString()}
-        renderItem={({ item }) => <FeedItem data={item} onClick={onSelect} />}
-        scrollIndicatorInsets={{ right: 1 }}
-      />
+      <Indicator isActive={postState.posting.loading} />
+      {postState.posting.error && !postState.posting.data ? (
+        <View>
+          <Text>{postState.posting.error}</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={postState.posting.data}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({ item }) => <FeedItem data={item} onClick={onSelect} />}
+          scrollIndicatorInsets={{ right: 1 }}
+        />
+      )}
     </View>
   );
 };

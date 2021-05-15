@@ -1,20 +1,24 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../../../config';
+import { LoginRes, RegisterRes, ValidateTokenRes } from './types';
 
-const validateToken = async <T>(token: string) => {
-  return await axios.get<T>(`${API_BASE_URL}/auth/validateUser`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
+const validateToken = async (token: string) => {
+  return await axios.get<ValidateTokenRes>(
+    `${API_BASE_URL}/auth/validateUser`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
+  );
 };
 
-const login = async <T>(data: any) => {
-  return await axios.post<T>(`${API_BASE_URL}/auth/login`, data);
+const login = async (data: any) => {
+  return await axios.post<LoginRes>(`${API_BASE_URL}/auth/login`, data);
 };
 
-const register = async <T>(data: any) => {
-  return await axios.post<T>(`${API_BASE_URL}/aut/register`, data);
+const register = async (data: any) => {
+  return await axios.post<RegisterRes>(`${API_BASE_URL}/auth/register`, data);
 };
 
 export { validateToken, login, register };

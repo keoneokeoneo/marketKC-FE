@@ -13,10 +13,10 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { PALETTE } from '../../constants/color';
 import { IMAGES } from '../../constants/image';
-import { ImagePickerRes } from '../../types';
+import { LoadedImage } from '../../types';
 
 interface Props {
-  data: ImagePickerRes;
+  data: LoadedImage;
   onRemove: (id: string) => void;
 }
 
@@ -70,7 +70,7 @@ const SelectedImgButton = ({ data, onRemove }: Props): JSX.Element => {
       </ImageBackground>
       <TouchableOpacity
         onPress={() => {
-          onRemove(data.localIdentifier);
+          onRemove(data.id);
         }}
         style={styles.closeButton}
         activeOpacity={1}>

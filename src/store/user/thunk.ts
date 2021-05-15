@@ -1,7 +1,6 @@
 import { ThunkAction } from 'redux-thunk';
 import { Location, User } from '../../types';
 import { userAPI } from '../../utils/api';
-import { LoadUserRes } from '../../utils/api/user/types';
 import { RootState } from '../reducer';
 import {
   UserAction,
@@ -23,7 +22,7 @@ export const loadUserThunk = (
   return async dispatch => {
     dispatch(loadUser());
     try {
-      const res = await userAPI.loadUserByID<LoadUserRes>(id);
+      const res = await userAPI.loadUserByID(id);
       if (res.status === 200) {
         const user: User = {
           id: res.data.id,

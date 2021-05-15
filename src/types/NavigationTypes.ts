@@ -1,5 +1,3 @@
-import { IFeedItem } from '.';
-
 export type NestedNavigatorParams<ParamList> = {
   [K in keyof ParamList]: undefined extends ParamList[K]
     ? { screen: K; params?: ParamList[K] }
@@ -40,7 +38,6 @@ export type CryptoParamList = {
 export type PostingParamList = {
   UploadPost: undefined;
   SelectCategory: undefined;
-  ImagePicker: undefined;
   GalleryPermission: undefined;
 };
 

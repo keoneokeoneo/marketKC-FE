@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { PALETTE } from '../constants/color';
@@ -10,10 +10,12 @@ import { RootState } from '../store/reducer';
 import { findCurrentLocationThunk, loadUserThunk } from '../store/user/thunk';
 import { validateTokenThunk } from '../store/auth/thunk';
 import { loadCategoriesThunk } from '../store/category';
+import { ValidateTokenReq } from '../utils/api/auth/types';
 
 const Intro = ({ navigation }: IntroProps) => {
   const dispatch = useDispatch();
   const authState = useSelector((state: RootState) => state.auth);
+  const [loading, setLoading] = useState(true);
 
   const requestLocationPermission = async () => {
     try {
@@ -47,12 +49,12 @@ const Intro = ({ navigation }: IntroProps) => {
   const initState = async () => {
     try {
       const userDataFromStorage = await AsyncStorage.getItem('UserData');
-      if (userDataFromStorage !== null) {
-        const parsedData = JSON.parse(userDataFromStorage);
-        console.log('Local Storage : ', parsedData);
-        dispatch(validateTokenThunk(parsedData.token));
+      if (userDataFromStorage) {
+        const parsedData: ValidateTokenReq = JSON.parse(userDataFromStorage);
+        setLoading(false);
+        dispatch(validateTokenThunk(parsedData));
       } else {
-        console.log('Local Storage에 User Data가 없습니다.');
+        console.log('로컬스토리지에 데이터 없음');
         navigation.navigate('Landing', { screen: 'SignIn' });
       }
     } catch (e) {
@@ -65,14 +67,18 @@ const Intro = ({ navigation }: IntroProps) => {
   }, []);
 
   useEffect(() => {
-    if (authState.validation.data) {
+    if (!loading && authState.validation.data) {
+      console.log('인증성공');
       dispatch(loadUserThunk(authState.validation.data.id));
-      dispatch(loadCategoriesThunk());
       getLocation();
+      dispatch(loadCategoriesThunk());
       navigation.navigate('Main', {
         screen: 'Home',
         params: { screen: 'Feed' },
       });
+    } else if (!loading && !authState.validation.data) {
+      console.log('유효하지 않은 데이터. 로그인으로');
+      navigation.navigate('Landing', { screen: 'SignIn' });
     }
   }, [authState.validation.data]);
 
