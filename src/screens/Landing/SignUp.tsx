@@ -20,7 +20,7 @@ import { SignUpSchema } from '../../constants/schema';
 import { RootState } from '../../store/reducer';
 import { RegisterReq } from '../../utils/api/auth/types';
 import { registerThunk } from '../../store/auth/thunk';
-import { initiate } from '../../store/auth/action';
+import { registerInit } from '../../store/auth/action';
 
 interface FormInput {
   name: string;
@@ -49,7 +49,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
     setModalOpen(false);
     if (!authState.register.error) {
       navigation.navigate('SignIn');
-      dispatch(initiate());
+      dispatch(registerInit());
     }
   };
 
@@ -258,7 +258,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('SignIn');
-              dispatch(initiate());
+              dispatch(registerInit());
             }}
             style={[
               styles.button,

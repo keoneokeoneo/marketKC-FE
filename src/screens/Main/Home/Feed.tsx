@@ -19,11 +19,18 @@ import Indicator from '../../../components/Indicator';
 const Feed = ({ navigation }: FeedProps) => {
   const userState = useSelector((state: RootState) => state.user);
   const postState = useSelector((state: RootState) => state.post);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getPostsThunk());
   }, []);
+
+  const onRefresh = async () => {
+    setLoading(true);
+    await dispatch(getPostsThunk());
+    setLoading(false);
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -65,17 +72,23 @@ const Feed = ({ navigation }: FeedProps) => {
   return (
     <View style={styles.container}>
       <Indicator isActive={postState.posting.loading} />
-      {postState.posting.error && !postState.posting.data ? (
-        <View>
-          <Text>{postState.posting.error}</Text>
-        </View>
-      ) : (
+      {postState.posting.data && postState.posting.data.length > 0 ? (
         <FlatList
           data={postState.posting.data}
           keyExtractor={item => item.id.toString()}
           renderItem={({ item }) => <FeedItem data={item} onClick={onSelect} />}
           scrollIndicatorInsets={{ right: 1 }}
+          refreshing={loading}
+          onRefresh={onRefresh}
         />
+      ) : !postState.posting.error ? (
+        <View>
+          <Text>데이터가 없습니다.</Text>
+        </View>
+      ) : (
+        <View>
+          <Text>{postState.posting.error}</Text>
+        </View>
       )}
     </View>
   );

@@ -5,15 +5,15 @@ import { PALETTE } from '../../../constants/color';
 import { IMAGES } from '../../../constants/image';
 
 interface Props {
-  onPress: () => void;
+  handlePress: (id: number) => void;
 }
 
-const ChatListItem = ({ onPress }: Props) => {
+const ChatListItem = ({ handlePress }: Props) => {
   return (
     <TouchableOpacity
       style={styles.container}
       activeOpacity={1}
-      onPress={onPress}>
+      onPress={() => handlePress(0)}>
       <Image source={IMAGES.defaultUserImage} style={styles.image} />
       <View style={styles.content}>
         <View style={styles.header}>

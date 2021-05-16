@@ -55,7 +55,6 @@ const Post = ({ navigation, route }: PostProps) => {
   };
 
   const createChat = () => {
-    socket.emit('test', 'fucku');
     if (postState.data) {
       const data: SocketReq = {
         postID: postState.data.id,
@@ -63,7 +62,12 @@ const Post = ({ navigation, route }: PostProps) => {
         userID: userState.user.data.id,
       };
       console.log(data);
-      socket.emit('roomCreationRequest', data, (res: any) => console.log(res));
+      socket.emit('requestNewRoom', data, (res: number) =>
+        navigation.navigate('Chat', {
+          screen: 'ChatRoom',
+          params: { id: res },
+        }),
+      );
     }
   };
 

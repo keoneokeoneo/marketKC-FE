@@ -1,30 +1,35 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AxiosError } from 'axios';
+import { socket } from '../../../App';
 import {
   AUTH_INIT,
-  AUTH_INITIATE,
   AUTH_INIT_ERROR,
   AUTH_INIT_SUCCESS,
   AUTH_LOGIN,
   AUTH_LOGIN_ERROR,
+  AUTH_LOGIN_INIT,
   AUTH_LOGIN_SUCCESS,
   AUTH_LOGOUT,
   AUTH_REGISTER,
   AUTH_REGISTER_ERROR,
+  AUTH_REGISTER_INIT,
   AUTH_REGISTER_SUCCESS,
 } from './types';
 
 /* ---------------------- 액션 생성 함수 ---------------------- */
-export const initiate = () => ({ type: AUTH_INITIATE });
+export const loginInit = () => ({ type: AUTH_LOGIN_INIT });
+export const registerInit = () => ({ type: AUTH_REGISTER_INIT });
 
 export const init = () => ({ type: AUTH_INIT });
-export const initSuccess = (id: string, token: string) => ({
-  type: AUTH_INIT_SUCCESS,
-  data: {
-    id: id,
-    token: token,
-  },
-});
+export const initSuccess = (id: string, token: string) => {
+  socket.emit('login', id);
+  return {
+    type: AUTH_INIT_SUCCESS,
+    data: {
+      id: id,
+      token: token,
+    },
+  };
+};
 export const initError = (error: string) => ({
   type: AUTH_INIT_ERROR,
   error: error,
@@ -88,19 +93,18 @@ type AuthInitAction =
   | ReturnType<typeof initError>;
 
 type AuthLoginAction =
+  | ReturnType<typeof loginInit>
   | ReturnType<typeof login>
   | ReturnType<typeof loginSuccess>
-  | ReturnType<typeof loginError>;
+  | ReturnType<typeof loginError>
+  | ReturnType<typeof logout>;
 
 type AuthRegisterAction =
+  | ReturnType<typeof registerInit>
   | ReturnType<typeof register>
   | ReturnType<typeof registerSuccess>
   | ReturnType<typeof registerError>;
 
-export type AuthAction =
-  | AuthInitAction
-  | AuthLoginAction
-  | AuthRegisterAction
-  | ReturnType<typeof initiate>
-  | ReturnType<typeof logout>;
+export type AuthAction = AuthInitAction | AuthLoginAction | AuthRegisterAction;
+
 /* ------------------------------------------------------------ */

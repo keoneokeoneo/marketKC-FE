@@ -24,7 +24,7 @@ import {
   findCurrentLocationThunk,
   loadUserThunk,
 } from '../../store/user/thunk';
-import { initiate } from '../../store/auth/action';
+import { loginInit } from '../../store/auth/action';
 import { loadCategoriesThunk } from '../../store/category';
 import Geolocation from 'react-native-geolocation-service';
 
@@ -96,7 +96,7 @@ const SignIn = ({ navigation }: SignInProps) => {
           screen: 'Home',
           params: { screen: 'Feed' },
         });
-        dispatch(initiate());
+        dispatch(loginInit());
       }
     }
   }, [authState.login.error, authState.login.data, authState.validation.data]);
@@ -108,7 +108,10 @@ const SignIn = ({ navigation }: SignInProps) => {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <NoticeModal
           isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
+          onClose={() => {
+            setModalOpen(false);
+            dispatch(loginInit());
+          }}
           content={authState.login.error ? authState.login.error : ''}
         />
         <View style={styles.container}>
@@ -198,7 +201,7 @@ const SignIn = ({ navigation }: SignInProps) => {
               onPress={() => {
                 navigation.navigate('SignUp');
                 reset();
-                dispatch(initiate());
+                dispatch(loginInit());
               }}>
               <Text
                 style={[

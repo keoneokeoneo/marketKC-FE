@@ -1,15 +1,16 @@
 import {
   AuthState,
   AUTH_INIT,
-  AUTH_INITIATE,
   AUTH_INIT_ERROR,
   AUTH_INIT_SUCCESS,
   AUTH_LOGIN,
   AUTH_LOGIN_ERROR,
+  AUTH_LOGIN_INIT,
   AUTH_LOGIN_SUCCESS,
   AUTH_LOGOUT,
   AUTH_REGISTER,
   AUTH_REGISTER_ERROR,
+  AUTH_REGISTER_INIT,
   AUTH_REGISTER_SUCCESS,
 } from './types';
 import { AuthAction } from './action';
@@ -37,8 +38,24 @@ export const authReducer = (
   action: AuthAction,
 ): AuthState => {
   switch (action.type) {
-    case AUTH_INITIATE:
-      return initialState;
+    case AUTH_REGISTER_INIT:
+      return {
+        ...state,
+        register: {
+          data: null,
+          error: null,
+          loading: false,
+        },
+      };
+    case AUTH_LOGIN_INIT:
+      return {
+        ...state,
+        login: {
+          data: null,
+          error: null,
+          loading: false,
+        },
+      };
     case AUTH_LOGOUT:
       return initialState;
     case AUTH_INIT:

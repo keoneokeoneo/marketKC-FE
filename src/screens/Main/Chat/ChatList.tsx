@@ -22,17 +22,17 @@ const ChatList = ({ navigation }: ChatListProps) => {
     });
   }, [navigation]);
 
-  const openChatRoom = () => {
-    navigation.navigate('ChatRoom');
+  const openChatRoom = (id: number) => {
+    navigation.navigate('ChatRoom', { id: id });
   };
 
   return (
     <View style={styles.container}>
-      <ChatListItem onPress={openChatRoom} />
-      <ChatListItem onPress={openChatRoom} />
-      <ChatListItem onPress={openChatRoom} />
-      <ChatListItem onPress={openChatRoom} />
-      <ChatListItem onPress={openChatRoom} />
+      <ChatListItem handlePress={openChatRoom} />
+      <ChatListItem handlePress={openChatRoom} />
+      <ChatListItem handlePress={openChatRoom} />
+      <ChatListItem handlePress={openChatRoom} />
+      <ChatListItem handlePress={openChatRoom} />
     </View>
   );
 };

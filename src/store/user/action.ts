@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios';
+import { socket } from '../../../App';
 import { Location, User } from '../../types';
 import {
   LOAD_USER,
@@ -19,11 +20,14 @@ export const loadUser = () => ({
   type: LOAD_USER,
 });
 
-export const loadUserSuccess = (user: User, categories: number[]) => ({
-  type: LOAD_USER_SUCCESS,
-  user,
-  categories,
-});
+export const loadUserSuccess = (user: User, categories: number[]) => {
+  socket.emit('login', user.id);
+  return {
+    type: LOAD_USER_SUCCESS,
+    user,
+    categories,
+  };
+};
 
 export const loadUserError = (error: Error | AxiosError) => ({
   type: LOAD_USER_ERROR,

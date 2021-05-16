@@ -13,7 +13,8 @@ export const AUTH_LOGIN = 'AUTH_LOGIN' as const;
 export const AUTH_LOGIN_SUCCESS = 'AUTH_LOGIN_SUCCESS' as const;
 export const AUTH_LOGIN_ERROR = 'AUTH_LOGIN_ERROR' as const;
 
-export const AUTH_INITIATE = 'AUTH_INITIATE' as const;
+export const AUTH_LOGIN_INIT = 'AUTH_LOGIN_INIT' as const;
+export const AUTH_REGISTER_INIT = 'AUTH_REIGSTER_INIT' as const;
 export const AUTH_LOGOUT = 'AUTH_LOGOUT' as const;
 /* ----------------------------------------------------- */
 
@@ -38,7 +39,8 @@ export type AUTH_ACTION_TYPE =
   | AUTH_REGISTER_TYPE
   | AUTH_LOGIN_TYPE
   | typeof AUTH_LOGOUT
-  | typeof AUTH_INITIATE;
+  | typeof AUTH_LOGIN_INIT
+  | typeof AUTH_REGISTER_INIT;
 /* ----------------------------------------------------- */
 
 export type AuthState = {
