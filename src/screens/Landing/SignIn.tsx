@@ -89,6 +89,7 @@ const SignIn = ({ navigation }: SignInProps) => {
       setModalOpen(true);
     } else {
       if (authState.login.data && authState.validation.data) {
+        dispatch(loginInit());
         dispatch(loadUserThunk(authState.validation.data.id));
         dispatch(loadCategoriesThunk());
         getLocation();
@@ -96,7 +97,7 @@ const SignIn = ({ navigation }: SignInProps) => {
           screen: 'Home',
           params: { screen: 'Feed' },
         });
-        dispatch(loginInit());
+        reset();
       }
     }
   }, [authState.login.error, authState.login.data, authState.validation.data]);
@@ -135,12 +136,13 @@ const SignIn = ({ navigation }: SignInProps) => {
                       styles.inputText,
                       errors.email && { borderColor: PALETTE.error },
                     ]}
-                    placeholder="YourEmail@market.kc"
+                    placeholder="YourEmail@smarcet.com"
                     placeholderTextColor={PALETTE.grey}
                     onBlur={onBlur}
                     onChangeText={value => onChange(value)}
                     value={value}
                     keyboardType="email-address"
+                    autoCapitalize="none"
                   />
                 )}
               />

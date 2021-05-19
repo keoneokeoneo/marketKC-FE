@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import { User, Location } from '../../types';
 
 /* ---------------------- 액션 타입 ---------------------- */
@@ -40,17 +39,17 @@ export type USER_ACTION_TYPE =
 export type UserState = {
   user: {
     loading: boolean;
-    error: Error | AxiosError | null;
+    error: string | null;
     data: User;
   };
   categories: {
     loading: boolean;
-    error: Error | AxiosError | null;
+    error: string | null;
     ids: number[];
   };
   location: {
     loading: boolean;
-    error: Error | AxiosError | null;
+    error: string | null;
     data: Location;
   };
 };

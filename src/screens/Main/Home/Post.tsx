@@ -5,11 +5,11 @@ import React, {
   useState,
 } from 'react';
 import {
-  Animated,
   Dimensions,
   Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -22,57 +22,58 @@ import PressableIcon from '../../../components/PressableIcon';
 import { PALETTE } from '../../../constants/color';
 import { IMAGES } from '../../../constants/image';
 import { RootState } from '../../../store/reducer';
-import { getPostThunk } from '../../../store/post/thunk';
+import { getETHThunk, getPostThunk } from '../../../store/post/thunk';
 import { PostProps } from '../../../types/ScreenProps';
 import { numberWithCommas } from '../../../utils';
 import { SliderBox } from 'react-native-image-slider-box';
-import io from 'socket.io-client';
 import { socket } from '../../../../App';
-import Toast from 'react-native-simple-toast';
 
 interface SocketReq {
-  postUserID: string;
+  sellerID: string;
   userID: string;
   postID: number;
 }
-const eth = 2.1e-7;
+
 const Post = ({ navigation, route }: PostProps) => {
-  const [headerTransparent, setHeaderTranspaernt] = useState(true);
   const { height: windowHeight } = Dimensions.get('window');
   const sliderHeight = (windowHeight - 84) / 2;
-  const [isLike, setIsLike] = useState(false);
   const postID = route.params.id;
   const dispatch = useDispatch();
-  const postState = useSelector((state: RootState) => state.post.post);
-  const userState = useSelector((state: RootState) => state.user);
+  const {
+    post: { post, eth },
+    user: {
+      user: {
+        data: { id: userID },
+      },
+    },
+  } = useSelector((state: RootState) => state);
 
   const getData = async () => {
     dispatch(getPostThunk(postID));
-  };
-
-  const onLikePress = () => {
-    setIsLike(prev => !prev);
+    dispatch(getETHThunk());
   };
 
   const createChat = () => {
-    if (postState.data) {
+    if (post.data !== null) {
+      const {
+        seller: { id: sellerID },
+      } = post.data;
       const data: SocketReq = {
-        postID: postState.data.id,
-        postUserID: postState.data.user.id,
-        userID: userState.user.data.id,
+        postID: postID,
+        sellerID: sellerID,
+        userID: userID,
       };
       console.log(data);
       socket.emit('requestNewRoom', data, (res: number) =>
         navigation.navigate('Chat', {
           screen: 'ChatRoom',
-          params: { id: res },
+          params: { chatID: res, postID: postID },
         }),
       );
     }
   };
 
   useLayoutEffect(() => {
-    const color = headerTransparent ? '#fff' : '#000';
     navigation.setOptions({
       headerLeft: () => (
         <HeaderSide left>
@@ -84,46 +85,35 @@ const Post = ({ navigation, route }: PostProps) => {
             onPress={() => {
               navigation.goBack();
             }}
-            color={color}
           />
         </HeaderSide>
       ),
       headerRight: () => null,
       title: '',
-      headerTransparent: headerTransparent,
     });
-  }, [headerTransparent, navigation]);
+  }, [navigation]);
 
   useEffect(() => {
     getData();
   }, []);
 
-  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { y } = e.nativeEvent.contentOffset;
-    if (y >= 280 && headerTransparent) {
-      setHeaderTranspaernt(false);
-    } else {
-      setHeaderTranspaernt(true);
-    }
-  }, []);
-
   return (
-    <View style={{ flex: 1 }}>
-      {postState.data ? (
+    <View style={styles.container}>
+      {post.data ? (
         <View style={{ flex: 1 }}>
           <ScrollView
-            style={{ flex: 1, backgroundColor: '#FFF' }}
-            onScroll={onScroll}
-            scrollEventThrottle={16}>
+            refreshControl={
+              <RefreshControl refreshing={post.loading} onRefresh={getData} />
+            }>
             <View style={{ width: '100%', height: sliderHeight }}>
               <SliderBox
-                images={postState.data.postImgs.map(img => {
+                images={post.data.postImgs.map(img => {
                   return img.url;
                 })}
                 sliderBoxHeight={sliderHeight}
               />
             </View>
-            <View style={styles.container}>
+            <View>
               <TouchableOpacity
                 activeOpacity={1}
                 onPress={() => {}}
@@ -135,40 +125,25 @@ const Post = ({ navigation, route }: PostProps) => {
                   />
                   <View style={styles.profileTextWrapper}>
                     <Text style={styles.profileTextP}>
-                      {postState.data.user.name}
+                      {post.data.seller.name}
                     </Text>
                     <Text style={styles.profileTextS}>
-                      {postState.data.location}
+                      {post.data.location}
                     </Text>
                   </View>
                 </View>
                 <View style={styles.profileRight}>
                   <View>
                     <View
-                      style={{
-                        flexDirection: 'row',
-                      }}>
-                      {/* <Ionicons name="star-outline" style={styles.profileRate} />
-                  <Ionicons name="star-outline" style={styles.profileRate} />
-                  <Ionicons name="star-outline" style={styles.profileRate} />
-                  <Ionicons name="star-outline" style={styles.profileRate} />
-                  <Ionicons name="star-outline" style={styles.profileRate} /> */}
-                    </View>
-                    <View
                       style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Ionicons name="star" style={styles.profileRate} />
+                      <Text style={styles.profileRate}>4.7</Text>
                       <Text
-                        style={{
-                          fontWeight: 'bold',
-                          fontSize: 16,
-                          color: PALETTE.main,
-                          marginRight: 4,
-                        }}>
-                        4.7
-                      </Text>
-                      <Text style={{ marginRight: 2, color: PALETTE.line1 }}>
+                        style={{ marginHorizontal: 2, color: PALETTE.line1 }}>
                         /
                       </Text>
                       <Text style={{ color: PALETTE.line1 }}>5.0</Text>
+                      <Text style={{ marginHorizontal: 2 }}>{`(${1})`}</Text>
                     </View>
                   </View>
                 </View>
@@ -178,83 +153,61 @@ const Post = ({ navigation, route }: PostProps) => {
 
               <View style={styles.contentWrapper}>
                 <View style={styles.contentTitle}>
-                  <Text style={styles.contentTitleText}>
-                    {postState.data.title}
-                  </Text>
+                  <Text style={styles.contentTitleText}>{post.data.title}</Text>
                 </View>
                 <View style={styles.contentInfo}>
                   <Text style={styles.contentInfoText}>
-                    {postState.data.categoryName}
+                    {post.data.categoryName}
                   </Text>
                   <Text style={styles.contentInfoText}>·</Text>
                   <Text style={styles.contentInfoText}>
-                    {postState.data.updatedAt}
-                  </Text>
-                </View>
-                <View style={styles.content}>
-                  <Text style={styles.contentText}>
-                    {postState.data.content}
-                  </Text>
-                </View>
-                <View style={styles.contentInfo}>
-                  <Ionicons
-                    name="chatbubbles-outline"
-                    style={styles.contentInfoText}
-                  />
-                  <Text style={styles.contentInfoText}>
-                    {postState.data.chats}
-                  </Text>
-                  <Text style={styles.contentInfoText}>·</Text>
-                  <Ionicons
-                    name="heart-outline"
-                    style={styles.contentInfoText}
-                  />
-                  <Text style={styles.contentInfoText}>
-                    {postState.data.likes}
+                    {post.data.updatedAt}
                   </Text>
                   <Text style={styles.contentInfoText}>·</Text>
                   <Ionicons name="eye-outline" style={styles.contentInfoText} />
-                  <Text style={styles.contentInfoText}>
-                    {postState.data.views}
+                  <Text style={[styles.contentInfoText]}>
+                    {post.data.views}
                   </Text>
                 </View>
+                <View style={styles.content}>
+                  <Text style={[styles.contentText]}>{post.data.content}</Text>
+                </View>
               </View>
-
-              {/* <Divider /> */}
             </View>
           </ScrollView>
+
           <View style={styles.bottomBarContainer}>
             <View style={styles.bottomBar}>
               <View style={styles.bottomBarLeft}>
-                <TouchableOpacity
-                  activeOpacity={0.9}
-                  onPress={onLikePress}
-                  style={styles.iconWrapper}>
-                  {isLike ? (
-                    <Ionicons name="heart" size={32} color="#f29886" />
-                  ) : (
-                    <Ionicons name="heart-outline" size={32} color="#c0c0c0" />
-                  )}
-                </TouchableOpacity>
                 <View style={styles.priceWrapper}>
-                  <Text style={[styles.priceText]}>{`${numberWithCommas(
-                    postState.data.price,
-                  )} ₩`}</Text>
-                  <Text style={[styles.priceText]}>{`${(
-                    (postState.data.price / 1000) *
-                    eth
+                  <Text style={[styles.priceText]}>{`ETH ${(
+                    post.data.price / eth
                   )
                     .toFixed(6)
-                    .toString()} ETH`}</Text>
+                    .toString()}`}</Text>
+                  <Text style={{}}>{`KRW ${numberWithCommas(
+                    post.data.price,
+                  )}`}</Text>
                 </View>
               </View>
               <View style={styles.bottomBarRight}>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={createChat}
-                  style={styles.button}>
-                  <Text style={styles.buttonText}>판매자와 대화</Text>
-                </TouchableOpacity>
+                {post.data.seller.id !== userID ? (
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={createChat}
+                    style={styles.button}>
+                    <Text style={styles.buttonText}>판매자와 대화</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      navigation.navigate('Chat', { screen: 'ChatList' })
+                    }
+                    style={styles.button}>
+                    <Text style={styles.buttonText}>{`채팅 목록 보기`}</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           </View>
@@ -269,11 +222,14 @@ const Post = ({ navigation, route }: PostProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 12, backgroundColor: '#FFF' },
+  container: { backgroundColor: '#FFF', flex: 1 },
   profileWrapper: {
+    padding: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 4,
+    borderBottomColor: 'rgb(216,216,216)',
+    borderBottomWidth: 0.5,
   },
   profileLeft: {
     flexDirection: 'row',
@@ -312,6 +268,7 @@ const styles = StyleSheet.create({
   },
   contentWrapper: {
     marginVertical: 4,
+    padding: 12,
   },
   contentTitle: {},
   contentTitleText: {
@@ -326,7 +283,7 @@ const styles = StyleSheet.create({
   contentInfoText: {
     color: PALETTE.grey,
     fontSize: 14,
-    marginRight: 2,
+    marginRight: 4,
   },
   content: {
     marginVertical: 4,
@@ -359,7 +316,6 @@ const styles = StyleSheet.create({
   },
   priceWrapper: {
     justifyContent: 'center',
-    alignItems: 'flex-end',
     marginLeft: 16,
   },
   priceText: {

@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import { Category, PostingData } from '../../types';
 import {
   POSTING_INIT,
@@ -24,7 +23,7 @@ export const selectCategory = (category: Category) => ({
 
 export const uploadPost = () => ({ type: POSTING_UPLOAD_POST });
 export const uploadPostSuccess = () => ({ type: POSTING_UPLOAD_POST_SUCCESS });
-export const uploadPostError = (error: Error | AxiosError) => ({
+export const uploadPostError = (error: string) => ({
   type: POSTING_UPLOAD_POST_ERROR,
   error,
 });
@@ -34,7 +33,7 @@ export const uploadImagesSuccess = (urls: string[]) => ({
   type: POSTING_UPLOAD_IMAGES_SUCCESS,
   urls,
 });
-export const uploadImagesError = (error: Error | AxiosError) => ({
+export const uploadImagesError = (error: string) => ({
   type: POSTING_UPLOAD_IMAGES_ERROR,
   error,
 });

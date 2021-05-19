@@ -41,11 +41,13 @@ import {
   UploadForm,
   ImagePickerRes,
 } from '../../../types';
-import { savePosting } from '../../../store/posting/action';
+import { savePosting, initPosting } from '../../../store/posting/action';
 import {
   uploadImagesThunk,
   uploadPostThunk,
 } from '../../../store/posting/thunk';
+import { getLibraryPermission } from '../../../utils';
+import { getETHThunk } from '../../../store/post/thunk';
 
 interface FormInput {
   title: string;
@@ -55,6 +57,8 @@ interface FormInput {
   priceS: string;
   priceN: number;
   img: number;
+  ethS: string;
+  ethN: number;
 }
 
 const UploadPost = ({ navigation }: UploadPostProps) => {
@@ -70,7 +74,10 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     resolver: yupResolver(PostingSchema),
   });
   const dispatch = useDispatch();
-  const postingState = useSelector((state: RootState) => state.posting);
+  const {
+    posting: postingState,
+    post: { eth },
+  } = useSelector((state: RootState) => state);
   const [keyboardHeight] = useKeyboard();
   const [selectedAssets, setSelectedAssets] = useState<LoadedImage[]>(
     postingState.images.data,
@@ -114,42 +121,8 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
     setSelectedAssets(prev => prev.filter(asset => asset.id !== id));
   }, []);
 
-  const getPermission = async () => {
-    const checkPermissionsResult = await checkMultiple([
-      PERMISSIONS.IOS.CAMERA,
-      PERMISSIONS.IOS.PHOTO_LIBRARY,
-    ]);
-
-    switch (checkPermissionsResult['ios.permission.PHOTO_LIBRARY']) {
-      case 'granted':
-        break;
-      case 'unavailable':
-        return 'unavailable';
-      case 'blocked':
-        return 'blocked';
-      case 'denied':
-        const requestGalleryPermission = await request(
-          PERMISSIONS.IOS.PHOTO_LIBRARY,
-        );
-        if (requestGalleryPermission === 'granted') break;
-        else return 'blocked';
-    }
-    switch (checkPermissionsResult['ios.permission.CAMERA']) {
-      case 'granted':
-        return 'granted';
-      case 'unavailable':
-        return 'unavailable';
-      case 'blocked':
-        return 'blocked';
-      case 'denied':
-        const requestCameraPermission = await request(PERMISSIONS.IOS.CAMERA);
-        if (requestCameraPermission === 'granted') return 'granted';
-        else return 'blocked';
-    }
-  };
-
   const openImagePicker = async () => {
-    const permission = await getPermission();
+    const permission = await getLibraryPermission();
     if (permission === 'unavailable') {
       Alert.alert('이 기기에선 사용이 불가합니다.');
       return;
@@ -189,30 +162,41 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
   }, [navigation]);
 
   useEffect(() => {
-    if (postingState.success) navigation.navigate('Home', { screen: 'Feed' });
+    if (postingState.success) {
+      dispatch(initPosting());
+      navigation.navigate('Home', { screen: 'Feed' });
+    }
   }, [postingState.success]);
 
   useEffect(() => {
     register('categoryID');
     register('priceN');
     register('img');
+    register('ethN');
   }, [register]);
 
   useFocusEffect(
     useCallback(() => {
       clearErrors();
-      setSelectedAssets(postingState.images.data);
-      setValue('title', postingState.form.data.title);
-      setValue('content', postingState.form.data.content);
-      setValue('categoryID', postingState.form.data.category.id);
-      setValue('categoryName', postingState.form.data.category.name);
-      if (postingState.form.data.category.name === '무료나눔') {
+      const {
+        form: {
+          data: { category, title, content, price },
+        },
+        images: { data: assets },
+      } = postingState;
+      setSelectedAssets(assets);
+      setValue('title', title);
+      setValue('content', content);
+      setValue('categoryID', category.id);
+      setValue('categoryName', category.name);
+      if (category.name === '무료나눔') {
         setValue('priceN', 0);
         setValue('priceS', '무료나눔');
       } else {
-        setValue('priceN', postingState.form.data.price);
+        setValue('priceN', price);
       }
-      setValue('img', postingState.images.data.length);
+      setValue('ethN', price / eth);
+      setValue('img', assets.length);
     }, [postingState]),
   );
 
@@ -310,9 +294,9 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
         <View style={styles.section}>
           <View style={styles.labelContainer}>
             <Text style={styles.label}>판매가격</Text>
-            {/* <Text style={styles.helper}>{`1 ETH = ₩ ${numberWithCommas(
-                ETH,
-              )}`}</Text> */}
+            <Text style={styles.helper}>{`1 ETH = ₩ ${numberWithCommas(
+              eth,
+            )}`}</Text>
           </View>
           <View style={{ flexDirection: 'row' }}>
             <View
@@ -350,13 +334,11 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
                     onChangeText={value => {
                       setValue('priceN', Number(inputFormatter(value)));
                       onChange(numberWithCommas(inputFormatter(value)));
-                      //const formatted = inputFormatter(value);
-                      // const eth = (Number(formatted) / ETH)
-                      //   .toFixed(8)
-                      //   .toString();
-                      // setEthP(eth);
-                      //onChange(numberWithCommas(value));
-                      //onChange(value);
+                      const formatted = inputFormatter(value);
+                      const tmp = (Number(formatted) / eth)
+                        .toFixed(8)
+                        .toString();
+                      setValue('ethS', tmp);
                     }}
                     onBlur={onBlur}
                   />
@@ -378,15 +360,22 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
                 source={IMAGES.ethLogo}
                 style={{ width: 20, height: 20 }}
               />
-              <TextInput
-                editable={false}
-                placeholder="ETH"
-                style={styles.textInput}
-                value={''}
+              <Controller
+                control={control}
+                name="ethS"
+                defaultValue=""
+                render={({ field: { value } }) => (
+                  <TextInput
+                    editable={false}
+                    placeholder="ETH"
+                    style={styles.textInput}
+                    value={value}
+                  />
+                )}
               />
             </View>
           </View>
-          {/* <View
+          <View
             style={{
               flexDirection: 'row',
               justifyContent: 'flex-end',
@@ -397,10 +386,10 @@ const UploadPost = ({ navigation }: UploadPostProps) => {
               size={24}
               name="refresh-circle-outline"
               onPress={() => {
-                //getData();
+                dispatch(getETHThunk());
               }}
             />
-          </View> */}
+          </View>
         </View>
         <View style={styles.section}>
           <View style={styles.labelContainer}>

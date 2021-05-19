@@ -23,7 +23,7 @@ export const loadCategoriesSuccess = (data: Category[]) => {
   return { type: LOAD_CATEGORIES_SUCCESS, data };
 };
 
-export const loadCategoriesError = (error: Error | AxiosError) => {
+export const loadCategoriesError = (error: string) => {
   return { type: LOAD_CATEGORIES_ERROR, error };
 };
 
@@ -36,7 +36,7 @@ export type CategoryAction = CategoryLoadAction;
 
 export type CategoryState = {
   loading: boolean;
-  error: Error | AxiosError | null;
+  error: string | null;
   data: Category[];
 };
 
@@ -55,7 +55,10 @@ export const loadCategoriesThunk = (): ThunkAction<
         dispatch(loadCategoriesSuccess(res.data));
       }
     } catch (e) {
-      dispatch(loadCategoriesError(e));
+      console.error(e);
+      if (axios.isAxiosError(e) && e.response)
+        dispatch(loadCategoriesError(e.response.data));
+      else dispatch(loadCategoriesError('네트워크 에러'));
     }
   };
 };

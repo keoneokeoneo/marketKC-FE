@@ -1,5 +1,7 @@
+import { postAPI } from '../../utils/api';
 import { PostRes, PostsRes } from '../../utils/api/post/types';
 import {
+  GET_ETH,
   GET_POST,
   GET_POSTS,
   GET_POSTS_ERROR,
@@ -9,6 +11,8 @@ import {
 } from './types';
 
 /* ---------------------- 액션 생성 함수 ---------------------- */
+export const getETH = (eth: number) => ({ type: GET_ETH, eth: eth });
+
 export const getPost = () => ({ type: GET_POST });
 export const getPostSuccess = (post: PostRes) => ({
   type: GET_POST_SUCCESS,
@@ -42,6 +46,9 @@ type GetPostsAction =
   | ReturnType<typeof getPostsSuccess>
   | ReturnType<typeof getPostsError>;
 
-export type PostAction = GetPostAction | GetPostsAction;
+export type PostAction =
+  | GetPostAction
+  | GetPostsAction
+  | ReturnType<typeof getETH>;
 
 /* ------------------------------------------------------------ */

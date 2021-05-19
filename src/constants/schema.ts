@@ -41,6 +41,8 @@ export const PostingSchema = yup.object().shape({
   priceN: yup.number(),
   priceS: yup.string(),
   img: yup.number().moreThan(0, '최소 한장 이상의 사진을 첨부해주세요'),
+  ethN: yup.number(),
+  ethS: yup.string(),
 });
 
 export const ProfileSchema = yup.object().shape({

@@ -38,6 +38,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormInput>({
     resolver: yupResolver(SignUpSchema),
@@ -50,6 +51,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
     if (!authState.register.error) {
       navigation.navigate('SignIn');
       dispatch(registerInit());
+      reset();
     }
   };
 
@@ -107,6 +109,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
                     onBlur={onBlur}
                     onChangeText={value => onChange(value)}
                     value={value}
+                    autoCapitalize="none"
                   />
                 )}
               />
@@ -137,6 +140,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
                     onChangeText={value => onChange(value)}
                     value={value}
                     keyboardType="email-address"
+                    autoCapitalize="none"
                   />
                 )}
               />
@@ -259,6 +263,7 @@ const SignUp = ({ navigation }: SignUpProps) => {
             onPress={() => {
               navigation.navigate('SignIn');
               dispatch(registerInit());
+              reset();
             }}
             style={[
               styles.button,

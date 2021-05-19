@@ -1,9 +1,9 @@
-export type ValidateTokenReq = {
+export type ValidationReq = {
   id: string;
   token: string;
 };
 
-export type ValidateTokenRes = {
+export type ValidationRes = {
   id: string;
   name: string;
   email: string;

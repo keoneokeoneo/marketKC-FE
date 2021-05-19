@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import { Category, LoadedImage } from '../../types';
 
 export const POSTING_INIT = 'POSTING_INIT' as const;
@@ -34,7 +33,7 @@ export type PostingState = {
   success: boolean;
   form: {
     loading: boolean;
-    error: Error | AxiosError | null;
+    error: string | null;
     data: {
       title: string;
       content: string;
@@ -45,7 +44,7 @@ export type PostingState = {
   };
   images: {
     loading: boolean;
-    error: Error | AxiosError | null;
+    error: string | null;
     data: LoadedImage[];
   };
 };

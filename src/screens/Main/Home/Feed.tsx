@@ -13,7 +13,7 @@ import { FeedProps } from '../../../types/ScreenProps';
 import FeedItem from '../../../components/List/Item/FeedItem';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store/reducer';
-import { getPostsThunk } from '../../../store/post/thunk';
+import { getETHThunk, getPostsThunk } from '../../../store/post/thunk';
 import Indicator from '../../../components/Indicator';
 
 const Feed = ({ navigation }: FeedProps) => {
@@ -24,9 +24,11 @@ const Feed = ({ navigation }: FeedProps) => {
 
   useEffect(() => {
     dispatch(getPostsThunk());
+    dispatch(getETHThunk());
   }, []);
 
   const onRefresh = async () => {
+    dispatch(getETHThunk());
     setLoading(true);
     await dispatch(getPostsThunk());
     setLoading(false);
@@ -72,11 +74,13 @@ const Feed = ({ navigation }: FeedProps) => {
   return (
     <View style={styles.container}>
       <Indicator isActive={postState.posting.loading} />
-      {postState.posting.data && postState.posting.data.length > 0 ? (
+      {postState.posting.data ? (
         <FlatList
           data={postState.posting.data}
           keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => <FeedItem data={item} onClick={onSelect} />}
+          renderItem={({ item }) => (
+            <FeedItem data={item} onClick={onSelect} eth={postState.eth} />
+          )}
           scrollIndicatorInsets={{ right: 1 }}
           refreshing={loading}
           onRefresh={onRefresh}

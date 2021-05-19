@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import { socket } from '../../../App';
 import { Location, User } from '../../types';
 import {
@@ -12,9 +11,6 @@ import {
   UPDATE_USER_LOCATION_ERROR,
   UPDATE_USER_LOCATION_SUCCESS,
 } from './types';
-// export const initUser = () => {
-//     return { type: INIT_USER };
-//   };
 
 export const loadUser = () => ({
   type: LOAD_USER,
@@ -29,7 +25,7 @@ export const loadUserSuccess = (user: User, categories: number[]) => {
   };
 };
 
-export const loadUserError = (error: Error | AxiosError) => ({
+export const loadUserError = (error: string) => ({
   type: LOAD_USER_ERROR,
   error,
 });
@@ -43,7 +39,7 @@ export const updateUserLocationSuccess = (location: Location) => ({
   location,
 });
 
-export const updateUserLocationError = (error: Error | AxiosError) => ({
+export const updateUserLocationError = (error: string) => ({
   type: UPDATE_USER_LOCATION_ERROR,
   error,
 });
@@ -57,7 +53,7 @@ export const updateUserCategoriesSuccess = (ids: number[]) => ({
   ids,
 });
 
-export const updateUserCategoriesError = (error: Error | AxiosError) => ({
+export const updateUserCategoriesError = (error: string) => ({
   type: UPDATE_USER_CATEGORIES_ERROR,
   error,
 });

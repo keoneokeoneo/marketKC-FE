@@ -15,6 +15,7 @@ import {
   updateUserLocationSuccess,
 } from './action';
 import Toast from 'react-native-simple-toast';
+import axios from 'axios';
 
 export const loadUserThunk = (
   id: string,
@@ -33,14 +34,15 @@ export const loadUserThunk = (
           createdAt: new Date(res.data.createdAt),
           updatedAt: new Date(res.data.updatedAt),
         };
-        const categories = res.data.subscribedCategories
-          .split(',')
-          .map(categoryID => parseInt(categoryID, 10));
+        const categories = res.data.subscribedCategories.map(c => Number(c));
 
         dispatch(loadUserSuccess(user, categories));
       }
     } catch (e) {
-      dispatch(loadUserError(e));
+      console.error(e);
+      if (axios.isAxiosError(e) && e.response)
+        dispatch(loadUserError(e.response.data));
+      else dispatch(loadUserError('네트워크 에러'));
     }
   };
 };
@@ -62,7 +64,10 @@ export const updateUserCategoriesThunk = (
         ]);
       }
     } catch (e) {
-      dispatch(updateUserCategoriesError(e));
+      console.error(e);
+      if (axios.isAxiosError(e) && e.response)
+        dispatch(updateUserCategoriesError(e.response.data));
+      else dispatch(updateUserCategoriesError('네트워크 에러'));
     }
   };
 };
@@ -92,7 +97,7 @@ export const findCurrentLocationThunk = (
         );
       }
     } catch (e) {
-      dispatch(updateUserLocationError(e));
+      dispatch(updateUserLocationError('알수없는에러'));
     }
   };
 };

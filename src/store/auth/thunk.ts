@@ -4,7 +4,7 @@ import { authAPI } from '../../utils/api';
 import {
   LoginReq,
   RegisterReq,
-  ValidateTokenReq,
+  ValidationReq,
 } from '../../utils/api/auth/types';
 import { RootState } from '../reducer';
 import {
@@ -21,12 +21,12 @@ import {
 } from './action';
 
 export const validateTokenThunk = (
-  param: ValidateTokenReq,
+  param: ValidationReq,
 ): ThunkAction<void, RootState, null, AuthAction> => {
   return async dispatch => {
     dispatch(init());
     try {
-      const res = await authAPI.validateToken(param.token);
+      const res = await authAPI.validation(param.token);
 
       if (res.status === 200 && res.data.id === param.id) {
         dispatch(initSuccess(param.id, param.token));
@@ -34,12 +34,8 @@ export const validateTokenThunk = (
         dispatch(initError('유효하지 않은 정보입니다'));
       }
     } catch (e) {
-      console.log(Object.values(e), e.status);
-      if (axios.isAxiosError(e) && e.response) dispatch(initError('아 몰랑'));
-      else {
-        dispatch(initError('알수없는에러'));
-        throw e;
-      }
+      console.error(e);
+      dispatch(initError(e.message));
     }
   };
 };
@@ -56,11 +52,11 @@ export const loginThunk = (
         dispatch(loginSuccess(res.data.id, res.data.access_token));
       }
     } catch (e) {
+      console.error(e);
       if (axios.isAxiosError(e) && e.response)
         dispatch(loginError(e.response.data));
       else {
         dispatch(loginError('알수없는에러'));
-        throw e;
       }
     }
   };
@@ -75,15 +71,14 @@ export const registerThunk = (
       const res = await authAPI.register(param);
       console.log(res);
       if (res.status === 201) {
-        dispatch(registerSuccess('회원가입성공'));
+        dispatch(registerSuccess(res.data));
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
       if (axios.isAxiosError(e) && e.response) {
         dispatch(registerError(e.response.data));
       } else {
         dispatch(registerError('알수없는에러'));
-        throw e;
       }
     }
   };

@@ -1,19 +1,17 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { numberWithCommas } from '../../../utils';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { PALETTE } from '../../../constants/color';
 import { IMAGES } from '../../../constants/image';
 import { FeedPost } from '../../../utils/api/post/types';
 
-const eth = 2.1e-7;
-
 interface IProps {
   data: FeedPost;
   onClick: (id: number) => void;
+  eth: number;
 }
 
-const FeedItem = ({ data, onClick }: IProps) => {
+const FeedItem = ({ data, onClick, eth }: IProps) => {
   const location = data.location.split(' ');
   const date = new Date(data.updatedAt).toLocaleString().toString();
   return (
@@ -37,35 +35,14 @@ const FeedItem = ({ data, onClick }: IProps) => {
             <Text style={styles.info}>{date}</Text>
           </View>
           <View style={styles.priceContainer}>
-            <Text style={styles.price}>{`ETH ${(
-              (data.price / 1000) *
-              eth
-            ).toFixed(9)}`}</Text>
+            <Text style={styles.price}>{`ETH ${(data.price / eth)
+              .toFixed(6)
+              .toString()}`}</Text>
           </View>
           <View style={styles.subInfoContainer}>
-            <Text style={styles.subInfoLeftText}>{`₩ ${numberWithCommas(
+            <Text style={styles.subInfoText}>{`KRW ${numberWithCommas(
               data.price,
             )}`}</Text>
-            <View style={styles.subInfoRight}>
-              {data.chats > 0 ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons
-                    name="chatbubbles-outline"
-                    style={styles.subInfoRightText}
-                  />
-                  <Text style={styles.subInfoRightText}>{data.chats}</Text>
-                </View>
-              ) : null}
-              {data.likes > 0 ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons
-                    name="heart-outline"
-                    style={styles.subInfoRightText}
-                  />
-                  <Text style={styles.subInfoRightText}>{data.likes}</Text>
-                </View>
-              ) : null}
-            </View>
           </View>
         </View>
       </View>
@@ -113,7 +90,8 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   price: {
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: 'bold',
     marginRight: 4,
   },
   subInfoContainer: {
@@ -121,12 +99,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  subInfoRightText: {
-    marginHorizontal: 1.5,
-  },
-  subInfoLeftText: {},
-  subInfoRight: {
-    flexDirection: 'row',
-  },
+  subInfoText: { fontSize: 13 },
 });
 export default FeedItem;

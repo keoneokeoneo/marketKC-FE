@@ -1,12 +1,30 @@
-import React, { useLayoutEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useCallback, useEffect, useLayoutEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import HeaderSide from '../../../components/HeaderSide';
 import HeaderText from '../../../components/HeaderText';
 import ChatListItem from '../../../components/List/Item/ChatListItem';
-import { PALETTE } from '../../../constants/color';
+import { loadChatsThunk } from '../../../store/chat/thunk';
+import { RootState } from '../../../store/reducer';
 import { ChatListProps } from '../../../types/ScreenProps';
 
 const ChatList = ({ navigation }: ChatListProps) => {
+  const {
+    user,
+    chat: { chats },
+  } = useSelector((state: RootState) => state);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(loadChatsThunk(user.user.data.id));
+  }, []);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -22,17 +40,33 @@ const ChatList = ({ navigation }: ChatListProps) => {
     });
   }, [navigation]);
 
-  const openChatRoom = (id: number) => {
-    navigation.navigate('ChatRoom', { id: id });
-  };
+  const openChatRoom = useCallback((chatID: number, postID: number) => {
+    navigation.navigate('ChatRoom', { chatID: chatID, postID: postID });
+  }, []);
 
   return (
     <View style={styles.container}>
-      <ChatListItem handlePress={openChatRoom} />
-      <ChatListItem handlePress={openChatRoom} />
-      <ChatListItem handlePress={openChatRoom} />
-      <ChatListItem handlePress={openChatRoom} />
-      <ChatListItem handlePress={openChatRoom} />
+      {chats.data ? (
+        <FlatList
+          data={chats.data}
+          keyExtractor={item => item.id.toString()}
+          refreshing={chats.loading}
+          onRefresh={() => dispatch(loadChatsThunk(user.user.data.id))}
+          renderItem={({ item }) => (
+            <ChatListItem handlePress={openChatRoom} data={item} />
+          )}
+        />
+      ) : (
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>채팅 내역이 존재하지 않아요</Text>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => dispatch(loadChatsThunk(user.user.data.id))}>
+            <Text>다시 시도하기</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };

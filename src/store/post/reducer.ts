@@ -1,4 +1,5 @@
 import {
+  GET_ETH,
   GET_POSTS,
   GET_POSTS_ERROR,
   GET_POSTS_SUCCESS,
@@ -8,6 +9,7 @@ import { PostAction } from './action';
 import { GET_POST, GET_POST_ERROR, GET_POST_SUCCESS } from './types';
 
 const initialState: PostState = {
+  eth: 0,
   post: {
     loading: false,
     error: null,
@@ -26,6 +28,11 @@ export const postReducer = (
   action: PostAction,
 ): PostState => {
   switch (action.type) {
+    case GET_ETH:
+      return {
+        ...state,
+        eth: action.eth,
+      };
     case GET_POST:
       return {
         ...state,

@@ -83,15 +83,6 @@ const SetCategory = ({ navigation }: SetCategoryProps) => {
   }, [navigation]);
 
   const onPress = (id: number) => {
-    if (userState.categories.status.stage === 'FETCHING') {
-      Toast.show(
-        '이전 요청을 처리중입니다. 잠시 뒤에 다시 시도해주세요.',
-        Toast.SHORT,
-        ['UIAlertController'],
-      );
-      return;
-    }
-
     // 1이면 추가, 0이면 제거
     const flag = userState.categories.ids.find(el => el === id) === undefined;
     dispatch(

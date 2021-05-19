@@ -1,29 +1,33 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { onChange } from 'react-native-reanimated';
 import { PALETTE } from '../../../constants/color';
-import { IMAGES } from '../../../constants/image';
+import { ChatRoom } from '../../../types';
 
 interface Props {
-  handlePress: (id: number) => void;
+  handlePress: (chatID: number, postID: number) => void;
+  data: ChatRoom;
 }
 
-const ChatListItem = ({ handlePress }: Props) => {
+const ChatListItem = ({ handlePress, data }: Props) => {
+  const { id, message, post, user } = data;
+  const location = post.location.split(' ');
+  const date = new Date(message.createdAt).toLocaleDateString();
   return (
     <TouchableOpacity
       style={styles.container}
       activeOpacity={1}
-      onPress={() => handlePress(0)}>
-      <Image source={IMAGES.defaultUserImage} style={styles.image} />
+      onPress={() => handlePress(id, post.id)}>
+      <Image source={{ uri: user.profileImgUrl }} style={styles.image} />
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.headerUserName}>유저 이름</Text>
-          <Text style={styles.headerInfo}>유저 위치 정보</Text>
+          <Text style={styles.headerUserName}>{user.name}</Text>
+          <Text
+            style={styles.headerInfo}>{`${location[1]} ${location[2]}`}</Text>
           <Text style={styles.headerInfo}>・</Text>
-          <Text style={styles.headerInfo}>00월 00일</Text>
+          <Text style={styles.headerInfo}>{date}</Text>
         </View>
         <View style={styles.msgContainer}>
-          <Text style={styles.msg}>채팅방 마지막 기록</Text>
+          <Text style={styles.msg}>{message.msg}</Text>
         </View>
       </View>
     </TouchableOpacity>

@@ -2,62 +2,75 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
   ActionSheetIOS,
   FlatList,
-  Image,
   Keyboard,
-  KeyboardAvoidingView,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import HeaderSide from '../../../components/HeaderSide';
 import PressableIcon from '../../../components/PressableIcon';
 import { ChatRoomProps } from '../../../types/ScreenProps';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { PALETTE } from '../../../constants/color';
 import { Controller, useForm } from 'react-hook-form';
 import { useKeyboard } from '../../../utils/useKeyboard';
-import { IMAGES } from '../../../constants/image';
-import io from 'socket.io-client';
-import ChatMsg from '../../../components/ChatMsg';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store/reducer';
 import { socket } from '../../../../App';
-import { getPostThunk } from '../../../store/post/thunk';
 import axios from 'axios';
 import { numberWithCommas } from '../../../utils';
-import Toast from 'react-native-simple-toast';
-
-export interface MsgRes {
-  time: string;
-  msg: string;
-  senderID: string;
-}
-
-interface PostRes {
-  title: string;
-  price: number;
-  img: string;
-}
-interface MsgReq {
-  msg: string;
-  senderID: string;
-  chatID: number;
-  postID: number;
-  receiverID: string;
-}
+import {
+  ChatMsgRes,
+  GetChatPost,
+  GetChatRes,
+} from '../../../utils/api/chat/types';
+import ChatMessage from '../../../components/ChatMessage';
+import ChatHeader from '../../../components/ChatHeader';
+import { loadChatThunk } from '../../../store/chat/thunk';
 
 const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
-  const { control, handleSubmit, watch, reset } = useForm<{ msg: string }>();
-  const [messages, setMessages] = useState<MsgRes[]>([]);
+  const { control, handleSubmit, watch, reset } = useForm<{ text: string }>();
   const [keyboardHeight] = useKeyboard();
-  const { id } = route.params;
-  const msgWatch = watch('msg');
-  const rootState = useSelector((state: RootState) => state);
+  const { chatID, postID } = route.params;
+  const msgWatch = watch('text');
+  const [messages, setMessages] = useState<ChatMsgRes[]>([]);
+  const [receiverID, setReceiverID] = useState('');
+  const [headerTitle, setHeaderTitle] = useState('');
+
+  const {
+    chat: { chat },
+    post: { eth },
+    user: {
+      user: {
+        data: { id: userID },
+      },
+    },
+  } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(loadChatThunk(chatID, postID));
+  }, [chatID, postID]);
+
+  useEffect(() => {
+    if (chat.data) {
+      // 채팅 정보를 불러왔음
+      const {
+        data: { buyer, seller, post },
+      } = chat;
+      if (buyer && seller) {
+        // 디비에 있는 채팅방
+        setHeaderTitle(userID === buyer.id ? seller.name : buyer.name);
+        setReceiverID(userID === buyer.id ? seller.id : buyer.id);
+      } else {
+        // 디비에 없는 채팅방 - 신설(메세지를 보내는 순간 디비에 저장)
+        setHeaderTitle(chat.data.post.seller.name);
+      }
+      setMessages(chat.data.msgs);
+    } else {
+      // 오류 발생해서 정보가 없음 혹은 초기상태
+    }
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -79,44 +92,30 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
           />
         </HeaderSide>
       ),
-      title: '채팅',
-      // title: rootState.post.post.data
-      //   ? rootState.post.post.data.user.name
-      //   : '로딩중',
+      title: headerTitle,
     });
-  }, [navigation]);
+  }, [navigation, headerTitle]);
 
-  useEffect(() => {
-    socket.on(
-      'msgToClient',
-      (res: { sender: string; msg: string; chatroomID: number }) => {
-        console.log('received data : ', res);
-        if (id !== res.chatroomID) navigation.setParams({ id: res.chatroomID });
-        //setMessages(prev => [...prev, res]);
-        Toast.show(`${res.sender}님의 메세지 : ${res.msg}`, Toast.SHORT, [
-          'UIAlertController',
-        ]);
-      },
-    );
-  }, []);
+  const onPress = (id: number) => {
+    navigation.navigate('Home', { screen: 'Post', params: { id: id } });
+  };
 
-  const onSubmit = (data: { msg: string }) => {
-    if (rootState.post.post.data) {
-      const {
-        id: postID,
-        user: { id: receiverID },
-      } = rootState.post.post.data;
-      const { id: senderID } = rootState.user.user.data;
-      const req: MsgReq = {
-        msg: data.msg,
-        postID: postID,
-        chatID: id,
-        receiverID: receiverID,
-        senderID: senderID,
-      };
-      socket.emit('msgToServer', req);
-      reset();
-    }
+  const onSubmit = (data: { text: string }) => {
+    const req = {
+      text: data.text,
+      chatID: chatID,
+      postID: postID,
+      senderID: userID,
+      receiverID: receiverID,
+    };
+    socket.emit('msgToServer', req);
+    // socket.emit('msgToServer', req, (res: ChatMsg) => {
+    //   console.log(res);
+    //   setMessages(prev => [...prev, res]);
+    //   if (chatID === -1)
+    //     navigation.setParams({ chatID: res.id, postID: postID });
+    // });
+    reset();
   };
 
   const openActionSheet = () => {
@@ -154,146 +153,86 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
       },
     );
   };
-  const renderHeader = () => {
-    return (
-      <View>
-        {rootState.post.post.data && (
-          <TouchableOpacity activeOpacity={1} style={styles.header}>
-            <Image
-              source={{ uri: rootState.post.post.data.postImgs[0].url }}
-              style={{
-                width: 40,
-                height: 40,
-                borderColor: 'black',
-                borderWidth: 1,
-                borderRadius: 4,
-              }}
-            />
-            <View
-              style={{
-                flex: 1,
-                paddingHorizontal: 4,
-                marginLeft: 6,
-              }}>
-              <View style={{ flexDirection: 'row', marginVertical: 1 }}>
-                {/* <Text style={{ color: PALETTE.line1, fontWeight: 'bold' }}>
-                  [거래상태]
-                </Text> */}
-                <Text
-                  ellipsizeMode="tail"
-                  style={{ overflow: 'hidden', width: '70%' }}
-                  numberOfLines={1}>
-                  {rootState.post.post.data.title}
-                </Text>
-              </View>
-              <View style={{ flexDirection: 'row', marginVertical: 1 }}>
-                <Text style={{ fontWeight: '700' }}>{`ETH ${0.0001}`}</Text>
-                <Text style={{ fontWeight: '500' }}>{`[KRW ${numberWithCommas(
-                  rootState.post.post.data.price,
-                )}]`}</Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={() => {}}
-              style={{
-                borderColor: PALETTE.grey,
-                padding: 8,
-                borderWidth: 0.5,
-                borderRadius: 4,
-                justifyContent: 'flex-end',
-              }}>
-              <Text
-                style={{
-                  fontWeight: '700',
-                  textAlign: 'center',
-                  fontSize: 13,
-                }}>{`작성한\n후기 보기`}</Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        )}
-      </View>
-    );
-  };
+
+  // useEffect(() => {
+  //   getData(chatID, postID);
+  //   socket.on('msgToClientMerge', (res: number) => {
+  //     if (res === chatID) getData(chatID, postID);
+  //   });
+  // }, [chatID]);
+
   return (
-    <TouchableWithoutFeedback
-      style={{ flex: 1 }}
-      onPress={() => Keyboard.dismiss()}>
-      <View style={styles.container}>
-        <View style={styles.content}>
-          {messages.length > 0 ? (
+    <View style={styles.container}>
+      <View style={styles.content}>
+        {chat.data ? (
+          <View>
+            <ChatHeader data={chat.data.post} eth={eth} onPress={onPress} />
             <FlatList
+              scrollIndicatorInsets={{ right: 1 }}
               data={messages}
-              contentContainerStyle={{ backgroundColor: 'white' }}
+              contentContainerStyle={{
+                backgroundColor: 'white',
+                padding: 12,
+              }}
               renderItem={({ item }) => (
-                <ChatMsg
-                  isMe={item.senderID === rootState.user.user.data.id}
-                  msg={item.msg}
-                  date={item.time}
+                <ChatMessage
+                  isMe={item.sender.id === userID}
+                  msg={item.text}
+                  date={item.createdAt}
                 />
               )}
               keyExtractor={(item, index) => index.toString()}
             />
-          ) : (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <Text>No Data</Text>
-            </View>
-          )}
-        </View>
-
-        <View
-          style={[
-            styles.bottom,
-            {
-              marginBottom: keyboardHeight,
-              paddingBottom:
-                keyboardHeight > 0 ? 0 : Platform.OS === 'ios' ? 24 : 0,
-            },
-          ]}>
-          <View style={styles.bottomContainer}>
-            {/* <PressableIcon
-                name="add-sharp"
-                size={26}
-                color={PALETTE.grey}
-                mh={6}
-                onPress={() => {}}
-              /> */}
-            <View style={styles.bottomInput}>
-              <Controller
-                control={control}
-                name="msg"
-                defaultValue=""
-                rules={{ required: true }}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    placeholder="메세지를 입력하세요."
-                    placeholderTextColor={PALETTE.grey}
-                    style={styles.bottomInputText}
-                    value={value}
-                    onChangeText={value => onChange(value)}
-                    onBlur={onBlur}
-                  />
-                )}
-              />
-            </View>
-            <PressableIcon
-              name="send-sharp"
-              size={26}
-              color={
-                msgWatch && msgWatch.length > 0 ? PALETTE.main : PALETTE.grey
-              }
-              mh={6}
-              onPress={handleSubmit(onSubmit)}
+          </View>
+        ) : chat.error ? (
+          <View>
+            <Text>{chat.error}</Text>
+          </View>
+        ) : (
+          <View>
+            <Text>??</Text>
+          </View>
+        )}
+      </View>
+      <View
+        style={[
+          styles.bottom,
+          {
+            marginBottom: keyboardHeight,
+            paddingBottom: keyboardHeight > 0 ? 0 : 24,
+          },
+        ]}>
+        <View style={styles.bottomContainer}>
+          <View style={styles.bottomInput}>
+            <Controller
+              control={control}
+              name="text"
+              defaultValue=""
+              rules={{ required: true }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  placeholder="메세지를 입력하세요."
+                  placeholderTextColor={PALETTE.grey}
+                  style={styles.bottomInputText}
+                  value={value}
+                  onChangeText={value => onChange(value)}
+                  onBlur={onBlur}
+                />
+              )}
             />
           </View>
+          <PressableIcon
+            name="send-sharp"
+            size={26}
+            color={
+              msgWatch && msgWatch.length > 0 ? PALETTE.main : PALETTE.grey
+            }
+            mh={6}
+            onPress={handleSubmit(onSubmit)}
+          />
         </View>
       </View>
-    </TouchableWithoutFeedback>
+    </View>
   );
 };
 
@@ -302,15 +241,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  header: {
-    backgroundColor: 'white',
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'rgb(216,216,216)',
-    padding: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  content: { flex: 1, backgroundColor: 'white', padding: 12 },
+  content: { flex: 1, backgroundColor: 'white' },
   bottom: {
     justifyContent: 'flex-end',
     paddingBottom: 24,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BottomTabBarProps,
   createBottomTabNavigator,
@@ -20,6 +20,9 @@ import Modal2 from '../components/Modal/Modal2';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/reducer';
 import { initPosting } from '../store/posting/action';
+import { socket } from '../../App';
+import Toast from 'react-native-simple-toast';
+import { ChatMsg } from '../types';
 
 const Tab = createBottomTabNavigator<MainParamList>();
 
@@ -38,6 +41,17 @@ const MainNav = () => {
       navigation.navigate('Posting');
     }
   };
+
+  useEffect(() => {
+    socket.on('msgToClientNoti', (res: ChatMsg) => {
+      Toast.showWithGravity(
+        `${res.sender.name}님 : ${res.msg}`,
+        Toast.SHORT,
+        Toast.TOP,
+        ['UIAlertController'],
+      );
+    });
+  }, []);
 
   return (
     <>

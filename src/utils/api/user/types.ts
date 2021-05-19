@@ -6,5 +6,5 @@ export type LoadUserRes = {
   profileImgUrl: string;
   createdAt: string;
   updatedAt: string;
-  subscribedCategories: string;
+  subscribedCategories: string[];
 };

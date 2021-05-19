@@ -5,10 +5,10 @@ import { PALETTE } from '../constants/color';
 interface Props {
   isMe: boolean;
   msg: string;
-  date?: string;
+  date: string;
 }
 
-const ChatMsg = ({ isMe, msg, date }: Props) => {
+const ChatMessage = ({ isMe, msg, date }: Props) => {
   return (
     <View style={styles.container}>
       {isMe ? (
@@ -38,4 +38,4 @@ const styles = StyleSheet.create({
   date: { fontSize: 12, color: PALETTE.grey, alignSelf: 'flex-end' },
 });
 
-export default ChatMsg;
+export default ChatMessage;

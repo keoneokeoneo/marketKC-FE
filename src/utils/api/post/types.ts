@@ -5,14 +5,12 @@ export type PostRes = {
   title: string;
   content: string;
   price: number;
-  likes: number;
-  chats: number;
   views: number;
   location: string;
   status: string;
   updatedAt: string;
   categoryName: string;
-  user: {
+  seller: {
     id: string;
     name: string;
     profileImgUrl: string;
@@ -24,8 +22,6 @@ export type FeedPost = {
   id: number;
   title: string;
   price: number;
-  likes: number;
-  chats: number;
   location: string;
   updatedAt: string;
   postImgs: S3Image[];

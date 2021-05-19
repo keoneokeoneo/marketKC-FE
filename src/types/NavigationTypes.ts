@@ -43,7 +43,7 @@ export type PostingParamList = {
 
 export type ChatParamList = {
   ChatList: undefined;
-  ChatRoom: { id: number };
+  ChatRoom: { chatID: number; postID: number };
 };
 
 export type ProfileParamList = {

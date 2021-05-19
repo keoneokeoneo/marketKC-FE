@@ -10,4 +10,10 @@ const getPosts = async () => {
   return await axios.get<PostsRes>(`${API_BASE_URL}/posts`);
 };
 
-export { getPostByID, getPosts };
+const getETH = async () => {
+  return await axios.get(
+    'https://api.upbit.com/v1/candles/minutes/1?market=KRW-ETH&count=1',
+  );
+};
+
+export { getPostByID, getPosts, getETH };
