@@ -9,6 +9,9 @@ import {
   UPDATE_USER_LOCATION,
   UPDATE_USER_LOCATION_ERROR,
   UPDATE_USER_LOCATION_SUCCESS,
+  UPDATE_USER_WALLET,
+  UPDATE_USER_WALLET_ERROR,
+  UPDATE_USER_WALLET_SUCCESS,
   UserState,
 } from './types';
 
@@ -129,6 +132,35 @@ export const userReducer = (
           ...state.categories,
           error: action.error,
           loading: false,
+        },
+      };
+    case UPDATE_USER_WALLET:
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          loading: true,
+        },
+      };
+    case UPDATE_USER_WALLET_SUCCESS:
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          loading: false,
+          data: {
+            ...state.user.data,
+            walletAddr: action.walletAddr,
+          },
+        },
+      };
+    case UPDATE_USER_WALLET_ERROR:
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          loading: false,
+          error: action.error,
         },
       };
     default:

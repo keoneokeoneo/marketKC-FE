@@ -12,6 +12,10 @@ export const UPDATE_USER_LOCATION_ERROR = 'UPDATE_USER_LOCATION_ERROR' as const;
 export const UPDATE_USER_CATEGORIES = 'UPDATE_USER_CATEGORIES' as const;
 export const UPDATE_USER_CATEGORIES_SUCCESS = 'UPDATE_USER_CATEGORIES_SUCCESS' as const;
 export const UPDATE_USER_CATEGORIES_ERROR = 'UPDATE_USER_CATEGORIES_ERROR' as const;
+
+export const UPDATE_USER_WALLET = 'UPDATE_USER_WALLET' as const;
+export const UPDATE_USER_WALLET_SUCCESS = 'UPDATE_USER_WALLET_SUCCESS' as const;
+export const UPDATE_USER_WALLET_ERROR = 'UPDATE_USER_WALLET_ERROR' as const;
 /* ----------------------------------------------------- */
 
 /* ---------------------- 액션 타입 유니온 ---------------------- */
@@ -30,10 +34,16 @@ type UPDATE_USER_CATEGORIES_TYPE =
   | typeof UPDATE_USER_CATEGORIES_SUCCESS
   | typeof UPDATE_USER_CATEGORIES_ERROR;
 
+type UPDATE_USER_WALLET_TYPE =
+  | typeof UPDATE_USER_WALLET
+  | typeof UPDATE_USER_WALLET_SUCCESS
+  | typeof UPDATE_USER_WALLET_ERROR;
+
 export type USER_ACTION_TYPE =
   | LOAD_USER_TYPE
   | UPDATE_USER_LOCATION_TYPE
-  | UPDATE_USER_CATEGORIES_TYPE;
+  | UPDATE_USER_CATEGORIES_TYPE
+  | UPDATE_USER_WALLET_TYPE;
 /* ----------------------------------------------------- */
 
 export type UserState = {

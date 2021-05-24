@@ -20,7 +20,6 @@ export const getETHThunk = (): ThunkAction<
   return async dispatch => {
     try {
       const res = await postAPI.getETH();
-      console.log(res);
       if (res.status === 200) {
         dispatch(getETH(res.data[0].low_price));
       }

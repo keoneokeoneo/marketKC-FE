@@ -47,18 +47,8 @@ export type ChatParamList = {
 };
 
 export type ProfileParamList = {
-  Dibs: undefined;
-  Sales: undefined;
-  Purchases: undefined;
-  Wallet: undefined;
   ModifyProfile: undefined;
   UserProfile: undefined;
   MyPage: undefined;
-  LikeList: undefined;
-  TradeList: NestedNavigatorParams<TradeListParamList>;
-};
-
-export type TradeListParamList = {
-  BuyList: undefined;
-  SellList: undefined;
+  RegisterWallet: undefined;
 };

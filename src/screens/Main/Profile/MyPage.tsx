@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  RefreshControl,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import HeaderSide from '../../../components/HeaderSide';
@@ -16,9 +17,36 @@ import { PALETTE } from '../../../constants/color';
 import TextChip from '../../../components/Button/TextChip';
 import { RootState } from '../../../store/reducer';
 import { logout } from '../../../store/auth/action';
+import ProfileBox from '../../../components/ProfileBox';
+import { loadUserThunk } from '../../../store/user/thunk';
+import axios from 'axios';
 
 const MyPage = ({ navigation }: MyPageProps) => {
-  const userState = useSelector((state: RootState) => state.user);
+  const [balance, setBalance] = useState(0);
+  const {
+    user: {
+      data: { id, name, profileImgUrl, walletAddr, email },
+      loading,
+    },
+    location: {
+      data: { area3 },
+    },
+  } = useSelector((state: RootState) => state.user);
+  const getData = async () => {
+    if (walletAddr !== '') {
+      try {
+        dispatch(loadUserThunk(id));
+        const res = await axios.get(
+          `http://127.0.0.1:3000/getBalance?addr=${walletAddr}`,
+        );
+        if (res.status === 200) {
+          setBalance(res.data.result / Math.pow(10, 18));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
   const dispatch = useDispatch();
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -32,213 +60,129 @@ const MyPage = ({ navigation }: MyPageProps) => {
     });
   }, [navigation]);
 
+  useEffect(() => {
+    getData();
+  }, []);
+
   return (
     <View style={styles.container}>
-      <ScrollView style={{ flex: 1 }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={getData} />
+        }>
         <View style={styles.paper}>
-          <View style={styles.profileContainer}>
-            <TouchableOpacity
-              style={styles.profileImgContainer}
-              activeOpacity={1}>
-              <Image
-                source={{ uri: userState.user.data.profileImgUrl }}
-                style={styles.profileImg}
-              />
-              <View style={styles.profileImgIcon}>
-                <Ionicons name="camera" size={18} />
-              </View>
-            </TouchableOpacity>
-            <View style={styles.profileInfoContainer}>
-              <Text style={styles.profileName}>{userState.user.data.name}</Text>
-              <Text style={styles.profileSubInfo}>{`${
-                userState.location.data.area3
-              } #${userState.user.data.id.split('-')[0]}`}</Text>
-            </View>
-          </View>
-          <TouchableOpacity
-            activeOpacity={1}
-            style={styles.profileBtn}
-            onPress={() => navigation.navigate('ModifyProfile')}>
-            <Text style={styles.profileBtnText}>프로필 보기</Text>
-          </TouchableOpacity>
-          <View style={styles.profileList}>
-            <TouchableOpacity
-              activeOpacity={1}
-              style={styles.profileListItem}
-              onPress={() =>
-                navigation.navigate('TradeList', { screen: 'SellList' })
-              }>
-              <View style={styles.profileListItemIcon}>
-                <Ionicons name="document-text" size={28} />
-              </View>
-              <Text style={styles.profileListItemText}>거래내역</Text>
-            </TouchableOpacity>
-            <View style={styles.profileListItemDivider} />
-            <TouchableOpacity
-              activeOpacity={1}
-              style={styles.profileListItem}
-              onPress={() => navigation.navigate('LikeList')}>
-              <View style={styles.profileListItemIcon}>
-                <Ionicons name="heart" size={28} />
-              </View>
-              <Text style={styles.profileListItemText}>관심목록</Text>
+          <ProfileBox
+            isMe
+            url={profileImgUrl}
+            name={name}
+            info={`${area3} #${id.split('-')[0]}`}
+          />
+          <View style={{ marginVertical: 4, padding: 12 }}>
+            <TouchableOpacity style={styles.btn} activeOpacity={1}>
+              <Text style={styles.btnText}>프로필 보기</Text>
             </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.menuList}>
-          <View style={styles.menuListItem}>
-            <View>
-              <Text style={styles.menuListItemText}>아이디(이메일)</Text>
-              <Text
-                style={[styles.menuListItemText, styles.menuListItemSubText]}>
-                {userState.user.data.email}
-              </Text>
-            </View>
-          </View>
 
-          <View style={styles.menuListItem}>
-            <View>
-              <Text style={styles.menuListItemText}>암호화폐 지갑주소</Text>
-              <Text
-                style={[styles.menuListItemText, styles.menuListItemSubText]}>
-                {userState.user.data.walletAddr === ''
-                  ? '인증되지않음'
-                  : userState.user.data.walletAddr}
-              </Text>
-            </View>
-            <TextChip text="인증하기" />
+        <View style={styles.paper}>
+          <View style={styles.info}>
+            <Text style={styles.infoLabel}>아이디(이메일)</Text>
+            <Text style={styles.infoText}>{email}</Text>
           </View>
+          <View style={styles.info}>
+            <Text style={styles.infoLabel}>지갑주소</Text>
+            <Text style={[styles.infoText]}>
+              {walletAddr === '' ? '인증 필요' : walletAddr}
+            </Text>
+          </View>
+          <View style={styles.info}>
+            <Text style={styles.infoLabel}>지갑잔액</Text>
+            <Text style={styles.infoText}>
+              {walletAddr !== '' ? `${balance} ETH` : '안증 필요'}
+            </Text>
+          </View>
+        </View>
 
-          <View style={styles.menuListItem}>
-            <View>
-              <Text style={styles.menuListItemText}>암호화폐 잔액</Text>
-              <Text
-                style={[styles.menuListItemText, styles.menuListItemSubText]}>
-                {userState.user.data.walletAddr === ''
-                  ? '인증되지않음'
-                  : `ETH    ${0.22}`}
-              </Text>
-            </View>
-          </View>
+        <View style={styles.paper}>
+          <TouchableOpacity style={styles.listItem} activeOpacity={1}>
+            <Text style={styles.listItemText}>판매내역</Text>
+            <Ionicons name="chevron-forward" style={styles.listItemText} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.listItem} activeOpacity={1}>
+            <Text style={styles.listItemText}>구매내역</Text>
+            <Ionicons name="chevron-forward" style={styles.listItemText} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.listItem} activeOpacity={1}>
+            <Text style={styles.listItemText}>신청내역</Text>
+            <Ionicons name="chevron-forward" style={styles.listItemText} />
+          </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.menuListItem}
+            style={styles.listItem}
+            activeOpacity={1}
+            onPress={() => navigation.navigate('RegisterWallet')}>
+            <Text style={styles.listItemText}>지갑 등록</Text>
+            <Ionicons name="chevron-forward" style={styles.listItemText} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.listItem}
+            activeOpacity={1}
+            onPress={() => navigation.navigate('ModifyProfile')}>
+            <Text style={styles.listItemText}>프로필 수정</Text>
+            <Ionicons name="chevron-forward" style={styles.listItemText} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.listItem}
             activeOpacity={1}
             onPress={() => {
               dispatch(logout());
               navigation.navigate('Landing', { screen: 'SignIn' });
             }}>
-            <Text style={styles.menuListItemText}>로그아웃</Text>
+            <Text style={styles.listItemText}>로그아웃</Text>
+            <Ionicons name="chevron-forward" style={styles.listItemText} />
           </TouchableOpacity>
-          <View style={styles.menuListItem}>
-            <Text style={styles.menuListItemText}>회원탈퇴</Text>
-          </View>
         </View>
       </ScrollView>
     </View>
   );
 };
 
-// document-text / back-check / heart
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: 'rgb(216,216,216)',
   },
   paper: {
-    padding: 20,
     backgroundColor: 'white',
-    marginBottom: 4,
+    marginBottom: 12,
   },
-  profileContainer: {
-    flexDirection: 'row',
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  profileImgContainer: {},
-  profileImg: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    borderColor: PALETTE.grey,
-    borderWidth: 0.5,
-  },
-  profileImgIcon: {
-    padding: 2,
-    position: 'absolute',
-    right: -2,
-    bottom: 0,
-    borderRadius: 30,
-    borderColor: PALETTE.grey,
-    borderWidth: 0.5,
-    backgroundColor: 'white',
-  },
-  profileInfoContainer: {
-    marginLeft: 16,
-  },
-  profileName: {
-    fontSize: 18,
-    fontWeight: '700',
-    paddingVertical: 2,
-  },
-  profileSubInfo: {
-    color: PALETTE.grey,
-    paddingVertical: 2,
-  },
-  profileBtn: {
-    borderColor: PALETTE.grey,
-    borderWidth: 0.5,
-    borderRadius: 6,
+  btn: {
     justifyContent: 'center',
     alignItems: 'center',
     padding: 8,
-    marginVertical: 12,
+    borderWidth: 0.5,
+    borderColor: 'rgb(216,216,216)',
+    borderRadius: 8,
   },
-  profileBtnText: { fontWeight: '600' },
-  profileList: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-  },
-  profileListItem: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  profileListItemIcon: {
-    padding: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileListItemText: {
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  profileListItemDivider: {
-    width: 2,
-    height: '20%',
-    backgroundColor: PALETTE.grey,
-  },
-  menuList: {
-    backgroundColor: 'white',
-  },
-  menuListItem: {
-    borderBottomColor: PALETTE.grey,
-    borderBottomWidth: 0.5,
+  btnText: { fontSize: 16, fontWeight: 'bold' },
+  listItem: {
+    paddingVertical: 16,
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgb(216,216,216)',
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
   },
-  menuListItemText: {
-    paddingVertical: 2,
-    fontSize: 15,
-  },
-  menuListItemSubText: {
-    color: PALETTE.grey,
-    fontSize: 13,
-  },
+  listItemText: { fontSize: 18, fontWeight: '500' },
+  infoLabel: { fontWeight: '500', fontSize: 16, marginBottom: 4 },
+  info: { paddingVertical: 16, paddingHorizontal: 20 },
+  infoText: { color: 'rgb(216,216,216)', fontSize: 13 },
 });
 
 export default MyPage;

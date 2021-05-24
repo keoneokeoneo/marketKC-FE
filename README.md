@@ -8,22 +8,6 @@
 - [Typescript](https://www.typescriptlang.org/)
 - [Redux](https://redux.js.org/)
 - [Redux-Thunk](https://github.com/reduxjs/redux-thunk)
-- [React-Navigation V5]
-- [React-Hook-Form]
-
-### 회원가입
-
-- [x] UI 구성
-- [x] 폼 검증
-- [x] 리덕스 연결
-- [x] 서버 연동
-- [ ] 회원가입 성공 시 자동 로그인
-
-### 로그인
-
-- [x] UI 구성
-- [x] 폼 검증
-- [x] 리덕스 연결
-- [x] 서버 연동
-- [x] 로컬 스토리지 저장
-- [x] JWT
+- [React-Navigation V5](https://reactnavigation.org/)
+- [React-Hook-Form](https://react-hook-form.com/)
+- [Socket.io](https://socket.io/)

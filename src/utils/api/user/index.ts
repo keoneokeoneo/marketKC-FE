@@ -17,6 +17,13 @@ const updateUserCategories = async (id: string, categories: number[]) => {
   );
 };
 
+const updateUserWalletAddr = async (id: string, walletAddr: string) => {
+  return await axios.patch(`${API_BASE_URL}/users/walletAddr`, {
+    id,
+    walletAddr,
+  });
+};
+
 const getCurrentLocation = async (long: number, lat: number) => {
   return await axios.get(
     `https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?request=coordsToaddr&coords=${long},${lat}&orders=admcode&output=json`,
@@ -29,4 +36,9 @@ const getCurrentLocation = async (long: number, lat: number) => {
   );
 };
 
-export { loadUserByID, getCurrentLocation, updateUserCategories };
+export {
+  loadUserByID,
+  getCurrentLocation,
+  updateUserCategories,
+  updateUserWalletAddr,
+};

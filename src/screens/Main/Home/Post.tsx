@@ -63,7 +63,6 @@ const Post = ({ navigation, route }: PostProps) => {
         sellerID: sellerID,
         userID: userID,
       };
-      console.log(data);
       socket.emit('requestNewRoom', data, (res: number) =>
         navigation.navigate('Chat', {
           screen: 'ChatRoom',

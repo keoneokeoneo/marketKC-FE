@@ -11,7 +11,6 @@ import {
   MainParamList,
   PostingParamList,
   ProfileParamList,
-  TradeListParamList,
 } from './NavigationTypes';
 
 export interface IntroProps {
@@ -159,25 +158,12 @@ export interface ModifyProfileProps {
   >;
 }
 
-export interface LikeListProps {
+export interface RegisterWalletProps {
   navigation: CompositeNavigationProp<
-    StackNavigationProp<ProfileParamList, 'LikeList'>,
+    StackNavigationProp<ProfileParamList, 'RegisterWallet'>,
     CompositeNavigationProp<
       BottomTabNavigationProp<MainParamList>,
       StackNavigationProp<AppNavParamList>
-    >
-  >;
-}
-
-export interface BuyListProps {
-  navigation: CompositeNavigationProp<
-    MaterialTopTabNavigationProp<TradeListParamList, 'BuyList'>,
-    CompositeNavigationProp<
-      StackNavigationProp<ProfileParamList, 'TradeList'>,
-      CompositeNavigationProp<
-        BottomTabNavigationProp<MainParamList, 'Profile'>,
-        StackNavigationProp<AppNavParamList>
-      >
     >
   >;
 }

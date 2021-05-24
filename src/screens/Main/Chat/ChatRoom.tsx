@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
   ActionSheetIOS,
+  Alert,
   FlatList,
   Keyboard,
   StyleSheet,
@@ -49,6 +50,15 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    socket.on('room created', (res: any) => {
+      Alert.alert(`채팅방이 생성됨 : ${res}`);
+    });
+    socket.on('newMsgRes', (res: ChatMsgRes) => {
+      setMessages(prev => [...prev, res]);
+    });
+  }, []);
+
+  useEffect(() => {
     dispatch(loadChatThunk(chatID, postID));
   }, [chatID, postID]);
 
@@ -65,12 +75,11 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
       } else {
         // 디비에 없는 채팅방 - 신설(메세지를 보내는 순간 디비에 저장)
         setHeaderTitle(chat.data.post.seller.name);
+        setReceiverID(post.seller.id);
       }
       setMessages(chat.data.msgs);
-    } else {
-      // 오류 발생해서 정보가 없음 혹은 초기상태
     }
-  }, []);
+  }, [chat]);
 
   useLayoutEffect(() => {
     navigation.setOptions({

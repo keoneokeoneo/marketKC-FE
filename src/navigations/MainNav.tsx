@@ -22,15 +22,27 @@ import { RootState } from '../store/reducer';
 import { initPosting } from '../store/posting/action';
 import { socket } from '../../App';
 import Toast from 'react-native-simple-toast';
-import { ChatMsg } from '../types';
+import { ChatMsgRes } from '../utils/api/chat/types';
+import { Alert } from 'react-native';
 
 const Tab = createBottomTabNavigator<MainParamList>();
+interface Msg {
+  name: string;
+  text: string;
+}
 
 const MainNav = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
-  const postingStatus = useSelector((state: RootState) => state.posting);
+  const {
+    posting: { empty },
+    user: {
+      user: {
+        data: { walletAddr },
+      },
+    },
+  } = useSelector((state: RootState) => state);
   const onSelect = (flag: boolean) => {
     setOpen(false);
     // true => 이어서 작성
@@ -43,9 +55,9 @@ const MainNav = () => {
   };
 
   useEffect(() => {
-    socket.on('msgToClientNoti', (res: ChatMsg) => {
+    socket.on('msgFromClient', (res: Msg) => {
       Toast.showWithGravity(
-        `${res.sender.name}님 : ${res.msg}`,
+        `${res.name}님 : ${res.text}`,
         Toast.SHORT,
         Toast.TOP,
         ['UIAlertController'],
@@ -121,8 +133,12 @@ const MainNav = () => {
           listeners={{
             tabPress: e => {
               e.preventDefault();
-              if (!postingStatus.empty) setOpen(true);
-              else navigation.navigate('Posting');
+              if (walletAddr === '')
+                Alert.alert('지갑 주소 등록을 먼저 해주세요!');
+              else {
+                if (empty) setOpen(true);
+                else navigation.navigate('Posting');
+              }
             },
           }}
           options={({ route }) => ({

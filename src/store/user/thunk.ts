@@ -13,6 +13,9 @@ import {
   updateUserCategoriesSuccess,
   updateUserLocationError,
   updateUserLocationSuccess,
+  updateUserWallet,
+  updateUserWalletSuccess,
+  updateUserWalletError,
 } from './action';
 import Toast from 'react-native-simple-toast';
 import axios from 'axios';
@@ -43,6 +46,23 @@ export const loadUserThunk = (
       if (axios.isAxiosError(e) && e.response)
         dispatch(loadUserError(e.response.data));
       else dispatch(loadUserError('네트워크 에러'));
+    }
+  };
+};
+
+export const updateUserWalletThunk = (
+  id: string,
+  walletAddr: string,
+): ThunkAction<void, RootState, null, UserAction> => {
+  return async dispatch => {
+    dispatch(updateUserWallet());
+    try {
+      const res = await userAPI.updateUserWalletAddr(id, walletAddr);
+      if (res.status === 200) {
+        dispatch(updateUserWalletSuccess(walletAddr));
+      }
+    } catch (e) {
+      dispatch(updateUserWalletError('알수없는에러'));
     }
   };
 };

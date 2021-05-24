@@ -10,6 +10,9 @@ import {
   UPDATE_USER_LOCATION,
   UPDATE_USER_LOCATION_ERROR,
   UPDATE_USER_LOCATION_SUCCESS,
+  UPDATE_USER_WALLET,
+  UPDATE_USER_WALLET_ERROR,
+  UPDATE_USER_WALLET_SUCCESS,
 } from './types';
 
 export const loadUser = () => ({
@@ -58,6 +61,20 @@ export const updateUserCategoriesError = (error: string) => ({
   error,
 });
 
+export const updateUserWallet = () => ({
+  type: UPDATE_USER_WALLET,
+});
+
+export const updateUserWalletSuccess = (walletAddr: string) => ({
+  type: UPDATE_USER_WALLET_SUCCESS,
+  walletAddr,
+});
+
+export const updateUserWalletError = (error: string) => ({
+  type: UPDATE_USER_WALLET_ERROR,
+  error,
+});
+
 type LoadUserAction =
   | ReturnType<typeof loadUser>
   | ReturnType<typeof loadUserSuccess>
@@ -70,8 +87,13 @@ type UpdateUserCategoriesAction =
   | ReturnType<typeof updateUserCategories>
   | ReturnType<typeof updateUserCategoriesSuccess>
   | ReturnType<typeof updateUserCategoriesError>;
+type UpdateUserWalletAction =
+  | ReturnType<typeof updateUserWallet>
+  | ReturnType<typeof updateUserWalletSuccess>
+  | ReturnType<typeof updateUserWalletError>;
 
 export type UserAction =
   | LoadUserAction
   | UpdateUserLocationAction
-  | UpdateUserCategoriesAction;
+  | UpdateUserCategoriesAction
+  | UpdateUserWalletAction;

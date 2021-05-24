@@ -1,33 +1,32 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { PALETTE } from '../../../constants/color';
-import { ChatRoom } from '../../../types';
+import { GetChatRoomsRes } from '../../../utils/api/chat/types';
 
 interface Props {
   handlePress: (chatID: number, postID: number) => void;
-  data: ChatRoom;
+  data: GetChatRoomsRes;
 }
 
 const ChatListItem = ({ handlePress, data }: Props) => {
-  const { id, message, post, user } = data;
+  const { id, lastMsg, post, target } = data;
   const location = post.location.split(' ');
-  const date = new Date(message.createdAt).toLocaleDateString();
   return (
     <TouchableOpacity
       style={styles.container}
       activeOpacity={1}
       onPress={() => handlePress(id, post.id)}>
-      <Image source={{ uri: user.profileImgUrl }} style={styles.image} />
+      <Image source={{ uri: target.profileImgUrl }} style={styles.image} />
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.headerUserName}>{user.name}</Text>
+          <Text style={styles.headerUserName}>{target.name}</Text>
           <Text
             style={styles.headerInfo}>{`${location[1]} ${location[2]}`}</Text>
           <Text style={styles.headerInfo}>・</Text>
-          <Text style={styles.headerInfo}>{date}</Text>
+          <Text style={styles.headerInfo}>{lastMsg.createdAt}</Text>
         </View>
         <View style={styles.msgContainer}>
-          <Text style={styles.msg}>{message.msg}</Text>
+          <Text style={styles.msg}>{lastMsg.text}</Text>
         </View>
       </View>
     </TouchableOpacity>

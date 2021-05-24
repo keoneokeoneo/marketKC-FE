@@ -22,6 +22,7 @@ const ChatList = ({ navigation }: ChatListProps) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    console.log('test');
     dispatch(loadChatsThunk(user.user.data.id));
   }, []);
 
@@ -57,6 +58,7 @@ const ChatList = ({ navigation }: ChatListProps) => {
           )}
         />
       ) : (
+        // <View />
         <View
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Text>채팅 내역이 존재하지 않아요</Text>
