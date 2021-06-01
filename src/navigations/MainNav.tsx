@@ -22,14 +22,9 @@ import { RootState } from '../store/reducer';
 import { initPosting } from '../store/posting/action';
 import { socket } from '../../App';
 import Toast from 'react-native-simple-toast';
-import { ChatMsgRes } from '../utils/api/chat/types';
 import { Alert } from 'react-native';
 
 const Tab = createBottomTabNavigator<MainParamList>();
-interface Msg {
-  name: string;
-  text: string;
-}
 
 const MainNav = () => {
   const navigation = useNavigation();
@@ -55,13 +50,11 @@ const MainNav = () => {
   };
 
   useEffect(() => {
-    socket.on('msgFromClient', (res: Msg) => {
-      Toast.showWithGravity(
-        `${res.name}님 : ${res.text}`,
-        Toast.SHORT,
-        Toast.TOP,
-        ['UIAlertController'],
-      );
+    socket.on('roomInvitation', (res: string) => {
+      socket.emit('joinToRoom', res);
+    });
+    socket.on('notiFromServer', (res: string) => {
+      Toast.showWithGravity(res, Toast.SHORT, Toast.TOP, ['UIAlertController']);
     });
   }, []);
 

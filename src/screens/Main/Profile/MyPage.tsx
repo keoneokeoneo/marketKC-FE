@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   RefreshControl,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -79,7 +78,12 @@ const MyPage = ({ navigation }: MyPageProps) => {
             info={`${area3} #${id.split('-')[0]}`}
           />
           <View style={{ marginVertical: 4, padding: 12 }}>
-            <TouchableOpacity style={styles.btn} activeOpacity={1}>
+            <TouchableOpacity
+              style={styles.btn}
+              activeOpacity={1}
+              onPress={() =>
+                navigation.navigate('UserProfile', { userID: id })
+              }>
               <Text style={styles.btnText}>프로필 보기</Text>
             </TouchableOpacity>
           </View>
@@ -105,18 +109,35 @@ const MyPage = ({ navigation }: MyPageProps) => {
         </View>
 
         <View style={styles.paper}>
-          <TouchableOpacity style={styles.listItem} activeOpacity={1}>
+          <TouchableOpacity
+            style={styles.listItem}
+            activeOpacity={1}
+            onPress={() => navigation.navigate('SellList', { userID: id })}>
             <Text style={styles.listItemText}>판매내역</Text>
             <Ionicons name="chevron-forward" style={styles.listItemText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.listItem} activeOpacity={1}>
-            <Text style={styles.listItemText}>구매내역</Text>
+          <TouchableOpacity
+            style={styles.listItem}
+            activeOpacity={1}
+            onPress={() => navigation.navigate('TXList', { userID: id })}>
+            <Text style={styles.listItemText}>트랜잭션</Text>
             <Ionicons name="chevron-forward" style={styles.listItemText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.listItem} activeOpacity={1}>
+          <TouchableOpacity
+            style={styles.listItem}
+            activeOpacity={1}
+            onPress={() => navigation.navigate('RequestList')}>
             <Text style={styles.listItemText}>신청내역</Text>
+            <Ionicons name="chevron-forward" style={styles.listItemText} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.listItem}
+            activeOpacity={1}
+            onPress={() => navigation.navigate('TradeList', { userID: id })}>
+            <Text style={styles.listItemText}>거래내역</Text>
             <Ionicons name="chevron-forward" style={styles.listItemText} />
           </TouchableOpacity>
 
@@ -182,7 +203,7 @@ const styles = StyleSheet.create({
   listItemText: { fontSize: 18, fontWeight: '500' },
   infoLabel: { fontWeight: '500', fontSize: 16, marginBottom: 4 },
   info: { paddingVertical: 16, paddingHorizontal: 20 },
-  infoText: { color: 'rgb(216,216,216)', fontSize: 13 },
+  infoText: { color: PALETTE.grey, fontSize: 13 },
 });
 
 export default MyPage;

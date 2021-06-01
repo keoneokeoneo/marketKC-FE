@@ -4,7 +4,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { PALETTE } from '../constants/color';
 
 interface IProps {
-  isMe: boolean;
+  isMe?: boolean;
   url: string;
   name: string;
   info: string;
@@ -26,11 +26,11 @@ const ProfileBox = ({ isMe, url, name, info }: IProps) => {
             <Text style={styles.no}>{info}</Text>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {/* <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons name="star" style={styles.ratePrimary} />
           <Text style={styles.ratePrimary}>{`4.4`}</Text>
           <Text style={styles.rate}>{`/ 5`}</Text>
-        </View>
+        </View> */}
       </View>
     </View>
   );
@@ -42,11 +42,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   img: {
-    width: 64,
-    height: 64,
+    width: 72,
+    height: 72,
     borderRadius: 40,
     borderColor: 'rgb(216,216,216)',
     marginRight: 8,
+    borderWidth: 0.5,
   },
   name: { fontSize: 18, fontWeight: 'bold', marginVertical: 2 },
   no: { color: 'rgb(216,216,216)', marginVertical: 2 },

@@ -2,6 +2,12 @@ import { UserAction } from './action';
 import {
   LOAD_USER,
   LOAD_USER_ERROR,
+  LOAD_USER_REQUEST,
+  LOAD_USER_REQUEST_ERROR,
+  LOAD_USER_REQUEST_SUCCESS,
+  LOAD_USER_SELL,
+  LOAD_USER_SELL_ERROR,
+  LOAD_USER_SELL_SUCCESS,
   LOAD_USER_SUCCESS,
   UPDATE_USER_CATEGORIES,
   UPDATE_USER_CATEGORIES_ERROR,
@@ -45,6 +51,16 @@ const initialState: UserState = {
       long: 0,
     },
   },
+  sell: {
+    loading: false,
+    error: null,
+    data: [],
+  },
+  request: {
+    loading: false,
+    error: null,
+    data: [],
+  },
 };
 
 export const userReducer = (
@@ -80,6 +96,58 @@ export const userReducer = (
           ...state.user,
           error: action.error,
           loading: false,
+        },
+      };
+    case LOAD_USER_SELL:
+      return {
+        ...state,
+        sell: {
+          ...state.sell,
+          loading: true,
+        },
+      };
+    case LOAD_USER_SELL_SUCCESS:
+      return {
+        ...state,
+        sell: {
+          ...state.sell,
+          loading: false,
+          data: action.data,
+        },
+      };
+    case LOAD_USER_SELL_ERROR:
+      return {
+        ...state,
+        sell: {
+          ...state.sell,
+          loading: false,
+          error: action.error,
+        },
+      };
+    case LOAD_USER_REQUEST:
+      return {
+        ...state,
+        request: {
+          ...state.request,
+          loading: true,
+        },
+      };
+    case LOAD_USER_REQUEST_SUCCESS:
+      return {
+        ...state,
+        request: {
+          ...state.request,
+          loading: false,
+          data: action.data,
+        },
+      };
+    case LOAD_USER_REQUEST_ERROR:
+      return {
+        ...state,
+        request: {
+          ...state.request,
+          loading: false,
+          error: action.error,
         },
       };
     case UPDATE_USER_LOCATION:

@@ -5,8 +5,9 @@ import store from './src/store';
 import io from 'socket.io-client';
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SOCKET_URL } from './src/config';
 
-export const socket = io.connect('ws://127.0.0.1:81/s-marcet', {
+export const socket = io.connect(SOCKET_URL, {
   jsonp: false,
   transports: ['websocket'],
 });

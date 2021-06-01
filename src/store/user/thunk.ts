@@ -16,6 +16,12 @@ import {
   updateUserWallet,
   updateUserWalletSuccess,
   updateUserWalletError,
+  loadUserSell,
+  loadUserSellError,
+  loadUserSellSuccess,
+  loadUserRequest,
+  loadUserRequestSuccess,
+  loadUserRequestError,
 } from './action';
 import Toast from 'react-native-simple-toast';
 import axios from 'axios';
@@ -46,6 +52,38 @@ export const loadUserThunk = (
       if (axios.isAxiosError(e) && e.response)
         dispatch(loadUserError(e.response.data));
       else dispatch(loadUserError('네트워크 에러'));
+    }
+  };
+};
+
+export const loadUserSellThunk = (
+  userID: string,
+): ThunkAction<void, RootState, null, UserAction> => {
+  return async dispatch => {
+    dispatch(loadUserSell());
+    try {
+      const res = await userAPI.getSellList(userID);
+      if (res.status === 200) dispatch(loadUserSellSuccess(res.data));
+    } catch (e) {
+      console.error(e);
+      if (axios.isAxiosError(e)) dispatch(loadUserSellError(e.message));
+      else dispatch(loadUserSellError(e.message));
+    }
+  };
+};
+
+export const loadUserRequestThunk = (
+  userID: string,
+): ThunkAction<void, RootState, null, UserAction> => {
+  return async dispatch => {
+    dispatch(loadUserRequest());
+    try {
+      const res = await userAPI.getTradeRequests(userID);
+      if (res.status === 200) dispatch(loadUserRequestSuccess(res.data));
+    } catch (e) {
+      console.error(e);
+      if (axios.isAxiosError(e)) dispatch(loadUserRequestError(e.message));
+      else dispatch(loadUserRequestError(e.message));
     }
   };
 };

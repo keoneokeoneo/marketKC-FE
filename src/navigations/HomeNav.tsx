@@ -2,6 +2,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import Feed from '../screens/Main/Home/Feed';
 import Post from '../screens/Main/Home/Post';
+import Search from '../screens/Main/Home/Search';
 import SetCategory from '../screens/Main/Home/SetCategory';
 import SetLocation from '../screens/Main/Home/SetLocation';
 import { HomeParamList } from '../types/NavigationTypes';
@@ -15,6 +16,7 @@ const HomeNav = () => {
       <Stack.Screen name="Post" component={Post} />
       <Stack.Screen name="SetCategory" component={SetCategory} />
       <Stack.Screen name="SetLocation" component={SetLocation} />
+      <Stack.Screen name="Search" component={Search} />
     </Stack.Navigator>
   );
 };

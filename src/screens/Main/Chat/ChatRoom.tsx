@@ -1,9 +1,12 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react';
 import {
-  ActionSheetIOS,
   Alert,
   FlatList,
-  Keyboard,
   StyleSheet,
   Text,
   TextInput,
@@ -18,16 +21,11 @@ import { useKeyboard } from '../../../utils/useKeyboard';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store/reducer';
 import { socket } from '../../../../App';
-import axios from 'axios';
-import { numberWithCommas } from '../../../utils';
-import {
-  ChatMsgRes,
-  GetChatPost,
-  GetChatRes,
-} from '../../../utils/api/chat/types';
+import { ChatMsgRes } from '../../../utils/api/chat/types';
 import ChatMessage from '../../../components/ChatMessage';
 import ChatHeader from '../../../components/ChatHeader';
 import { loadChatThunk } from '../../../store/chat/thunk';
+import { LogBox } from 'react-native';
 
 const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
   const { control, handleSubmit, watch, reset } = useForm<{ text: string }>();
@@ -50,11 +48,18 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    socket.on('room created', (res: any) => {
-      Alert.alert(`채팅방이 생성됨 : ${res}`);
+    socket.on('room created', (res: number) => {
+      //navigation.navigate('ChatRoom', { chatID: res, postID: postID });
+      navigation.setParams({ chatID: res, postID: postID });
     });
     socket.on('newMsgRes', (res: ChatMsgRes) => {
       setMessages(prev => [...prev, res]);
+    });
+    socket.on('tradeRequestFail', (res: string) => {
+      Alert.alert('거래 요청 실패', res);
+    });
+    socket.on('tradeRequestSuccess', (res: string) => {
+      Alert.alert('거래 요청 성공', res);
     });
   }, []);
 
@@ -88,26 +93,13 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
           <PressableIcon
             name="arrow-back-sharp"
             size={26}
-            onPress={() => navigation.goBack()}
-          />
-        </HeaderSide>
-      ),
-      headerRight: () => (
-        <HeaderSide right>
-          <PressableIcon
-            name="ellipsis-vertical-sharp"
-            size={26}
-            onPress={openActionSheet}
+            onPress={() => navigation.navigate('ChatList')}
           />
         </HeaderSide>
       ),
       title: headerTitle,
     });
   }, [navigation, headerTitle]);
-
-  const onPress = (id: number) => {
-    navigation.navigate('Home', { screen: 'Post', params: { id: id } });
-  };
 
   const onSubmit = (data: { text: string }) => {
     const req = {
@@ -118,64 +110,60 @@ const ChatRoom = ({ navigation, route }: ChatRoomProps) => {
       receiverID: receiverID,
     };
     socket.emit('msgToServer', req);
-    // socket.emit('msgToServer', req, (res: ChatMsg) => {
-    //   console.log(res);
-    //   setMessages(prev => [...prev, res]);
-    //   if (chatID === -1)
-    //     navigation.setParams({ chatID: res.id, postID: postID });
-    // });
     reset();
   };
 
-  const openActionSheet = () => {
-    ActionSheetIOS.showActionSheetWithOptions(
-      {
-        options: [
-          '닫기',
-          '채팅방 나가기',
-          '거래 신청하기',
-          '신고하기',
-          '알림 해제하기',
-          '매너 평가하기',
-        ],
-        cancelButtonIndex: 0,
-        destructiveButtonIndex: 1,
-        userInterfaceStyle: 'light',
-      },
-      index => {
-        switch (index) {
-          case 0:
-            break;
-          case 1:
-            break;
-          case 2:
-            break;
-          case 3:
-            break;
-          case 4:
-            break;
-          case 5:
-            break;
-          default:
-            break;
-        }
-      },
-    );
-  };
+  const onPostClick = useCallback(
+    (id: number) => {
+      navigation.navigate('Home', { screen: 'Post', params: { id: id } });
+    },
+    [navigation],
+  );
 
-  // useEffect(() => {
-  //   getData(chatID, postID);
-  //   socket.on('msgToClientMerge', (res: number) => {
-  //     if (res === chatID) getData(chatID, postID);
-  //   });
-  // }, [chatID]);
+  const onBtnClick = () => {
+    if (chat.data) {
+      const { status, seller } = chat.data.post;
+      if (seller.id !== userID) {
+        if (status === '판매중') {
+          console.log('거래신청');
+          socket.emit('sendTradeRequest', {
+            postID: chat.data.post.id,
+            chatID: chat.data.id,
+            senderID: userID,
+            receiverID: seller.id,
+          });
+        } else if (status === '거래중') {
+        } else {
+          // 후기작성
+        }
+      } else {
+        if (status === '판매중') {
+        } else if (status === '거래중') {
+        } else {
+          // 후기작성
+        }
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         {chat.data ? (
-          <View>
-            <ChatHeader data={chat.data.post} eth={eth} onPress={onPress} />
+          <View style={{ flex: 1 }}>
+            <ChatHeader
+              data={chat.data.post}
+              eth={eth}
+              onBtnClick={onBtnClick}
+              onPostClick={onPostClick}
+              btnText={
+                chat.data.post.status === '판매중' &&
+                chat.data.post.seller.id !== userID
+                  ? '거래신청'
+                  : undefined
+              }
+              show={chatID !== -1}
+            />
             <FlatList
               scrollIndicatorInsets={{ right: 1 }}
               data={messages}

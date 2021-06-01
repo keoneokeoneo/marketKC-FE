@@ -17,71 +17,69 @@ const Intro = ({ navigation }: IntroProps) => {
   const authState = useSelector((state: RootState) => state.auth);
   const [loading, setLoading] = useState(true);
 
-  const requestLocationPermission = async () => {
-    try {
-      return await Geolocation.requestAuthorization('whenInUse');
-    } catch (e) {
-      console.log(e);
-    }
-  };
+  // const requestLocationPermission = async () => {
+  //   try {
+  //     return await Geolocation.requestAuthorization('whenInUse');
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // };
 
-  const getLocation = () => {
-    requestLocationPermission().then(res => {
-      if (res === 'granted') {
-        Geolocation.getCurrentPosition(
-          pos => {
-            dispatch(
-              findCurrentLocationThunk(
-                pos.coords.longitude,
-                pos.coords.latitude,
-              ),
-            );
-          },
-          err => {
-            console.log(err);
-          },
-          { enableHighAccuracy: true, timeout: 3600, maximumAge: 3600 },
-        );
-      }
-    });
-  };
+  // const getLocation = () => {
+  //   requestLocationPermission().then(res => {
+  //     if (res === 'granted') {
+  //       Geolocation.getCurrentPosition(
+  //         pos => {
+  //           dispatch(
+  //             findCurrentLocationThunk(
+  //               pos.coords.longitude,
+  //               pos.coords.latitude,
+  //             ),
+  //           );
+  //         },
+  //         err => {
+  //           console.log(err);
+  //         },
+  //         { enableHighAccuracy: true, timeout: 3600, maximumAge: 3600 },
+  //       );
+  //     }
+  //   });
+  // };
 
-  const initState = async () => {
-    try {
-      const userDataFromStorage = await AsyncStorage.getItem('UserData');
-      if (userDataFromStorage) {
-        const parsedData: ValidateTokenReq = JSON.parse(userDataFromStorage);
-        setLoading(false);
-        dispatch(validateTokenThunk(parsedData));
-      } else {
-        console.log('로컬스토리지에 데이터 없음');
-        navigation.navigate('Landing', { screen: 'SignIn' });
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
+  // const initState = async () => {
+  //   try {
+  //     const userDataFromStorage = await AsyncStorage.getItem('UserData');
+  //     if (userDataFromStorage) {
+  //       const parsedData: ValidateTokenReq = JSON.parse(userDataFromStorage);
+  //       setLoading(false);
+  //       dispatch(validateTokenThunk(parsedData));
+  //     } else {
+  //       console.log('로컬스토리지에 데이터 없음');
+  //       navigation.navigate('Landing', { screen: 'SignIn' });
+  //     }
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // };
 
-  useEffect(() => {
-    initState();
-  }, []);
+  // useEffect(() => {
+  //   initState();
+  // }, []);
 
-  useEffect(() => {
-    if (authState.validation.error) {
-      console.log('유효하지 않은 데이터. 로그인으로');
-      navigation.navigate('Landing', { screen: 'SignIn' });
-    }
-    if (!loading && authState.validation.data) {
-      console.log('인증성공');
-      dispatch(loadUserThunk(authState.validation.data.id));
-      getLocation();
-      dispatch(loadCategoriesThunk());
-      navigation.navigate('Main', {
-        screen: 'Home',
-        params: { screen: 'Feed' },
-      });
-    }
-  }, [authState.validation.data, authState.validation.error]);
+  // useEffect(() => {
+  //   if (authState.validation.error) {
+  //     navigation.navigate('Landing', { screen: 'SignIn' });
+  //   }
+  //   if (!loading && authState.validation.data) {
+  //     dispatch(loadUserThunk(authState.validation.data.id));
+  //     getLocation();
+  //     dispatch(loadCategoriesThunk());
+  //     navigation.navigate('Main', {
+  //       screen: 'Home',
+  //       params: { screen: 'Feed' },
+  //     });
+  //   }
+  // }, [authState.validation.data, authState.validation.error]);
 
   return (
     <View style={styles.container}>

@@ -22,7 +22,6 @@ const ChatList = ({ navigation }: ChatListProps) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log('test');
     dispatch(loadChatsThunk(user.user.data.id));
   }, []);
 

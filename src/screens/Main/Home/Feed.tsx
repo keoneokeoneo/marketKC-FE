@@ -46,24 +46,26 @@ const Feed = ({ navigation }: FeedProps) => {
           </TouchableOpacity>
         </HeaderSide>
       ),
-      headerRight: () => (
-        <HeaderSide right>
-          <PressableIcon
-            name="search-sharp"
-            size={26}
-            onPress={() => {}}
-            mh={4}
-          />
-          <PressableIcon
-            name="filter-sharp"
-            size={26}
-            onPress={() => {
-              navigation.navigate('SetCategory');
-            }}
-            mh={4}
-          />
-        </HeaderSide>
-      ),
+      // headerRight: () => (
+      //   <HeaderSide right>
+      //     <PressableIcon
+      //       name="search-sharp"
+      //       size={26}
+      //       onPress={() => {
+      //         navigation.navigate('Search');
+      //       }}
+      //       mh={4}
+      //     />
+      //     <PressableIcon
+      //       name="filter-sharp"
+      //       size={26}
+      //       onPress={() => {
+      //         navigation.navigate('SetCategory');
+      //       }}
+      //       mh={4}
+      //     />
+      //   </HeaderSide>
+      // ),
     });
   }, [navigation, userState.location.data]);
 

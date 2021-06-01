@@ -42,6 +42,16 @@ export interface FeedProps {
   >;
 }
 
+export interface SearchProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<HomeParamList, 'Search'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
 export interface PostProps {
   navigation: CompositeNavigationProp<
     StackNavigationProp<HomeParamList, 'Post'>,
@@ -148,6 +158,17 @@ export interface MyPageProps {
   >;
 }
 
+export interface UserProfileProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<ProfileParamList, 'UserProfile'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+  route: RouteProp<ProfileParamList, 'UserProfile'>;
+}
+
 export interface ModifyProfileProps {
   navigation: CompositeNavigationProp<
     StackNavigationProp<ProfileParamList, 'ModifyProfile'>,
@@ -161,6 +182,49 @@ export interface ModifyProfileProps {
 export interface RegisterWalletProps {
   navigation: CompositeNavigationProp<
     StackNavigationProp<ProfileParamList, 'RegisterWallet'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+}
+
+export interface TradeListProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<ProfileParamList, 'TradeList'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+  route: RouteProp<ProfileParamList, 'TradeList'>;
+}
+
+export interface SellListProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<ProfileParamList, 'SellList'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+  route: RouteProp<ProfileParamList, 'SellList'>;
+}
+
+export interface TXListProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<ProfileParamList, 'TXList'>,
+    CompositeNavigationProp<
+      BottomTabNavigationProp<MainParamList>,
+      StackNavigationProp<AppNavParamList>
+    >
+  >;
+  route: RouteProp<ProfileParamList, 'TXList'>;
+}
+
+export interface RequestListProps {
+  navigation: CompositeNavigationProp<
+    StackNavigationProp<ProfileParamList, 'RequestList'>,
     CompositeNavigationProp<
       BottomTabNavigationProp<MainParamList>,
       StackNavigationProp<AppNavParamList>

@@ -8,6 +8,7 @@ const PALETTE = {
   bg2: '#f7f3f3',
   grey: '#c0c0c0',
   error: '#d6464a',
+  border: 'rgb(216,216,216)',
 };
 
 export { PALETTE };

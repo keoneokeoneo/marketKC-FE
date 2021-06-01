@@ -4,7 +4,7 @@ import {
   NAVER_MAP_CLIENT_ID,
   NAVER_MAP_CLIENT_SECRET,
 } from '../../../config';
-import { LoadUserRes } from './types';
+import { LoadUserRes, TradePost, TradeRequest } from './types';
 
 const loadUserByID = async (id: string) => {
   return await axios.get<LoadUserRes>(`${API_BASE_URL}/users/${id}`);
@@ -36,9 +36,21 @@ const getCurrentLocation = async (long: number, lat: number) => {
   );
 };
 
+const getSellList = async (userID: string) => {
+  return await axios.get<TradePost[]>(`${API_BASE_URL}/posts/users/${userID}`);
+};
+
+const getTradeRequests = async (userID: string) => {
+  return await axios.get<TradeRequest[]>(
+    `${API_BASE_URL}/trades/requests/users/${userID}`,
+  );
+};
+
 export {
   loadUserByID,
   getCurrentLocation,
   updateUserCategories,
   updateUserWalletAddr,
+  getSellList,
+  getTradeRequests,
 };

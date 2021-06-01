@@ -29,7 +29,7 @@ import { SliderBox } from 'react-native-image-slider-box';
 import { socket } from '../../../../App';
 
 interface SocketReq {
-  sellerID: string;
+  postUserID: string;
   userID: string;
   postID: number;
 }
@@ -60,9 +60,10 @@ const Post = ({ navigation, route }: PostProps) => {
       } = post.data;
       const data: SocketReq = {
         postID: postID,
-        sellerID: sellerID,
+        postUserID: sellerID,
         userID: userID,
       };
+      console.log(data);
       socket.emit('requestNewRoom', data, (res: number) =>
         navigation.navigate('Chat', {
           screen: 'ChatRoom',
@@ -71,6 +72,15 @@ const Post = ({ navigation, route }: PostProps) => {
       );
     }
   };
+
+  const onClickUser = useCallback(() => {
+    if (post.data) {
+      navigation.navigate('Profile', {
+        screen: 'UserProfile',
+        params: { userID: post.data.seller.id },
+      });
+    }
+  }, [post.data, navigation]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -115,7 +125,7 @@ const Post = ({ navigation, route }: PostProps) => {
             <View>
               <TouchableOpacity
                 activeOpacity={1}
-                onPress={() => {}}
+                onPress={onClickUser}
                 style={styles.profileWrapper}>
                 <View style={styles.profileLeft}>
                   <Image
@@ -133,7 +143,7 @@ const Post = ({ navigation, route }: PostProps) => {
                 </View>
                 <View style={styles.profileRight}>
                   <View>
-                    <View
+                    {/* <View
                       style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <Ionicons name="star" style={styles.profileRate} />
                       <Text style={styles.profileRate}>4.7</Text>
@@ -143,7 +153,7 @@ const Post = ({ navigation, route }: PostProps) => {
                       </Text>
                       <Text style={{ color: PALETTE.line1 }}>5.0</Text>
                       <Text style={{ marginHorizontal: 2 }}>{`(${1})`}</Text>
-                    </View>
+                    </View> */}
                   </View>
                 </View>
               </TouchableOpacity>

@@ -48,7 +48,11 @@ export type ChatParamList = {
 
 export type ProfileParamList = {
   ModifyProfile: undefined;
-  UserProfile: undefined;
+  UserProfile: { userID: string };
   MyPage: undefined;
   RegisterWallet: undefined;
+  TradeList: { userID: string };
+  TXList: { userID: string };
+  SellList: { userID: string };
+  RequestList: undefined;
 };

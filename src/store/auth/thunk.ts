@@ -34,8 +34,11 @@ export const validateTokenThunk = (
         dispatch(initError('유효하지 않은 정보입니다'));
       }
     } catch (e) {
-      console.error(e);
-      dispatch(initError(e.message));
+      if (axios.isAxiosError(e) && e.response)
+        dispatch(initError(e.response.data));
+      else {
+        dispatch(initError('알수없는에러'));
+      }
     }
   };
 };
@@ -52,7 +55,6 @@ export const loginThunk = (
         dispatch(loginSuccess(res.data.id, res.data.access_token));
       }
     } catch (e) {
-      console.error(e);
       if (axios.isAxiosError(e) && e.response)
         dispatch(loginError(e.response.data));
       else {
@@ -69,12 +71,10 @@ export const registerThunk = (
     dispatch(register());
     try {
       const res = await authAPI.register(param);
-      console.log(res);
       if (res.status === 201) {
         dispatch(registerSuccess(res.data));
       }
     } catch (e) {
-      console.error(e);
       if (axios.isAxiosError(e) && e.response) {
         dispatch(registerError(e.response.data));
       } else {
